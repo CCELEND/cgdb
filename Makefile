@@ -18,9 +18,9 @@ disasm.o: ./disasm/disasm.cc
 fun_obj := $(wildcard ./build/*.o)
 
 cgdb: $(fun_obj)
-	$(CXX) -std=c++11 -o ./build/$@ cgdb.cc $(fun_obj) -lbfd
+	$(CXX) -std=c++11 -o build/$@ cgdb.cc $(fun_obj) -lbfd
 
 
 clean:
-	rm -f ./build/$(OBJ) ./build/*.o
+	rm -f build/$(OBJ) build/*.o
 
