@@ -44,17 +44,19 @@ void argparse() {
 // 输出寄存器
 void show_regs(pid_t child, struct user_regs_struct* regs)
 {
+    printf("\033[34m──────────────[ REGISTERS ]──────────────\033[0m\n");
     ptrace(PTRACE_GETREGS, child, nullptr, regs);
 	printf(
 		"RAX      0x%llx\nRBX      0x%llx\nRCX      0x%llx\nRDX      0x%llx\nRDI      0x%llx\n"
 		"RSI      0x%llx\nR8       0x%llx\nR9       0x%llx\nR10      0x%llx\nR11      0x%llx\n"
 		"R12      0x%llx\nR13      0x%llx\nR14      0x%llx\nR15      0x%llx\nEFLAGS   0x%llx\n"
-		"RBP      0x%llx\nRSP      0x%llx\nRIP      0x%llx\n",
+		"RBP      0x%llx\nRSP      \033[33m0x%llx\033[0m\nRIP      \033[31m0x%llx\033[0m\n",
 		regs->rax, regs->rbx, regs->rcx, regs->rdx, regs->rdi,
 		regs->rsi, regs->r8, regs->r9, regs->r10, regs->r11,
 		regs->r12, regs->r13, regs->r14, regs->r15, regs->eflags,
 		regs->rbp, regs->rsp, regs->rip
     );
+    printf("\033[34m─────────────────────────────────────────\033[0m\n");
 }
 
 /* *
@@ -74,7 +76,7 @@ void get_data(pid_t child, unsigned long long addr, char* str, int len) {
     while (i < j) {//每次读取1个字，8个字节，每次地址加8(LONG_SIZE)
         word.val = ptrace(PTRACE_PEEKDATA, child, addr + i * LONG_SIZE, nullptr);
         if (word.val == -1)
-            perror("trace error");
+            err_info("Trace error!");
         memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进数组
         ++i;
         laddr += LONG_SIZE;
@@ -83,7 +85,7 @@ void get_data(pid_t child, unsigned long long addr, char* str, int len) {
     if (j != 0) {
         word.val = ptrace(PTRACE_PEEKDATA, child, addr + i * LONG_SIZE, nullptr);
         if (word.val == -1)
-            perror("trace error");
+            err_info("Trace error!");
     }
     str[len] = '\0';
 }
@@ -105,7 +107,7 @@ void put_data(pid_t child, unsigned long long addr, char* str, int len) {
     while (i < j) {
         memcpy(word.chars, laddr, LONG_SIZE);
         if (ptrace(PTRACE_POKEDATA, child, addr + i * LONG_SIZE, word.val) == -1)
-            perror("trace error");
+            err_info("Trace error!");
         ++i;
         laddr += LONG_SIZE;
     }
@@ -114,7 +116,7 @@ void put_data(pid_t child, unsigned long long addr, char* str, int len) {
         word.val = 0;
         memcpy(word.chars, laddr, j);
         if (ptrace(PTRACE_POKEDATA, child, addr + i * LONG_SIZE, word.val) == -1)
-            perror("trace error");
+            err_info("Trace error!");
     }
 }
 
@@ -178,8 +180,9 @@ int wait_break_point(pid_t pid, int status, break_point& bp) {
     /* 捕获信号之后判断信号类型	*/
     if (WIFEXITED(status)) {
         /* 如果是EXit信号 */
-        printf("\nsubprocess EXITED!\n");
-        exit(0);
+        err_exit("Subprocess EXITED!");
+        // printf("\n\n");
+        // exit(0);
     }
     if (WIFSTOPPED(status)) {
         /* 如果是STOP信号 */
@@ -188,11 +191,11 @@ int wait_break_point(pid_t pid, int status, break_point& bp) {
             /* 将此时的指针与我的addr做对比，如果满足关系，说明断点命中 */
             if (bp.addr != (regs.rip - 1)) {
                 /*未命中*/
-                printf("Miss, fail to hit, rip: 0x%llx\n", regs.rip);
+                printf("Miss, fail to hit, RIP: 0x%llx\n", regs.rip);
                 return -1;
             } else {
                 /*如果命中*/
-                printf("Hit break_point at: 0x%llx\n", bp.addr);
+                printf("Hit break point at: \033[31m0x%llx\033[0m\n", bp.addr);
                 /*把INT 3 patch 回本来正常的指令*/
                 put_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
@@ -226,7 +229,7 @@ void get_base_address(pid_t pid, unsigned long long& base_addr) {
     string line;
     getline(inf, line);//读第一行，根据文件的特点，起始地址之后是"-"字符
     base_addr = strtol(line.data(), nullptr, 16);//默认读到"-"字符为止，16进制
-    printf("[+] Base addr: \033[32m\033[1m0x%llx\033[0m\n", base_addr);
+    printf("[+] Base addr: 0x%llx\n", base_addr);
 }
 
 void show_help() {
