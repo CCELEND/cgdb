@@ -1,5 +1,6 @@
-
 #include "disasm.h"
+
+// execute_disasm("f30f1efa554889e5");
 
 void execute_disasm(char* byte_codes)
 {
@@ -28,9 +29,4 @@ void execute_disasm(char* byte_codes)
     printf("%s", result);
 }
 
-// int main()
-// {
-//     execute_disasm("f30f1efa554889e5");
-//     return 0;
-// }
 
