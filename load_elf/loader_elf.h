@@ -1,10 +1,6 @@
 #ifndef LOADER_ELF_H
 #define LOADER_ELF_H
 
-// #include <stdint.h>
-// #include <string>
-// #include <vector>
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -92,7 +88,7 @@ public:
 int  load_binary   (std::string &fname, Binary *bin, Binary::BinaryType type);
 void unload_binary (Binary *bin);
 
-void show_elf_got(std::string fname);
+void show_elf_got  (std::string fname);
 
 #endif /* LOADER_H */
 
