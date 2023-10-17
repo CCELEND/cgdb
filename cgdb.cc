@@ -3,7 +3,7 @@
 #include "./load_elf/loader_elf.h"
 #include "./disasm/disasm.h"
 
-// 定义
+
 vector<string> myargv;
 string cmd;
 
