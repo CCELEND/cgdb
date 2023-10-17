@@ -86,12 +86,12 @@ int main(int argc, char *argv[])
         } else if (cmd == "got"){
             show_elf_got(fname);
         } else if (cmd == "r") {
-            //fork 子进程
+            // fork 子进程
             switch (pid = fork()) {
-                //fork 子进程失败
+                // fork 子进程失败
                 case -1:
                     err_exit("Failed to create subprocess!");
-                //处理子进程
+                // 处理子进程
                 case 0:
                     if (ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0) {
                         err_exit("Ptrace error in subprocess!");
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
                         } else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {//获取子进程制定区域的内存内容
                             ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
                             struct Params 
-                            {   //默认地址采用 rip 指针的内容，偏移默认为0，默认读取40个字节
+                            {   // 默认地址采用 rip 指针的内容，偏移默认为0，默认读取40个字节
                                 unsigned long long addr;
                                 long offset;
                                 int nbytes;
@@ -237,12 +237,12 @@ int main(int argc, char *argv[])
                                 err_info("Please input the address of break point!");
                             }
                         } else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {
-                            //显示帮助信息
+                            // 显示帮助信息
                             show_help();
                         } else {
                             err_info("Invalid Argument!");
                         }
-                        myargv.clear();// 下一轮参数输入之前需要把当前存储的命令清除
+                        myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
                     }
                     // 等待子进程结束之后父进程再退出
                     wait(&status);
