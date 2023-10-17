@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <iostream>
 
 #include <string>
 #include <vector>
@@ -90,6 +91,8 @@ public:
 
 int  load_binary   (std::string &fname, Binary *bin, Binary::BinaryType type);
 void unload_binary (Binary *bin);
+
+void show_elf_got(std::string fname);
 
 #endif /* LOADER_H */
 
