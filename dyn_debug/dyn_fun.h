@@ -15,6 +15,7 @@
 #include <sys/reg.h>
 #include <sys/user.h>
 #include <fstream>
+// #include <termios.h>
 
 //LONG型数据的长度8个字节
 #define LONG_SIZE 8 
@@ -39,6 +40,8 @@ void argparse();
 
 //输出寄存器值
 void show_regs(pid_t child, struct user_regs_struct* regs);
+
+int get_rip_data(pid_t child, unsigned long long addr, char* codes);
 
 //从子进程指定地址获取指定长度的数据，长度单位为字节
 void get_data(pid_t child, unsigned long long addr, char* str, int len);

@@ -56,7 +56,32 @@ void show_regs(pid_t child, struct user_regs_struct* regs)
 		regs->r12, regs->r13, regs->r14, regs->r15, regs->eflags,
 		regs->rbp, regs->rsp, regs->rip
     );
-    printf("\033[34m─────────────────────────────────────────\033[0m\n");
+    printf("\033[34m────────────────────────────────────[ DISASM ]────────────────────────────────────\033[0m\n");
+}
+
+int get_rip_data(pid_t child, unsigned long long addr, char* codes)
+{
+
+    char buf[64];
+    union u {
+        long val;
+        char chars[LONG_SIZE];
+    } word{};
+
+    for (int i = 0;i < 32; i += LONG_SIZE){
+        word.val = ptrace(PTRACE_PEEKDATA, child, addr + i, nullptr);
+        if (word.val == -1)
+            err_info("Trace error!");
+        memcpy(buf + i, word.chars, LONG_SIZE);//将这8个字节拷贝进数组
+        for (int j = i; j < i+4; j++){
+            // printf("%02x ", (unsigned char)buf[j]);
+            if (long((unsigned char)buf[j]) == 0xe8 || long((unsigned char)buf[j]) == 0xc3 || long((unsigned char)buf[j]) == 0xeb)  {
+                memcpy(codes, buf, i+8);
+                return (i+8);
+            }
+        }
+    }
+    return 0;
 }
 
 /* *
