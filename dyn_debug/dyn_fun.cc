@@ -71,7 +71,7 @@ int get_rip_data(pid_t child, unsigned long long addr, char* codes)
         word.val = ptrace(PTRACE_PEEKDATA, child, addr + i, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
-        memcpy(buf + i, word.chars, LONG_SIZE);//将这8个字节拷贝进数组
+        memcpy(buf + i, word.chars, LONG_SIZE); //将这8个字节拷贝进数组
         for (int j = i; j < i+4; j++){
             // printf("%02x ", (unsigned char)buf[j]);
             if (long((unsigned char)buf[j]) == 0xe8 || long((unsigned char)buf[j]) == 0xc3 || long((unsigned char)buf[j]) == 0xeb)  {
