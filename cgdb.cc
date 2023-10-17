@@ -13,14 +13,14 @@ int main(int argc, char *argv[])
     Binary bin;
     Section *sec;
     Symbol *sym;
-    char rip_instruct[CODE_SIZE];
+    char rip_instruct[64];
     string fname;
     unsigned long long base_addr;
     break_point break_point = {
         //默认不进入断点模式
         .break_point_mode = false 
     };
-    int status;
+    int status ,num;
 
     if(argc < 2) arg_error(argv[0]);
 
@@ -33,43 +33,58 @@ int main(int argc, char *argv[])
     while (true){
         printf("\033[32m\033[1mcgdb> \033[0m");
         getline(cin, cmd);
-        if (cmd == "sections"){
-          printf("[+] sections(\033[32m\033[1mcode and data\033[0m)\n");
-          printf("%22s   %-8s %-20s %s\n", "vma", "size", "name", "type");
-          printf("========================================================\n");
-          for(int i = 0; i < bin.sections.size(); i++) {
-            sec = &bin.sections[i];
-            printf("0x%016jx   %-8ju %-20s %s\n", 
-                   sec->vma, sec->size, sec->name.c_str(), 
-                   sec->type == Section::SEC_TYPE_CODE ? "CODE" : "DATA");
-          }
-        } else if (cmd == "symbol"){
-            for(int i = 0; i < bin.symbols.size(); i++) {
+        if (cmd == "q"){
+            goto cgdb_exit;
+        } else if (cmd == "symbol" || cmd == "sym"){
+            printf("[+] Symbol tables(\033[32m\033[1mFUNC\033[0m)\n");
+            printf("    %-31s %18s   %s\n", "name", "address", "type");
+            printf("======================================================================\n");
+            for(int i = 0; i < bin.symbols.size(); i++) 
+            {
                 sym = &bin.symbols[i];
-                if(sym->fun_sym_type == "symtab"){
-                  printf("%-35s 0x%016jx   %s  %s\n", 
-                    sym->name.c_str(), sym->addr, 
-                    (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
+                if(sym->fun_sym_type == "symtab")
+                {
+                    printf("%-35s 0x%016jx   %s  %s\n", 
+                        sym->name.c_str(), sym->addr, 
+                        (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
                 }
             }
             printf("\033[34m\033[1mmodule internal symbol table:\033[0m\n");
             for(int i = 0; i < bin.symbols.size(); i++) {
                 sym = &bin.symbols[i];
                 if(sym->addr){
-                  printf("%-35s 0x%016jx   %s  %s\n", 
-                    sym->name.c_str(), sym->addr, 
-                    (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
+                    printf("%-35s 0x%016jx   %s  %s\n", 
+                        sym->name.c_str(), sym->addr, 
+                        (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
                 }
             }
-        } else if (cmd == "dynsym"){
-            for(int i = 0; i < bin.symbols.size(); i++) {
+        } else if (cmd == "dynsym" || cmd == "dyn"){
+            printf("[+] Dynamic symbol(\033[32m\033[1mFUNC\033[0m)\n");
+            printf("    %-31s %18s   %s\n", "name", "address", "type");
+            printf("======================================================================\n");
+            for(int i = 0; i < bin.symbols.size(); i++) 
+            {
                 sym = &bin.symbols[i];
-                if(sym->fun_sym_type == "dynsym"){
-                  printf("%-35s 0x%016jx   %s  %s\n", 
-                    sym->name.c_str(), sym->addr, 
-                    (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
+                if(sym->fun_sym_type == "dynsym")
+                {
+                    printf("%-35s 0x%016jx   %s  %s\n", 
+                        sym->name.c_str(), sym->addr, 
+                        (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
                 }
             }
+        } else if (cmd == "sections") {
+            printf("[+] sections(\033[32m\033[1mcode and data\033[0m)\n");
+            printf("%18s   %-8s %-20s %s\n", "vma", "size", "name", "type");
+            printf("========================================================\n");
+            for(int i = 0; i < bin.sections.size(); i++) 
+            {
+                sec = &bin.sections[i];
+                printf("0x%016jx   %-8ju %-20s %s\n", 
+                    sec->vma, sec->size, sec->name.c_str(), 
+                    sec->type == Section::SEC_TYPE_CODE ? "CODE" : "DATA");
+            }
+        } else if (cmd == "got"){
+            show_elf_got(fname);
         } else if (cmd == "r") {
             //fork 子进程
             switch (pid = fork()) {
@@ -91,15 +106,17 @@ int main(int argc, char *argv[])
                 default:{
                     printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
                     sleep(1);
+
                     //获取子进程的起始虚拟地址
                     get_base_address(pid, base_addr);
+
                     //开始轮询输入的命令
                     while (true) {
                         struct user_regs_struct regs{}; //存储子进程当前寄存器的值
                         show_regs(pid, &regs);
 
-                        get_data(pid, regs.rip, rip_instruct, CODE_SIZE);
-                        execute_disasm(rip_instruct);
+                        num = get_rip_data(pid, regs.rip, rip_instruct);
+                        execute_disasm(rip_instruct, num);
 
                         printf("\033[32m\033[1mcgdb> \033[0m");
                         getline(cin, cmd);
@@ -116,8 +133,8 @@ int main(int argc, char *argv[])
                         if (strcmp(arguments[0], "exit") == 0 || strcmp(arguments[0], "q") == 0) {//退出操作
                             //杀死子进程，避免出现僵尸进程
                             ptrace(PTRACE_KILL, pid, nullptr, nullptr);
-                            break;
-                        } else if (strcmp(arguments[0], "step") == 0 || strcmp(arguments[0], "s") == 0) {//单步调试
+                            goto cgdb_exit;
+                        } else if (strcmp(arguments[0], "step") == 0 || strcmp(arguments[0], "si") == 0) {//单步调试
                             //发送 single step 给子进程
                             ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
                             //等待子进程收到 sigtrap 信号
@@ -200,7 +217,7 @@ int main(int argc, char *argv[])
                                 // 先把需要打断点的地址上指令取出备份
                                 get_data(pid, break_point.addr, break_point.backup, CODE_SIZE);
                                 print_bytes("[+] Get trace instruction: ", break_point.backup, LONG_SIZE);
-                                execute_disasm(break_point.backup);
+                                execute_disasm(break_point.backup, 8);
                                 break_point_inject(pid, break_point);//注入断点
                             } else {
                                 err_info("Please input the address of break_point!");
@@ -208,8 +225,7 @@ int main(int argc, char *argv[])
                         } else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {
                             //显示帮助信息
                             show_help();
-                        } 
-                        else {
+                        } else {
                             err_info("Invalid Argument!");
                         }
                         myargv.clear();//下一轮参数输入之前需要把当前存储的命令清除
@@ -218,8 +234,7 @@ int main(int argc, char *argv[])
                     wait(&status);
                 }
             }
-        } else if (cmd == "q") {
-            break;
-        }
+        } 
     }
+    cgdb_exit: return 0;
 }
