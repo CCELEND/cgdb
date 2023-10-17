@@ -8,10 +8,11 @@ string cmd;
 
 int main(int argc, char *argv[]) 
 {
-    pid_t pid;
     Binary bin;
     Section *sec;
     Symbol *sym;
+
+    pid_t pid;
     char rip_instruct[64];
     string fname;
     unsigned long long base_addr;
@@ -36,53 +37,11 @@ int main(int argc, char *argv[])
         if (cmd == "q"){
             goto cgdb_exit;
         } else if (cmd == "symbol" || cmd == "sym"){
-            printf("[+] Symbol tables(\033[32m\033[1mFUNC\033[0m)\n");
-            printf("    %-31s %18s   %s\n", "name", "address", "type");
-            printf("======================================================================\n");
-            for(int i = 0; i < bin.symbols.size(); i++) 
-            {
-                sym = &bin.symbols[i];
-                if(sym->fun_sym_type == "symtab")
-                {
-                    printf("%-35s 0x%016jx   %s  %s\n", 
-                        sym->name.c_str(), sym->addr, 
-                        (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
-                }
-            }
-            printf("\033[34m\033[1mmodule internal symbol table:\033[0m\n");
-            for(int i = 0; i < bin.symbols.size(); i++) {
-                sym = &bin.symbols[i];
-                if(sym->addr){
-                    printf("%-35s 0x%016jx   %s  %s\n", 
-                        sym->name.c_str(), sym->addr, 
-                        (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
-                }
-            }
+            show_elf_symbol(&bin);
         } else if (cmd == "dynsym" || cmd == "dyn"){
-            printf("[+] Dynamic symbol(\033[32m\033[1mFUNC\033[0m)\n");
-            printf("    %-31s %18s   %s\n", "name", "address", "type");
-            printf("======================================================================\n");
-            for(int i = 0; i < bin.symbols.size(); i++) 
-            {
-                sym = &bin.symbols[i];
-                if(sym->fun_sym_type == "dynsym")
-                {
-                    printf("%-35s 0x%016jx   %s  %s\n", 
-                        sym->name.c_str(), sym->addr, 
-                        (sym->type & Symbol::SYM_TYPE_FUNC) ? "FUNC" : "", sym->fun_sym_type.c_str());
-                }
-            }
+            show_elf_dynsym(&bin);
         } else if (cmd == "sections") {
-            printf("[+] sections(\033[32m\033[1mcode and data\033[0m)\n");
-            printf("%18s   %-8s %-20s %s\n", "vma", "size", "name", "type");
-            printf("========================================================\n");
-            for(int i = 0; i < bin.sections.size(); i++) 
-            {
-                sec = &bin.sections[i];
-                printf("0x%016jx   %-8ju %-20s %s\n", 
-                    sec->vma, sec->size, sec->name.c_str(), 
-                    sec->type == Section::SEC_TYPE_CODE ? "CODE" : "DATA");
-            }
+            show_elf_sections_code_data(&bin);
         } else if (cmd == "got"){
             show_elf_got(fname);
         } else if (cmd == "r") {
