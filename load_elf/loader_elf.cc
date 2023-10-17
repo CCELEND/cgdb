@@ -323,8 +323,6 @@ void
 show_elf_got(std::string fname)
 {
     std::string command = std::string("objdump -R ") + fname;
-
-    // printf("[+] Dump of assembler code:\n");
     // 执行命令并将标准输出连接到文件流中
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)

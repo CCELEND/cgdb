@@ -61,14 +61,13 @@ void show_regs(pid_t child, struct user_regs_struct* regs)
 
 int get_rip_data(pid_t child, unsigned long long addr, char* codes)
 {
-
     char buf[64];
     union u {
         long val;
         char chars[LONG_SIZE];
     } word{};
 
-    for (int i = 0;i < 32; i += LONG_SIZE){
+    for (int i = 0; i < 32; i += LONG_SIZE){
         word.val = ptrace(PTRACE_PEEKDATA, child, addr + i, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
