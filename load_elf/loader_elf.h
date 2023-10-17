@@ -88,7 +88,10 @@ public:
 int  load_binary   (std::string &fname, Binary *bin, Binary::BinaryType type);
 void unload_binary (Binary *bin);
 
+void show_elf_symbol(Binary *bin);
+void show_elf_dynsym(Binary *bin);
 void show_elf_got  (std::string fname);
+void show_elf_sections_code_data(Binary *bin);
 
 #endif /* LOADER_H */
 
