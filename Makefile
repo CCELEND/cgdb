@@ -2,7 +2,7 @@ CXX=g++
 OBJ=cgdb
 
 BUILDDIR:=build
-sources:=$(wildcard load_elf/*.cc)
+sources:=$(wildcard elf/*.cc)
 objects:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(sources)))
 
 sources2:=$(wildcard dyn_debug/*.cc)
