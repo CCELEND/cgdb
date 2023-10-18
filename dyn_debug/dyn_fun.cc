@@ -27,7 +27,7 @@ void good_info(const char *msg)
     printf("\033[32m\033[1m[+] %s\033[0m\n", msg);
 }
 
-//解析输入参数
+// 解析输入参数
 void argparse() {
     string param;
     for (char i:cmd + " ") {//因为要用到空格进行分割，为了防止最后一个参数分割不到加一个空格
@@ -42,9 +42,9 @@ void argparse() {
 }
 
 // 输出寄存器
-void show_regs(pid_t child, struct user_regs_struct* regs)
+void get_show_regs(pid_t child, struct user_regs_struct* regs)
 {
-    printf("\033[34m──────────────[ REGISTERS ]──────────────\033[0m\n");
+    printf("\033[34m───────────────────────────────────[ REGISTERS ]───────────────────────────────────\033[0m\n");
     ptrace(PTRACE_GETREGS, child, nullptr, regs);
 	printf(
 		"RAX      0x%llx\nRBX      0x%llx\nRCX      0x%llx\nRDX      0x%llx\nRDI      0x%llx\n"
@@ -67,15 +67,13 @@ int get_rip_data(pid_t child, unsigned long long addr, char* codes)
         char chars[LONG_SIZE];
     } word{};
 
-    printf("%llx\n", addr);
-
     for (int i = 0; i < 64; i += LONG_SIZE){
         word.val = ptrace(PTRACE_PEEKDATA, child, addr + i, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
-        memcpy(buf + i, word.chars, LONG_SIZE); //将这8个字节拷贝进数组
+        memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
         for (int j = i; j < i+4; j++){
-            printf("%02x ", (unsigned char)buf[j]);
+            // printf("%02x ", (unsigned char)buf[j]);
             if (long((unsigned char)buf[j]) == 0xe8 || long((unsigned char)buf[j]) == 0xc3 || long((unsigned char)buf[j]) == 0xeb)  {
                 memcpy(codes, buf, i+8);
                 return (i+8);
@@ -92,7 +90,7 @@ int get_rip_data(pid_t child, unsigned long long addr, char* codes)
  * str: 用来存储读取的字节
  * len: 读取字节长度
  * */
-void get_data(pid_t child, unsigned long long addr, char* str, int len) {
+void get_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
     char* laddr = str;
     int i = 0, j = len / LONG_SIZE;//计算一共需要读取多少个字
     union u {
@@ -123,7 +121,7 @@ void get_data(pid_t child, unsigned long long addr, char* str, int len) {
  * str: 用来插入的字节
  * len: 插入字节数
  * */
-void put_data(pid_t child, unsigned long long addr, char* str, int len) {
+void put_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
     char* laddr = str;//与getdata类似
     int i = 0, j = len / LONG_SIZE;
     union u {
@@ -176,7 +174,7 @@ void show_memory(pid_t pid, unsigned long long addr, long offset, int nbytes) {
     printf("current base address is : 0x%llx\n"//显示任意内存内容
            "offset is : %ld\n", addr, offset);
     auto* memory_content = new char[nbytes];
-    get_data(pid, addr + offset, memory_content, nbytes);//从指定的地址按照指定的偏移量读取指定的字节数
+    get_addr_data(pid, addr + offset, memory_content, nbytes);//从指定的地址按照指定的偏移量读取指定的字节数
     printf("The %d bytes after start address: 0x%llx :\n", nbytes, addr + offset);
     print_bytes("", memory_content, nbytes);
 }
@@ -191,7 +189,7 @@ void break_point_inject(pid_t pid, break_point& bp) {
     char code[LONG_SIZE] = { static_cast<char>(0xcc) };//int3中断指令
 
     // print_bytes("[+] Set break point instruction: ", code, LONG_SIZE);
-    put_data(pid, bp.addr, code, CODE_SIZE);    //将中断指令int3注入
+    put_addr_data(pid, bp.addr, code, CODE_SIZE);    //将中断指令int3注入
     bp.break_point_mode = true;     //将断点模式标识变量置为true
 }
 
@@ -223,7 +221,7 @@ int wait_break_point(pid_t pid, int status, break_point& bp) {
                 /*如果命中*/
                 printf("Hit break point at: \033[31m0x%llx\033[0m\n", bp.addr);
                 /*把INT 3 patch 回本来正常的指令*/
-                put_data(pid, bp.addr, bp.backup, CODE_SIZE);
+                put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
                 /*执行流回退，重新执行正确的指令*/
                 regs.rip = bp.addr;//addr与rip不相等，恢复时以addr为准
@@ -238,10 +236,10 @@ int wait_break_point(pid_t pid, int status, break_point& bp) {
 
 /* *
  * 获取子进程再虚拟地址空间的起始地址
- * pid: 子进程pid
+ * pid: 子进程 pid
  * base_addr: 用来存储起始地址
  * */
-void get_base_address(pid_t pid, unsigned long long& base_addr) {
+void get_base_address(pid_t pid) {
     /* *
      * 每个进程的内存分布文件放在/proc/进程pid/maps文件夹里
      * 通过获取pid来读取对应的maps文件
@@ -254,8 +252,24 @@ void get_base_address(pid_t pid, unsigned long long& base_addr) {
     }
     string line;
     getline(inf, line);//读第一行，根据文件的特点，起始地址之后是"-"字符
-    base_addr = strtol(line.data(), nullptr, 16);//默认读到"-"字符为止，16进制
-    printf("[+] Base addr: 0x%llx\n", base_addr);
+    elf_base = strtol(line.data(), nullptr, 16);//默认读到"-"字符为止，16进制
+
+    bool libcflag = false, ldflag = false, stackflag = false;
+
+    while(getline(inf, line))
+    {
+        if (line.find("libc") != string::npos && !libcflag) {
+            libc_base = strtol(line.data(), nullptr, 16);
+            libcflag = true;
+        } else if (line.find("ld-linux") != string::npos && !ldflag) {
+            ld_base = strtol(line.data(), nullptr, 16);
+            ldflag = true;
+        } else if (line.find("[stack]") != string::npos && !stackflag) {
+            stack_base = strtol(line.data(), nullptr, 16);
+            stackflag = true;
+        }
+    }
+
     inf.close();
 }
 
@@ -284,6 +298,8 @@ void get_vmmap(pid_t pid){
         } else if (line.find("rw-p") != string::npos) {
             if (line.find("[stack]") != string::npos){
                 printf("\033[33m%s\033[0m\n", line.c_str());
+            } else if (line.find("[heap]") != string::npos){
+                printf("\033[34m%s\033[0m\n", line.c_str());
             } else {
                 printf("\033[35m%s\033[0m\n", line.c_str());
             }
