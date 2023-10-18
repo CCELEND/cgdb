@@ -61,19 +61,21 @@ void show_regs(pid_t child, struct user_regs_struct* regs)
 
 int get_rip_data(pid_t child, unsigned long long addr, char* codes)
 {
-    char buf[64];
+    char buf[128];
     union u {
         long val;
         char chars[LONG_SIZE];
     } word{};
 
-    for (int i = 0; i < 32; i += LONG_SIZE){
+    printf("%llx\n", addr);
+
+    for (int i = 0; i < 64; i += LONG_SIZE){
         word.val = ptrace(PTRACE_PEEKDATA, child, addr + i, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
         memcpy(buf + i, word.chars, LONG_SIZE); //将这8个字节拷贝进数组
         for (int j = i; j < i+4; j++){
-            // printf("%02x ", (unsigned char)buf[j]);
+            printf("%02x ", (unsigned char)buf[j]);
             if (long((unsigned char)buf[j]) == 0xe8 || long((unsigned char)buf[j]) == 0xc3 || long((unsigned char)buf[j]) == 0xeb)  {
                 memcpy(codes, buf, i+8);
                 return (i+8);
@@ -254,6 +256,42 @@ void get_base_address(pid_t pid, unsigned long long& base_addr) {
     getline(inf, line);//读第一行，根据文件的特点，起始地址之后是"-"字符
     base_addr = strtol(line.data(), nullptr, 16);//默认读到"-"字符为止，16进制
     printf("[+] Base addr: 0x%llx\n", base_addr);
+    inf.close();
+}
+
+void get_vmmap(pid_t pid){
+    string maps_path = "/proc/" + to_string(pid) + "/maps";
+    ifstream inf(maps_path.data());//建立输入流
+    if (!inf) {
+        err_info("Read failed!");
+        return;
+    }
+
+    printf("LEGEND: "
+        "\033[33mSTACK\033[0m | "
+        "\033[34mHEAP\033[0m | "
+        "\033[31mCODE\033[0m | "
+        "\033[35mDATA\033[0m\n");
+    printf("%12s%13s%5s%9s%6s%8s%24s\n",
+        "Start", "End", "Perm", "Offset", "Dev", "Inode", "File"
+    );
+
+    string line;
+    while(getline(inf, line))
+    {
+        if (line.find("-xp") != string::npos) {
+            printf("\033[31m%s\033[0m\n", line.c_str());
+        } else if (line.find("rw-p") != string::npos) {
+            if (line.find("[stack]") != string::npos){
+                printf("\033[33m%s\033[0m\n", line.c_str());
+            } else {
+                printf("\033[35m%s\033[0m\n", line.c_str());
+            }
+        } else {
+            printf("%s\n", line.c_str());
+        }
+    }
+    inf.close();
 }
 
 void show_help() {

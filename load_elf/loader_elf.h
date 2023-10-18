@@ -54,7 +54,7 @@ public:
   SectionType   type;
   uint64_t      vma;
   uint64_t      size;
-  uint8_t       *bytes;
+  uint8_t      *bytes;
 };
 
 // 二进制程序的基本信息
@@ -90,7 +90,7 @@ void unload_binary (Binary *bin);
 
 void show_elf_symbol(Binary *bin);
 void show_elf_dynsym(Binary *bin);
-void show_elf_got  (std::string fname);
+void show_elf_got   (std::string fname);
 void show_elf_sections_code_data(Binary *bin);
 
 #endif /* LOADER_H */

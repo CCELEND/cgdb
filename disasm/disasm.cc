@@ -10,6 +10,8 @@ void execute_disasm(char* byte_codes, int num)
     string byte_codes_str = buf;
     string command = string("cstool -u x64 ") + "'" + byte_codes_str + "'";
 
+    printf("%s\n", command.c_str());
+
     // 执行命令并将标准输出连接到文件流中
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)
@@ -32,13 +34,3 @@ void execute_disasm(char* byte_codes, int num)
     // 释放动态分配的内存
     free(result);
 }
-
-// printf("[+] Dump of assembler code:\n");
-// char result[512];
-// // 读取文件流中的数据
-// fread(result, 1, sizeof(result), fp);
-// // 关闭文件流
-// pclose(fp);
-// printf("\033[31m%s\033[0m\n", result);
-
-// execute_disasm("f30f1efa554889e5", 8);

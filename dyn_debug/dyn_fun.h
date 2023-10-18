@@ -15,7 +15,8 @@
 #include <sys/reg.h>
 #include <sys/user.h>
 #include <fstream>
-// #include <termios.h>
+
+#include "../load_elf/loader_elf.h"
 
 //LONG型数据的长度8个字节
 #define LONG_SIZE 8 
@@ -64,6 +65,8 @@ void break_point_inject(pid_t pid, break_point& bp);
 //从当前子进程的虚拟地址范围获取子进程的起始地址
 void get_base_address(pid_t pid, unsigned long long& base_addr);
 
+void get_vmmap(pid_t pid);
+
 //显示帮助信息
 void show_help();
 
@@ -76,5 +79,7 @@ void err_info(const char* msg);
 void note_info(const char* msg);
 
 void good_info(const char* msg);
+
+void run_elf_debug(std::string fname, Binary *bin);
 
 #endif

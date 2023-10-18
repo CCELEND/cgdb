@@ -1,0 +1,9 @@
+// printf("[+] Dump of assembler code:\n");
+// char result[512];
+// // 读取文件流中的数据
+// fread(result, 1, sizeof(result), fp);
+// // 关闭文件流
+// pclose(fp);
+// printf("\033[31m%s\033[0m\n", result);
+
+// execute_disasm("f30f1efa554889e5", 8);
