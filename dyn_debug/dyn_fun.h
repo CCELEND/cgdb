@@ -30,8 +30,14 @@ extern vector<string> myargv;
 extern string cmd;
 
 extern unsigned long long elf_base;
+extern unsigned long long elf_code_start;
+extern unsigned long long elf_code_end;
 extern unsigned long long libc_base;
+extern unsigned long long libc_code_start;
+extern unsigned long long libc_code_end;
 extern unsigned long long ld_base;
+extern unsigned long long ld_code_start;
+extern unsigned long long ld_code_end;
 extern unsigned long long stack_base;
 
 //断点结构体，包含有需要插入断点的地址，对断点地址处的指令进行备份，以及用来标记是否有断点存在的变量
@@ -69,6 +75,8 @@ void break_point_inject(pid_t pid, break_point& bp);
 
 // 从当前子进程的虚拟地址范围获取子进程的起始地址
 void get_base_address(pid_t pid);
+
+void get_code_address(pid_t pid);
 
 void get_vmmap(pid_t pid);
 

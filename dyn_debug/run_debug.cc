@@ -3,8 +3,14 @@
 #include "../disasm/disasm.h"
 
 unsigned long long elf_base = 0;
+unsigned long long elf_code_start = 0;
+unsigned long long elf_code_end = 0;
 unsigned long long libc_base = 0;
+unsigned long long libc_code_start = 0;
+unsigned long long libc_code_end = 0;
 unsigned long long ld_base = 0;
+unsigned long long ld_code_start = 0;
+unsigned long long ld_code_end = 0;
 unsigned long long stack_base = 0;
 
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
@@ -194,6 +200,12 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     printf("[+] Ld base: 0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "stack") == 0) {
                     printf("[+] Stack base: 0x%llx\n", stack_base);
+                } else if (strcmp(arguments[0], "code") == 0) {
+                    get_code_address(pid);
+                    printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
+                    printf("[+] Libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
+                    printf("[+] Ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
+
                 } else {
                     err_info("Invalid Argument!");
                 }

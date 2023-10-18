@@ -56,6 +56,15 @@ void get_show_regs(pid_t child, struct user_regs_struct* regs)
 		regs->r12, regs->r13, regs->r14, regs->r15, regs->eflags,
 		regs->rbp, regs->rsp, regs->rip
     );
+
+    if (regs->rip < elf_code_end) {
+        printf("RIP      \033[31m0x%llx\033[0m (elf)\n", regs->rip);
+    } else if (regs->rip > libc_code_start && regs->rip < libc_code_end ) {
+        printf("RIP      \033[31m0x%llx\033[0m (libc)\n", regs->rip);
+    } else {
+        printf("RIP      \033[31m0x%llx\033[0m (ld-linux)\n", regs->rip);
+    }
+
     printf("\033[34m────────────────────────────────────[ DISASM ]────────────────────────────────────\033[0m\n");
 }
 
@@ -205,8 +214,6 @@ int wait_break_point(pid_t pid, int status, break_point& bp) {
     if (WIFEXITED(status)) {
         /* 如果是EXit信号 */
         err_exit("Subprocess EXITED!");
-        // printf("\n\n");
-        // exit(0);
     }
     if (WIFSTOPPED(status)) {
         /* 如果是STOP信号 */
@@ -267,6 +274,38 @@ void get_base_address(pid_t pid) {
         } else if (line.find("[stack]") != string::npos && !stackflag) {
             stack_base = strtol(line.data(), nullptr, 16);
             stackflag = true;
+        }
+    }
+
+    inf.close();
+}
+
+void get_code_address(pid_t pid) {
+    /* *
+     * 每个进程的内存分布文件放在/proc/进程pid/maps文件夹里
+     * 通过获取pid来读取对应的maps文件
+     * */
+    string maps_path = "/proc/" + to_string(pid) + "/maps";
+    ifstream inf(maps_path.data());//建立输入流
+    if (!inf) {
+        err_info("Read failed!");
+        return;
+    }
+
+    string line;
+    while(getline(inf, line))
+    {
+        if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos) {
+            elf_code_start = strtol(line.data(), nullptr, 16);
+            elf_code_end = strtol(line.data()+13, nullptr, 16);
+
+        } else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos) {
+            libc_code_start = strtol(line.data(), nullptr, 16);
+            libc_code_end = strtol(line.data()+13, nullptr, 16);
+
+        } else if (line.find("ld-linux") != string::npos && line.find("r-xp") != string::npos) {
+            ld_code_start = strtol(line.data(), nullptr, 16);
+            ld_code_end = strtol(line.data()+13, nullptr, 16);
         }
     }
 
