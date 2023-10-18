@@ -50,11 +50,11 @@ void get_show_regs(pid_t child, struct user_regs_struct* regs)
 		"RAX      0x%llx\nRBX      0x%llx\nRCX      0x%llx\nRDX      0x%llx\nRDI      0x%llx\n"
 		"RSI      0x%llx\nR8       0x%llx\nR9       0x%llx\nR10      0x%llx\nR11      0x%llx\n"
 		"R12      0x%llx\nR13      0x%llx\nR14      0x%llx\nR15      0x%llx\nEFLAGS   0x%llx\n"
-		"RBP      0x%llx\nRSP      \033[33m0x%llx\033[0m\nRIP      \033[31m0x%llx\033[0m\n",
+		"RBP      0x%llx\nRSP      \033[33m0x%llx\033[0m\n",
 		regs->rax, regs->rbx, regs->rcx, regs->rdx, regs->rdi,
 		regs->rsi, regs->r8, regs->r9, regs->r10, regs->r11,
 		regs->r12, regs->r13, regs->r14, regs->r15, regs->eflags,
-		regs->rbp, regs->rsp, regs->rip
+		regs->rbp, regs->rsp
     );
 
     if (regs->rip < elf_code_end) {
