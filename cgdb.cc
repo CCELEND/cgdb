@@ -1,6 +1,6 @@
 
 #include "./dyn_debug/dyn_fun.h"
-#include "./load_elf/loader_elf.h"
+#include "./elf/loader_elf.h"
 #include "./disasm/disasm.h"
 
 // 定义两个全局变量
@@ -12,17 +12,8 @@ int main(int argc, char *argv[])
     Binary bin;
     Section *sec;
     Symbol *sym;
-
     pid_t pid;
-    char rip_instruct[64];
     string fname;
-    string cmd;
-    unsigned long long base_addr;
-    break_point break_point = {
-        //默认不进入断点模式
-        .break_point_mode = false 
-    };
-    int status, num;
 
     if(argc < 2) arg_error(argv[0]);
 
@@ -47,7 +38,7 @@ int main(int argc, char *argv[])
         } else if (cmd == "got"){
             show_elf_got(fname);
         } else if (cmd == "r") {
-            run_elf_debug(fname, &bin);
+            run_dyn_debug(fname, &bin);
         } else {
             err_info("Invalid Argument!");
         }
