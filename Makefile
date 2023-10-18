@@ -1,24 +1,25 @@
 CXX=g++
 OBJ=cgdb
 
+BUILDDIR:=build
+sources:=$(wildcard load_elf/*.cc)
+objects:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(sources)))
+
+sources2:=$(wildcard dyn_debug/*.cc)
+objects2:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(sources2)))
+
 .PHONY: all clean
 
 all: $(OBJ)
 
-loader_elf.o: ./load_elf/loader_elf.cc
+$(BUILDDIR)/%.o: %.cc
 	$(CXX) -std=c++11 -c $^ -o $@
 
-show_elf.o: ./load_elf/show_elf.cc
+$(BUILDDIR)/disasm.o: disasm/disasm.cc
 	$(CXX) -std=c++11 -c $^ -o $@
 
-dyn_fun.o: ./dyn_debug/dyn_fun.cc
-	$(CXX) -std=c++11 -c $^ -o $@
-
-disasm.o: ./disasm/disasm.cc
-	$(CXX) -std=c++11 -c $^ -o $@
-
-cgdb: loader_elf.o show_elf.o dyn_fun.o disasm.o
+$(OBJ): $(objects) $(objects2) $(BUILDDIR)/disasm.o
 	$(CXX) -std=c++11 -o build/$@ cgdb.cc $^ -lbfd
 
 clean:
-	rm -f build/$(OBJ) ./*.o
+	rm -f $(BUILDDIR)/$(OBJ) `find -name "*.o"`
