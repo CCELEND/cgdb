@@ -312,8 +312,7 @@ void get_vmmap(pid_t pid){
 
 void show_help() {
     printf("Type \"exit\" to exit debugger.\n");
-    printf("Type \"reg\" or \"r\" to show registers.\n");
-    printf("Type \"step\" or \"s\" to single step.\n");
+    printf("Type \"step\" or \"si\" to single step.\n");
     printf("Type \"continue\" or \"c\" to continue until tracee stop.\n");
     printf("Type \"memory\" or \"m\" to show memory content.\n"
            "\tYou can use \"-addr\" or \"-off\" or \"-nb\" as argument.\n"
@@ -325,6 +324,6 @@ void show_help() {
            "\tuse \"-nb\" to specify the decimal number of bytes to be displayed\n"
            "\t\t(default number is 40)\n");
     printf("Type \"ic\" to count total instructions.\n");
-    printf("Type \"break\" or \"b\" to insert break_point.\n"
-           "\tfor example: Type \"b 555555555131\" to specify the break_point address 0x555555555131\n");
+    printf("Type \"break\" or \"b\" to insert break point.\n"
+           "\tfor example: Type \"b 555555555131\" to specify the break point address 0x555555555131\n");
 }
