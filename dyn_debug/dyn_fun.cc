@@ -1,5 +1,7 @@
 
 #include "dyn_fun.h"
+#include "../elf/loader_elf.h"
+#include "../disasm/disasm.h"
 
 void arg_error(const char* fname){
     printf("\033[31m\033[1m[-] Usage: %s <binary>\033[0m\n", fname);
@@ -90,6 +92,16 @@ int get_rip_data(pid_t child, unsigned long long addr, char* codes)
         }
     }
     return 0;
+}
+
+void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
+    int num;
+    char rip_instruct[64];
+
+    // 存储子进程当前寄存器的值
+    get_show_regs(pid, regs);
+    num = get_rip_data(pid, regs->rip, rip_instruct);
+    execute_disasm(rip_instruct, num);
 }
 
 /* *
@@ -195,45 +207,48 @@ void show_memory(pid_t pid, unsigned long long addr, long offset, int nbytes) {
  * 
  */
 void break_point_inject(pid_t pid, break_point& bp) {
-    char code[LONG_SIZE] = { static_cast<char>(0xcc) };//int3中断指令
+    char code[LONG_SIZE] = { static_cast<char>(0xcc) };// int3 中断指令
 
-    // print_bytes("[+] Set break point instruction: ", code, LONG_SIZE);
-    put_addr_data(pid, bp.addr, code, CODE_SIZE);    //将中断指令int3注入
-    bp.break_point_mode = true;     //将断点模式标识变量置为true
+    put_addr_data(pid, bp.addr, code, CODE_SIZE);    // 将中断指令 int3 注入
+    bp.break_point_state = true;     // 将断点模式标识变量置为 true
 }
 
 /* *
- * 等待断点，判断是否命中
+ * 判断是否命中
  * pid: 子进程pid
- * status: 由外部传入，获取当前trace停止的状态码
+ * status: 由外部传入，获取当前 trace 停止的状态码
  * bp: 断点结构体
  * */
-int wait_break_point(pid_t pid, int status, break_point& bp) {
+int break_point_handler(pid_t pid, int status, break_point& bp) {
     struct user_regs_struct regs{};
-    /* 捕获信号之后判断信号类型	*/
+    // 捕获信号之后判断信号类型
     if (WIFEXITED(status)) {
-        /* 如果是EXit信号 */
-        err_exit("Subprocess EXITED!");
+        // exit 信号
+        err_exit("The child process has ended!");
     }
     if (WIFSTOPPED(status)) {
-        /* 如果是STOP信号 */
-        if (WSTOPSIG(status) == SIGTRAP) {                //如果是触发了SIGTRAP,说明碰到了断点
-            ptrace(PTRACE_GETREGS, pid, 0, &regs);    //读取此时用户态寄存器的值，准备为回退做准备
-            /* 将此时的指针与我的addr做对比，如果满足关系，说明断点命中 */
-            if (bp.addr != (regs.rip - 1)) {
-                /*未命中*/
-                printf("Miss, fail to hit, RIP: 0x%llx\n", regs.rip);
+        // 如果是 STOP 信号
+        if (WSTOPSIG(status) == SIGTRAP) {                  // 如果触发了 SIGTRAP,说明碰到了断点
+            ptrace(PTRACE_GETREGS, pid, nullptr, &regs);          // 读取寄存器的值，为回退做准备
+
+            // 如果满足关系，说明断点命中
+            if (bp.addr != (regs.rip - 1)) 
+            {
+                // 未命中
+                printf("\033[31m\033[1m [-] Break point: 0x%llx failure!\033[0m\n", regs.rip);
                 return -1;
-            } else {
-                /*如果命中*/
-                printf("Hit break point at: \033[31m0x%llx\033[0m\n", bp.addr);
-                /*把INT 3 patch 回本来正常的指令*/
+            } 
+            else 
+            {
+                printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
+                // 把INT 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
+                // ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
+                // 执行流回退，重新执行正确的指令
+                regs.rip = bp.addr; // addr 与 rip 不相等，恢复时以 addr 为准
                 ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
-                /*执行流回退，重新执行正确的指令*/
-                regs.rip = bp.addr;//addr与rip不相等，恢复时以addr为准
-                ptrace(PTRACE_SETREGS, pid, 0, &regs);
-                bp.break_point_mode = false;//命中断点之后取消断点状态
+                regs_disasm_info(pid, &regs);
+                bp.break_point_state = false; // 命中断点之后取消断点
                 return 1;
             }
         }
@@ -251,6 +266,8 @@ void get_base_address(pid_t pid) {
      * 每个进程的内存分布文件放在/proc/进程pid/maps文件夹里
      * 通过获取pid来读取对应的maps文件
      * */
+    if (libc_base) return;
+
     string maps_path = "/proc/" + to_string(pid) + "/maps";
     ifstream inf(maps_path.data());//建立输入流
     if (!inf) {
@@ -261,19 +278,17 @@ void get_base_address(pid_t pid) {
     getline(inf, line);//读第一行，根据文件的特点，起始地址之后是"-"字符
     elf_base = strtol(line.data(), nullptr, 16);//默认读到"-"字符为止，16进制
 
-    bool libcflag = false, ldflag = false, stackflag = false;
-
     while(getline(inf, line))
     {
-        if (line.find("libc") != string::npos && !libcflag) {
+        if (line.find("libc") != string::npos && !libc_base) {
             libc_base = strtol(line.data(), nullptr, 16);
-            libcflag = true;
-        } else if (line.find("ld-linux") != string::npos && !ldflag) {
+
+        } else if (line.find("ld-linux") != string::npos && !ld_base) {
             ld_base = strtol(line.data(), nullptr, 16);
-            ldflag = true;
-        } else if (line.find("[stack]") != string::npos && !stackflag) {
+
+        } else if (line.find("[stack]") != string::npos && !stack_base) {
             stack_base = strtol(line.data(), nullptr, 16);
-            stackflag = true;
+
         }
     }
 
@@ -285,6 +300,9 @@ void get_code_address(pid_t pid) {
      * 每个进程的内存分布文件放在/proc/进程pid/maps文件夹里
      * 通过获取pid来读取对应的maps文件
      * */
+
+    if (libc_code_start) return;
+
     string maps_path = "/proc/" + to_string(pid) + "/maps";
     ifstream inf(maps_path.data());//建立输入流
     if (!inf) {
@@ -295,15 +313,15 @@ void get_code_address(pid_t pid) {
     string line;
     while(getline(inf, line))
     {
-        if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos) {
+        if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos && !elf_code_start) {
             elf_code_start = strtol(line.data(), nullptr, 16);
             elf_code_end = strtol(line.data()+13, nullptr, 16);
 
-        } else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos) {
+        } else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos && !libc_code_start) {
             libc_code_start = strtol(line.data(), nullptr, 16);
             libc_code_end = strtol(line.data()+13, nullptr, 16);
 
-        } else if (line.find("ld-linux") != string::npos && line.find("r-xp") != string::npos) {
+        } else if (line.find("ld-linux") != string::npos && line.find("r-xp") != string::npos && !ld_code_start) {
             ld_code_start = strtol(line.data(), nullptr, 16);
             ld_code_end = strtol(line.data()+13, nullptr, 16);
         }

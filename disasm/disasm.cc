@@ -10,8 +10,6 @@ void execute_disasm(char* byte_codes, int num)
     string byte_codes_str = buf;
     string command = string("cstool -u x64 ") + "'" + byte_codes_str + "'";
 
-    printf("%s\n", command.c_str());
-
     // 执行命令并将标准输出连接到文件流中
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)
@@ -28,6 +26,8 @@ void execute_disasm(char* byte_codes, int num)
         // 处理每一行输出
         std::cout << result;
     }
+
+    printf("\033[34m──────────────────────────────────────────────────────────────────────────────────\033[0m\n");
 
     // 关闭管道
     pclose(fp);

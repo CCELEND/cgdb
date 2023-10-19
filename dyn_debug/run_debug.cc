@@ -1,3 +1,4 @@
+
 #include "dyn_fun.h"
 #include "../elf/loader_elf.h"
 #include "../disasm/disasm.h"
@@ -12,27 +13,26 @@ unsigned long long ld_base = 0;
 unsigned long long ld_code_start = 0;
 unsigned long long ld_code_end = 0;
 unsigned long long stack_base = 0;
+struct break_point break_point_list[8];
 
-void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
-    int num;
-    char rip_instruct[64];
+// void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
+//     int num;
+//     char rip_instruct[64];
 
-    // 存储子进程当前寄存器的值
-    get_show_regs(pid, regs);
-    num = get_rip_data(pid, regs->rip, rip_instruct);
-    execute_disasm(rip_instruct, num);
-}
+//     // 存储子进程当前寄存器的值
+//     get_show_regs(pid, regs);
+//     num = get_rip_data(pid, regs->rip, rip_instruct);
+//     execute_disasm(rip_instruct, num);
+// }
 
 void run_dyn_debug(std::string fname, Binary *bin)
 {
     pid_t pid;
     Symbol *sym;
-    // unsigned long long elf_base;
-    // unsigned long long libc_base;
 
     break_point break_point = {
         //默认不进入断点模式
-        .break_point_mode = false 
+        .break_point_state = false 
     };
     int status, num;
 
@@ -65,12 +65,12 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
             // 开始轮询输入的命令
             while (true) {
-                
-                // 存储子进程当前寄存器的值
-                // get_show_regs(pid, &regs);
-                // num = get_rip_data(pid, regs.rip, rip_instruct);
-                // execute_disasm(rip_instruct, num);
-                
+
+                if (libc_base == 0){
+                    get_base_address(pid);
+                    get_code_address(pid);
+                }
+
                 printf("\033[32m\033[1mcgdb> \033[0m");
                 getline(cin, cmd);
 
@@ -89,35 +89,37 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     ptrace(PTRACE_KILL, pid, nullptr, nullptr);
                     goto debug_stop;
                 } else if (strcmp(arguments[0], "step") == 0 || strcmp(arguments[0], "si") == 0) {//单步调试
-                    regs_disasm_info(pid, &regs);
+                    
                     // 发送 single step 给子进程
                     ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
-                    // 等待子进程收到 sigtrap 信号
+                    // 等待zhu进程收到 sigtrap 信号
                     wait(&status);
+
+                    regs_disasm_info(pid, &regs);
                     // 执行到最后一条指令退出循环，同时父进程也会结束
                     if (WIFEXITED(status)) {
                         good_info("Process finished.");
                         break;
                     }
                 } else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {//继续执行
-                    regs_disasm_info(pid, &regs);
-                    // 继续执行，一直到子进程发出发出暂停信号
+
+                    // 继续执行，一直到子进程发出发出暂停hz jshu信号
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
-                    // 等待子进程停止，并获取子进程状态值
+                    // 等待子进程停止hz jieshu，并获取子进程状态值
                     wait(&status);
 
-                    // 没有断点，一直执行到子进程结束
-                    if (!break_point.break_point_mode) {
+                    // 没有断点, zjc jie shu
+                    if (!break_point.break_point_state) {
                         if (WIFEXITED(status)) {
                             good_info("Process finished.");
                             goto debug_stop;
-                            // exit(0);
                         }
                     } 
-                    else {
+                    else 
+                    {
                         // 断点模式被激活，break_point_mode 字段被置为 true
-                        // 等待并判断断点是否被命中
-                        wait_break_point(pid, status, break_point);
+                        // 判断断点是否被命中
+                        break_point_handler(pid, status, break_point);
                     }
                 } else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {//获取子进程制定区域的内存内容
                     ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
@@ -195,13 +197,13 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 } else if (strcmp(arguments[0], "vmmap") == 0) {
                     get_vmmap(pid);
                 } else if (strcmp(arguments[0], "libc") == 0) {
-                    get_base_address(pid);
+                    // get_base_address(pid);
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "stack") == 0) {
                     printf("[+] Stack base: 0x%llx\n", stack_base);
                 } else if (strcmp(arguments[0], "code") == 0) {
-                    get_code_address(pid);
+                    // get_code_address(pid);
                     printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
                     printf("[+] Libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
                     printf("[+] Ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);

@@ -40,12 +40,14 @@ extern unsigned long long ld_code_start;
 extern unsigned long long ld_code_end;
 extern unsigned long long stack_base;
 
-//断点结构体，包含有需要插入断点的地址，对断点地址处的指令进行备份，以及用来标记是否有断点存在的变量
+//断点结构体，包含有需要插入断点的地址，对断点地址处的指令进行备份，以及用来标记是否有断点存在的
 struct break_point {
     unsigned long long addr;
     char backup[CODE_SIZE];
-    bool break_point_mode;
+    bool break_point_state;
 };
+
+extern struct break_point break_point_list[8];
 
 // 解析参数
 void argparse();
@@ -54,6 +56,8 @@ void argparse();
 void get_show_regs(pid_t child, struct user_regs_struct* regs);
 
 int get_rip_data(pid_t child, unsigned long long addr, char* codes);
+
+void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
 
 // 从子进程指定地址获取指定长度的数据，长度单位为字节
 void get_addr_data(pid_t child, unsigned long long addr, char* str, int len);
@@ -68,7 +72,7 @@ void print_bytes(const char* tip, char* codes, int len);
 void show_memory(pid_t pid, unsigned long long addr, long offset = 0, int nbytes = 40);
 
 // 判断断点是否命中
-int wait_break_point(pid_t pid, int status, break_point& bp);
+int break_point_handler(pid_t pid, int status, break_point& bp);
 
 // 给子进程注入断点
 void break_point_inject(pid_t pid, break_point& bp);
