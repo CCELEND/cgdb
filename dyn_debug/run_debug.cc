@@ -12,28 +12,21 @@ unsigned long long libc_code_end = 0;
 unsigned long long ld_base = 0;
 unsigned long long ld_code_start = 0;
 unsigned long long ld_code_end = 0;
+
 unsigned long long stack_base = 0;
+
 struct break_point break_point_list[8];
-
-// void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
-//     int num;
-//     char rip_instruct[64];
-
-//     // 存储子进程当前寄存器的值
-//     get_show_regs(pid, regs);
-//     num = get_rip_data(pid, regs->rip, rip_instruct);
-//     execute_disasm(rip_instruct, num);
-// }
 
 void run_dyn_debug(std::string fname, Binary *bin)
 {
     pid_t pid;
     Symbol *sym;
 
-    break_point break_point = {
-        //默认不进入断点模式
-        .break_point_state = false 
-    };
+    // break_point break_point = {
+    //     //默认不进入断点模式
+    //     .break_point_state = false 
+    // };
+    break_point break_point;
     int status, num;
 
     // fork 子进程
@@ -50,7 +43,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
             if (execl(fname.data(), fname.data(), nullptr)) {
                 err_exit("Execl error in subprocess!");
             }
-            //子进程，没有成功执行
+            // 子进程，没有成功执行
             printf("\033[31m\033[1m[-] Invalid input command: %s\033[0m\n", fname.c_str());
             exit(3);
         default:{
@@ -96,32 +89,30 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     wait(&status);
 
                     regs_disasm_info(pid, &regs);
-                    // 执行到最后一条指令退出循环，同时父进程也会结束
+                    // 执行到最后一条指令退出循环
                     if (WIFEXITED(status)) {
                         good_info("Process finished.");
                         break;
                     }
-                } else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {//继续执行
-
-                    // 继续执行，一直到子进程发出发出暂停hz jshu信号
+                } else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {
+                    // 继续执行，一直到子进程发出发出暂停或者结束信号
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
-                    // 等待子进程停止hz jieshu，并获取子进程状态值
+
+                    // 等待子进程停止或者结束，并获取子进程状态值
                     wait(&status);
 
-                    // 没有断点, zjc jie shu
-                    if (!break_point.break_point_state) {
-                        if (WIFEXITED(status)) {
-                            good_info("Process finished.");
-                            goto debug_stop;
+                    for (int i = 0; i < 8; i++) {
+                        if (break_point_list[i].break_point_state) {
+                            break_point_handler(pid, status, break_point_list[i]);
                         }
-                    } 
-                    else 
-                    {
-                        // 断点模式被激活，break_point_mode 字段被置为 true
-                        // 判断断点是否被命中
-                        break_point_handler(pid, status, break_point);
                     }
-                } else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {//获取子进程制定区域的内存内容
+                    // 没有断点, 子进程结束
+                    if (WIFEXITED(status)) {
+                        good_info("Process finished.");
+                        goto debug_stop;
+                    }
+                } else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {
+                    //获取子进程制定区域的内存内容
                     ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
                     struct Params 
                     {   // 默认地址采用 rip 指针的内容，偏移默认为0，默认读取40个字节
@@ -149,14 +140,22 @@ void run_dyn_debug(std::string fname, Binary *bin)
                         }
                         show_memory(pid, params.addr, params.offset, params.nbytes);
                     }
-                } else if (strcmp(arguments[0], "ic") == 0) {// 计算执行完毕所需指令数
+                } else if (strcmp(arguments[0], "x") == 0){
+                    if (argc == 3) {
+                        // printf("aaaa\n");
+                        read_addr_data(pid, arguments[1], arguments[2]);
+                    } else {
+                        err_info("Please enter the address and read quantity!");
+                    }
+                } else if (strcmp(arguments[0], "ic") == 0) { // 计算执行完毕所需指令数
                     long count = 0;
                     while (true) {
+
                         // 当前子进程还是暂停状态，父进程被阻塞
                         wait(&status);
                         if (WIFEXITED(status)) {
                             good_info("Process finished.");
-                            printf("[+] Total instruction count is \033[32m\033[1m%ld\033[0m\n", 
+                            printf("[+] Total instruction count: \033[32m\033[1m%ld\033[0m\n", 
                                 count);
                             // 指令执行完子进程也结束运行
                             goto debug_stop;
@@ -168,28 +167,26 @@ void run_dyn_debug(std::string fname, Binary *bin)
                         count++;
                     }
                 } else if (strcmp(arguments[0], "break") == 0 || strcmp(arguments[0], "b") == 0) {
-                    //打断点
-                    if (argc == 2) {
-                        for(int i = 0; i < bin->symbols.size(); i++) {
-                            sym = &bin->symbols[i];
-                            if(sym->fun_sym_type == "symtab") {
-                                if (arguments[1] == sym->name){
-                                    printf("[+] Break point at: \033[31m0x%lx\033[0m\n", 
-                                        sym->addr);
-                                    break_point.addr = sym->addr + elf_base; // .c_str
-                                }
-                            }
-                        }
-                        printf("[+] Break point addr: \033[31m0x%llx\033[0m\n", 
-                            break_point.addr);
-                        // 先把需要打断点的地址上指令取出备份
-                        get_addr_data(pid, break_point.addr, break_point.backup, CODE_SIZE);
-                        print_bytes("[+] Get trace instruction: ", break_point.backup, LONG_SIZE);
-                        execute_disasm(break_point.backup, 8);
-                        // 注入断点
-                        break_point_inject(pid, break_point);
+                    if (argc == 2) { // 打断点
+                        set_break_point(pid, arguments[1], bin);
                     } else {
-                        err_info("Please input the address of break point!");
+                        err_info("Please enter the break point address or function name!");
+                    }
+                } else if((strcmp(arguments[0], "delete") == 0 || strcmp(arguments[0], "d") == 0) && strcmp(arguments[1], "b") == 0){
+                    if (argc == 3) {
+                        break_point_delete(pid, arguments[2]);
+                    }
+                    else {
+                        err_info("Please enter the break point number to delete!");
+                    }
+                } else if (strcmp(arguments[0], "ib") == 0) {
+                    printf("Num        Type            Address\n");
+                    for (int i = 0; i < 8; i++) {
+                        if (break_point_list[i].break_point_state) {
+                            printf("%-11dbreak point     \033[31m0x%llx\033[0m\n",
+                                i, break_point_list[i].addr
+                            );
+                        }
                     }
                 } else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {
                     // 显示帮助信息
@@ -197,21 +194,18 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 } else if (strcmp(arguments[0], "vmmap") == 0) {
                     get_vmmap(pid);
                 } else if (strcmp(arguments[0], "libc") == 0) {
-                    // get_base_address(pid);
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "stack") == 0) {
                     printf("[+] Stack base: 0x%llx\n", stack_base);
                 } else if (strcmp(arguments[0], "code") == 0) {
-                    // get_code_address(pid);
                     printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
                     printf("[+] Libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
                     printf("[+] Ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
-
                 } else {
                     err_info("Invalid Argument!");
                 }
-                myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
+                next_input: myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
             }
             // 等待子进程结束之后父进程再退出
             wait(&status);

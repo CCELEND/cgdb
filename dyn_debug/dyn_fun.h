@@ -45,6 +45,8 @@ struct break_point {
     unsigned long long addr;
     char backup[CODE_SIZE];
     bool break_point_state;
+
+    break_point(): addr(0), break_point_state(false) {}
 };
 
 extern struct break_point break_point_list[8];
@@ -71,11 +73,17 @@ void print_bytes(const char* tip, char* codes, int len);
 // 显示指定地址处指定长度的内存内容
 void show_memory(pid_t pid, unsigned long long addr, long offset = 0, int nbytes = 40);
 
+void read_addr_data(pid_t pid, char* num , char* addr);
+
+void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
+
 // 判断断点是否命中
 int break_point_handler(pid_t pid, int status, break_point& bp);
 
 // 给子进程注入断点
 void break_point_inject(pid_t pid, break_point& bp);
+
+void break_point_delete(pid_t pid, char* bp_num);
 
 // 从当前子进程的虚拟地址范围获取子进程的起始地址
 void get_base_address(pid_t pid);
