@@ -1,7 +1,5 @@
 
 #include "dyn_fun.h"
-#include "../elf/loader_elf.h"
-#include "../disasm/disasm.h"
 
 void arg_error(const char* fname){
     printf("\033[31m\033[1m[-] Usage: %s <binary>\033[0m\n", fname);
@@ -44,33 +42,33 @@ void argparse() {
 }
 
 // 输出寄存器
-void get_show_regs(pid_t child, struct user_regs_struct* regs)
+void get_show_regs(pid_t pid, struct user_regs_struct* regs)
 {
     printf("\033[34m───────────────────────────────────[ REGISTERS ]──────────────────────────────────\033[0m\n");
-    ptrace(PTRACE_GETREGS, child, nullptr, regs);
+    ptrace(PTRACE_GETREGS, pid, nullptr, regs);
 	printf(
 		"RAX      0x%llx\nRBX      0x%llx\nRCX      0x%llx\nRDX      0x%llx\nRDI      0x%llx\n"
 		"RSI      0x%llx\nR8       0x%llx\nR9       0x%llx\nR10      0x%llx\nR11      0x%llx\n"
 		"R12      0x%llx\nR13      0x%llx\nR14      0x%llx\nR15      0x%llx\nEFLAGS   0x%llx\n"
-		"RBP      0x%llx\nRSP      \033[33m0x%llx\033[0m\n",
+		"RBP      0x%llx\n",
 		regs->rax, regs->rbx, regs->rcx, regs->rdx, regs->rdi,
 		regs->rsi, regs->r8, regs->r9, regs->r10, regs->r11,
 		regs->r12, regs->r13, regs->r14, regs->r15, regs->eflags,
-		regs->rbp, regs->rsp
+		regs->rbp
     );
 
-    if (regs->rip < elf_code_end) {
-        printf("RIP      \033[31m0x%llx\033[0m (elf)\n", regs->rip);
-    } else if (regs->rip > libc_code_start && regs->rip < libc_code_end ) {
-        printf("RIP      \033[31m0x%llx\033[0m (libc)\n", regs->rip);
-    } else {
-        printf("RIP      \033[31m0x%llx\033[0m (ld-linux)\n", regs->rip);
-    }
+    printf("RSP      ");
+    flag_addr_printf(regs->rsp, true);
+    printf("\n");
+
+    printf("RIP      ");
+    flag_addr_printf(regs->rip, true);
+    printf("\n");
 
     printf("\033[34m────────────────────────────────────[ DISASM ]────────────────────────────────────\033[0m\n");
 }
 
-int get_rip_data(pid_t child, unsigned long long addr, char* codes)
+int get_rip_data(pid_t pid, unsigned long long addr, char* codes)
 {
     char buf[128];
     union u {
@@ -79,7 +77,7 @@ int get_rip_data(pid_t child, unsigned long long addr, char* codes)
     } word{};
 
     for (int i = 0; i < 64; i += LONG_SIZE){
-        word.val = ptrace(PTRACE_PEEKDATA, child, addr + i, nullptr);
+        word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
@@ -106,12 +104,12 @@ void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
 
 /* *
  * 从子进程指定地址读取数据
- * child: 子进程pid号
+ * pid: 子进程pid号
  * addr: 地址
  * str: 用来存储读取的字节
  * len: 读取字节长度
  * */
-void get_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
+void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len) {
     char* laddr = str;
     int i = 0, j = len / LONG_SIZE;//计算一共需要读取多少个字
     union u {
@@ -119,7 +117,7 @@ void get_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
         char chars[LONG_SIZE];
     } word{};
     while (i < j) {//每次读取1个字，8个字节，每次地址加8(LONG_SIZE)
-        word.val = ptrace(PTRACE_PEEKDATA, child, addr + i * LONG_SIZE, nullptr);
+        word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
         memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进数组
@@ -128,7 +126,7 @@ void get_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
     }
     j = len % LONG_SIZE;//不足一个字的虚读一个字
     if (j != 0) {
-        word.val = ptrace(PTRACE_PEEKDATA, child, addr + i * LONG_SIZE, nullptr);
+        word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
     }
@@ -137,13 +135,13 @@ void get_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
 
 /* *
  * 从子进程指定地址插入数据
- * child: 子进程pid号
+ * pid: 子进程pid号
  * addr: 地址
  * str: 用来插入的字节
  * len: 插入字节数
  * */
-void put_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
-    char* laddr = str;//与getdata类似
+void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len) {
+    char* laddr = str;
     int i = 0, j = len / LONG_SIZE;
     union u {
         long val;
@@ -151,7 +149,7 @@ void put_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
     } word{};
     while (i < j) {
         memcpy(word.chars, laddr, LONG_SIZE);
-        if (ptrace(PTRACE_POKEDATA, child, addr + i * LONG_SIZE, word.val) == -1)
+        if (ptrace(PTRACE_POKEDATA, pid, addr + i * LONG_SIZE, word.val) == -1)
             err_info("Trace error!");
         ++i;
         laddr += LONG_SIZE;
@@ -160,7 +158,7 @@ void put_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
     if (j != 0) {
         word.val = 0;
         memcpy(word.chars, laddr, j);
-        if (ptrace(PTRACE_POKEDATA, child, addr + i * LONG_SIZE, word.val) == -1)
+        if (ptrace(PTRACE_POKEDATA, pid, addr + i * LONG_SIZE, word.val) == -1)
             err_info("Trace error!");
     }
 }
@@ -171,8 +169,8 @@ void put_addr_data(pid_t child, unsigned long long addr, char* str, int len) {
  * codes: 需要打印的字节
  * len: 需要打印的字节数
  * */
-void print_bytes(const char* tip, char* codes, int len) {
-
+void print_bytes(const char* tip, char* codes, int len) 
+{
     int i;
 
     printf("%s", tip);
@@ -200,16 +198,37 @@ void show_memory(pid_t pid, unsigned long long addr, long offset, int nbytes) {
     print_bytes("", memory_content, nbytes);
 }
 
-void flag_addr(unsigned long long addr)
+void flag_addr_printf(unsigned long long addr, bool addr_flag)
 {
-    if (addr > elf_code_start && addr < elf_code_end) {
-        printf("\033[31m0x%llx\033[0m", addr);
-    } else if (addr > libc_code_start && addr < libc_code_end) {
-        printf("\033[31m0x%llx\033[0m", addr);
-    } else if (addr > ld_code_start && addr < ld_code_end){
-        printf("\033[31m0x%llx\033[0m", addr);
-    } else if (addr > stack_base) {
-        printf("\033[33m0x%llx\033[0m", addr);
+    if (addr == 0){
+        printf("0x%llx", addr);
+        return;
+    }
+
+    if (addr_flag)
+    {
+        if (addr > elf_code_start && addr < elf_code_end) {
+            printf("\033[31m0x%llx\033[0m (elf)", addr);
+        } else if (addr > libc_code_start && addr < libc_code_end) {
+            printf("\033[31m0x%llx\033[0m (libc)", addr);
+        } else if (addr > stack_base) {
+            printf("\033[33m0x%llx\033[0m (stack)", addr);
+        }
+        else {
+            printf("\033[31m0x%llx\033[0m (ld-linux)", addr);
+        }
+    }
+    else
+    {
+        if (addr > elf_code_start && addr < elf_code_end) {
+            printf("\033[31m0x%llx\033[0m", addr);
+        } else if (addr > libc_code_start && addr < libc_code_end) {
+            printf("\033[31m0x%llx\033[0m", addr);
+        } else if (addr > ld_code_start && addr < ld_code_end){
+            printf("\033[31m0x%llx\033[0m", addr);
+        } else if (addr > stack_base) {
+            printf("\033[33m0x%llx\033[0m", addr);
+        }
     }
 }
 
@@ -230,9 +249,8 @@ void read_addr_data(pid_t pid, char* num , char* addr)
 
     for (int i = 0; i < r_num; i++) {
         if( i % 2 == 0){
-            flag_addr(address + i * LONG_SIZE);
+            flag_addr_printf(address + i * LONG_SIZE, false);
             printf(": ");
-            // printf("0x%llx: ", address + i * LONG_SIZE);
         }
         printf("0x");
 
@@ -255,104 +273,104 @@ void read_addr_data(pid_t pid, char* num , char* addr)
     }
 }
 
-void break_point_inject(pid_t pid, break_point& bp) {
-    char code[LONG_SIZE] = { static_cast<char>(0xcc) };// int3 中断指令
+// void break_point_inject(pid_t pid, break_point& bp) {
+//     char code[LONG_SIZE] = { static_cast<char>(0xcc) };// int3 中断指令
 
-    put_addr_data(pid, bp.addr, code, CODE_SIZE);    // 将中断指令 int3 注入
-    bp.break_point_state = true;     // 将断点模式标识变量置为 true
-}
-void set_break_point(pid_t pid, char* bp_fun, Binary *bin) 
-{
-    Symbol *sym;
-    unsigned long long break_point_addr;
+//     put_addr_data(pid, bp.addr, code, CODE_SIZE);    // 将中断指令 int3 注入
+//     bp.break_point_state = true;     // 将断点模式标识变量置为 true
+// }
+// void set_break_point(pid_t pid, char* bp_fun, Binary *bin) 
+// {
+//     Symbol *sym;
+//     unsigned long long break_point_addr;
 
-    for(int i = 0; i < bin->symbols.size(); i++) {
-        sym = &bin->symbols[i];
-        if(sym->fun_sym_type == "symtab") {
-            if (bp_fun == sym->name) {
-                break_point_addr = sym->addr + elf_base;
-                break;
-            }
-        }
-    }
-    for (int i = 0; i < 8; i++) {
-        if (break_point_list[i].addr == break_point_addr){
-            err_info("Break point already exists!");
-            return;
-        }
-    }
-    for (int i = 0; i < 8; i++) {
-        if (break_point_list[i].addr == 0)
-        {
-            break_point_list[i].addr = break_point_addr;
-            printf("[+] Break point %d at \033[31m0x%lx\033[0m: \033[31m0x%llx\033[0m\n", 
-                    i, sym->addr, break_point_list[i].addr);
+//     for(int i = 0; i < bin->symbols.size(); i++) {
+//         sym = &bin->symbols[i];
+//         if(sym->fun_sym_type == "symtab") {
+//             if (bp_fun == sym->name) {
+//                 break_point_addr = sym->addr + elf_base;
+//                 break;
+//             }
+//         }
+//     }
+//     for (int i = 0; i < 8; i++) {
+//         if (break_point_list[i].addr == break_point_addr){
+//             err_info("Break point already exists!");
+//             return;
+//         }
+//     }
+//     for (int i = 0; i < 8; i++) {
+//         if (break_point_list[i].addr == 0)
+//         {
+//             break_point_list[i].addr = break_point_addr;
+//             printf("[+] Break point %d at \033[31m0x%lx\033[0m: \033[31m0x%llx\033[0m\n", 
+//                     i, sym->addr, break_point_list[i].addr);
 
-            // 先把需要打断点的地址上指令取出备份
-            get_addr_data(pid, break_point_list[i].addr, break_point_list[i].backup, CODE_SIZE);
-            print_bytes("[+] Get trace instruction: ", break_point_list[i].backup, CODE_SIZE);
-            execute_disasm(break_point_list[i].backup, CODE_SIZE);
-            // 注入断点
-            break_point_inject(pid, break_point_list[i]);
-            break;
-        }
-    }
-}
-/* *
- * 判断是否命中
- * pid: 子进程pid
- * status: 由外部传入，获取当前 trace 停止的状态码
- * bp: 断点结构体
- * */
-int break_point_handler(pid_t pid, int status, break_point& bp) {
-    struct user_regs_struct regs{};
-    // 捕获信号之后判断信号类型
-    if (WIFEXITED(status)) {
-        // exit 信号
-        err_exit("The child process has ended!");
-    }
-    if (WIFSTOPPED(status)) {
-        // 如果是 STOP 信号
-        if (WSTOPSIG(status) == SIGTRAP) {                  // 如果触发了 SIGTRAP,说明碰到了断点
-            ptrace(PTRACE_GETREGS, pid, nullptr, &regs);    // 读取寄存器的值，为回退做准备
+//             // 先把需要打断点的地址上指令取出备份
+//             get_addr_data(pid, break_point_list[i].addr, break_point_list[i].backup, CODE_SIZE);
+//             print_bytes("[+] Get trace instruction: ", break_point_list[i].backup, CODE_SIZE);
+//             execute_disasm(break_point_list[i].backup, CODE_SIZE);
+//             // 注入断点
+//             break_point_inject(pid, break_point_list[i]);
+//             break;
+//         }
+//     }
+// }
+// /* *
+//  * 判断是否命中
+//  * pid: 子进程pid
+//  * status: 由外部传入，获取当前 trace 停止的状态码
+//  * bp: 断点结构体
+//  * */
+// int break_point_handler(pid_t pid, int status, break_point& bp) {
+//     struct user_regs_struct regs{};
+//     // 捕获信号之后判断信号类型
+//     if (WIFEXITED(status)) {
+//         // exit 信号
+//         err_exit("The pid process has ended!");
+//     }
+//     if (WIFSTOPPED(status)) {
+//         // 如果是 STOP 信号
+//         if (WSTOPSIG(status) == SIGTRAP) {                  // 如果触发了 SIGTRAP,说明碰到了断点
+//             ptrace(PTRACE_GETREGS, pid, nullptr, &regs);    // 读取寄存器的值，为回退做准备
 
-            // 如果满足关系，说明断点命中
-            if (bp.addr != (regs.rip - 1)) 
-            {
-                // 未命中
-                printf("\033[31m\033[1m[-] Break point: 0x%llx failure!\033[0m\n", regs.rip);
-                return -1;
-            } 
-            else 
-            {
-                printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
-                // 把INT 3 patch 回本来正常的指令
-                put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
-                // 执行流回退，重新执行正确的指令
-                regs.rip = bp.addr;
-                ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
-                regs_disasm_info(pid, &regs);
+//             // 如果满足关系，说明断点命中
+//             if (bp.addr != (regs.rip - 1)) 
+//             {
+//                 // 未命中
+//                 printf("\033[31m\033[1m[-] Break point: 0x%llx failure!\033[0m\n", regs.rip);
+//                 return -1;
+//             } 
+//             else 
+//             {
+//                 printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
+//                 // 把INT 3 patch 回本来正常的指令
+//                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
+//                 // 执行流回退，重新执行正确的指令
+//                 regs.rip = bp.addr;
+//                 ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
+//                 regs_disasm_info(pid, &regs);
 
-                bp.addr = 0;
-                bp.break_point_state = false; // 命中断点之后取消断点
-                return 1;
-            }
-        }
-    }
-    return 0;
-}
+//                 bp.addr = 0;
+//                 bp.break_point_state = false; // 命中断点之后取消断点
+//                 return 1;
+//             }
+//         }
+//     }
+//     return 0;
+// }
 
-void break_point_delete(pid_t pid, char* bp_num)
-{
-    int b_num = stoi(bp_num);
-    if (b_num >= 8 || b_num < 0){
-        err_info("Error break point number!");
-        return;
-    }
-    put_addr_data(pid, break_point_list[b_num].addr, break_point_list[b_num].backup, CODE_SIZE);
-    break_point_list[b_num].addr = 0;
-    break_point_list[b_num].break_point_state = false;
-}
+// void break_point_delete(pid_t pid, char* bp_num)
+// {
+//     int b_num = stoi(bp_num);
+//     if (b_num >= 8 || b_num < 0){
+//         err_info("Error break point number!");
+//         return;
+//     }
+//     put_addr_data(pid, break_point_list[b_num].addr, break_point_list[b_num].backup, CODE_SIZE);
+//     break_point_list[b_num].addr = 0;
+//     break_point_list[b_num].break_point_state = false;
+// }
 
 /* *
  * 获取子进程再虚拟地址空间的起始地址
@@ -386,6 +404,7 @@ void get_base_address(pid_t pid) {
 
         } else if (line.find("[stack]") != string::npos && !stack_base) {
             stack_base = strtoul(line.data(), nullptr, 16);
+            stack_end = strtoul(line.data()+13, nullptr, 16);
 
         }
     }

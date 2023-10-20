@@ -1,5 +1,104 @@
 
 #include "dyn_fun.h"
-#include "../elf/loader_elf.h"
-#include "../disasm/disasm.h"
+
+void break_point_inject(pid_t pid, break_point& bp) {
+    char code[LONG_SIZE] = { static_cast<char>(0xcc) };// int3 中断指令
+
+    put_addr_data(pid, bp.addr, code, CODE_SIZE);    // 将中断指令 int3 注入
+    bp.break_point_state = true;     // 将断点模式标识变量置为 true
+}
+
+void set_break_point(pid_t pid, char* bp_fun, Binary *bin) 
+{
+    Symbol *sym;
+    unsigned long long break_point_addr;
+
+    for(int i = 0; i < bin->symbols.size(); i++) {
+        sym = &bin->symbols[i];
+        if(sym->fun_sym_type == "symtab") {
+            if (bp_fun == sym->name) {
+                break_point_addr = sym->addr + elf_base;
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < 8; i++) {
+        if (break_point_list[i].addr == break_point_addr){
+            err_info("Break point already exists!");
+            return;
+        }
+    }
+    for (int i = 0; i < 8; i++) {
+        if (break_point_list[i].addr == 0)
+        {
+            break_point_list[i].addr = break_point_addr;
+            printf("[+] Break point %d at \033[31m0x%lx\033[0m: \033[31m0x%llx\033[0m\n", 
+                    i, sym->addr, break_point_list[i].addr);
+
+            // 先把需要打断点的地址上指令取出备份
+            get_addr_data(pid, break_point_list[i].addr, break_point_list[i].backup, CODE_SIZE);
+            print_bytes("[+] Get trace instruction: ", break_point_list[i].backup, CODE_SIZE);
+            execute_disasm(break_point_list[i].backup, CODE_SIZE);
+            // 注入断点
+            break_point_inject(pid, break_point_list[i]);
+            break;
+        }
+    }
+}
+
+void break_point_delete(pid_t pid, char* bp_num)
+{
+    int b_num = stoi(bp_num);
+    if (b_num >= 8 || b_num < 0){
+        err_info("Error break point number!");
+        return;
+    }
+    put_addr_data(pid, break_point_list[b_num].addr, break_point_list[b_num].backup, CODE_SIZE);
+    break_point_list[b_num].addr = 0;
+    break_point_list[b_num].break_point_state = false;
+}
+
+/* *
+ * 判断是否命中
+ * pid: 子进程pid
+ * status: 由外部传入，获取当前 trace 停止的状态码
+ * bp: 断点结构体
+ * */
+int break_point_handler(pid_t pid, int status, break_point& bp) {
+    struct user_regs_struct regs{};
+    // 捕获信号之后判断信号类型
+    if (WIFEXITED(status)) {
+        // exit 信号
+        err_exit("The child process has ended!");
+    }
+    if (WIFSTOPPED(status)) {
+        // 如果是 STOP 信号
+        if (WSTOPSIG(status) == SIGTRAP) {                  // 如果触发了 SIGTRAP,说明碰到了断点
+            ptrace(PTRACE_GETREGS, pid, nullptr, &regs);    // 读取寄存器的值，为回退做准备
+
+            // 如果满足关系，说明断点命中
+            if (bp.addr != (regs.rip - 1)) 
+            {
+                // 未命中
+                printf("\033[31m\033[1m[-] Break point: 0x%llx failure!\033[0m\n", regs.rip);
+                return -1;
+            } 
+            else 
+            {
+                printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
+                // 把INT 3 patch 回本来正常的指令
+                put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
+                // 执行流回退，重新执行正确的指令
+                regs.rip = bp.addr;
+                ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
+                regs_disasm_info(pid, &regs);
+
+                bp.addr = 0;
+                bp.break_point_state = false; // 命中断点之后取消断点
+                return 0;
+            }
+        }
+    }
+    return 0;
+}
 

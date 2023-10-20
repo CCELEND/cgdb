@@ -17,10 +17,12 @@
 #include <fstream>
 
 #include "../elf/loader_elf.h"
+#include "../disasm/disasm.h"
 
-//LONG型数据的长度8个字节
-#define LONG_SIZE 8 
-//注入断点中断指令的长度，8个字节
+// LONG 型数据的长度8个字节
+#define LONG_SIZE 8
+
+// 注入断点中断指令的长度，8个字节
 #define CODE_SIZE 8
 using namespace std;
 
@@ -39,6 +41,7 @@ extern unsigned long long ld_base;
 extern unsigned long long ld_code_start;
 extern unsigned long long ld_code_end;
 extern unsigned long long stack_base;
+extern unsigned long long stack_end;
 
 //断点结构体，包含有需要插入断点的地址，对断点地址处的指令进行备份，以及用来标记是否有断点存在的
 struct break_point {
@@ -48,24 +51,25 @@ struct break_point {
 
     break_point(): addr(0), break_point_state(false) {}
 };
-
 extern struct break_point break_point_list[8];
 
 // 解析参数
 void argparse();
 
-// 输出寄存器值
-void get_show_regs(pid_t child, struct user_regs_struct* regs);
+void flag_addr_printf(unsigned long long addr, bool addr_flag);
 
-int get_rip_data(pid_t child, unsigned long long addr, char* codes);
+// 输出寄存器值
+void get_show_regs(pid_t pid, struct user_regs_struct* regs);
+
+int get_rip_data(pid_t pid, unsigned long long addr, char* codes);
 
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
 
 // 从子进程指定地址获取指定长度的数据，长度单位为字节
-void get_addr_data(pid_t child, unsigned long long addr, char* str, int len);
+void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 
 // 将数据插入子进程指定地址处
-void put_addr_data(pid_t child, unsigned long long addr, char* str, int len);
+void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 
 // 打印字节
 void print_bytes(const char* tip, char* codes, int len);
@@ -105,6 +109,6 @@ void note_info(const char* msg);
 
 void good_info(const char* msg);
 
-void run_dyn_debug(std::string fname, Binary *bin);
+void run_dyn_debug(string fname, Binary *bin);
 
 #endif

@@ -18,7 +18,7 @@ void execute_disasm(char* byte_codes, int num)
         return;
     }
 
-    char *result = nullptr;
+    char* result = nullptr;
     size_t len = 0;
     ssize_t read;
 

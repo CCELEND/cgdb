@@ -1,7 +1,5 @@
 
 #include "dyn_fun.h"
-#include "../elf/loader_elf.h"
-#include "../disasm/disasm.h"
 
 unsigned long long elf_base = 0;
 unsigned long long elf_code_start = 0;
@@ -14,6 +12,7 @@ unsigned long long ld_code_start = 0;
 unsigned long long ld_code_end = 0;
 
 unsigned long long stack_base = 0;
+unsigned long long stack_end = 0;
 
 struct break_point break_point_list[8];
 
@@ -86,7 +85,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     regs_disasm_info(pid, &regs);
                     // 执行到最后一条指令退出循环
                     if (WIFEXITED(status)) {
-                        good_info("Process finished.");
+                        printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         break;
                     }
                 } else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {
@@ -103,7 +102,8 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     }
                     // 没有断点, 子进程结束
                     if (WIFEXITED(status)) {
-                        good_info("Process finished.");
+                        // good_info("Process finished.");
+                        printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         goto debug_stop;
                     }
                 } else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {
@@ -137,7 +137,6 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     }
                 } else if (strcmp(arguments[0], "x") == 0){
                     if (argc == 3) {
-                        // printf("aaaa\n");
                         read_addr_data(pid, arguments[1], arguments[2]);
                     } else {
                         err_info("Please enter the address and read quantity!");
@@ -192,7 +191,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "stack") == 0) {
-                    printf("[+] Stack base: 0x%llx\n", stack_base);
+                    printf("[+] Stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
                 } else if (strcmp(arguments[0], "code") == 0) {
                     printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
                     printf("[+] Libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
