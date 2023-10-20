@@ -89,6 +89,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                         break;
                     }
                 } else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {
+                    printf("[*] Continuing...\n");
                     // 继续执行，一直到子进程发出发出暂停或者结束信号
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
 

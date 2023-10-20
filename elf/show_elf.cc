@@ -29,7 +29,7 @@ void show_elf_symbol(Binary *bin)
 {
     Symbol *sym;
 
-    printf("[+] Symbol tables(\033[32m\033[1mFUNC\033[0m)\n");
+    printf("[+] Symbol tables (\033[32mFUNC\033[0m)\n");
     printf("    %-31s %18s   %s\n", "name", "address", "type");
     printf("======================================================================\n");
 
@@ -44,7 +44,7 @@ void show_elf_symbol(Binary *bin)
         }
     }
 
-    printf("\033[34m\033[1mmodule internal symbol table:\033[0m\n");
+    printf("\033[34mmodule internal symbol table:\033[0m\n");
     for(int i = 0; i < bin->symbols.size(); i++) {
         sym = &bin->symbols[i];
         if(sym->addr){
@@ -59,7 +59,7 @@ void show_elf_dynsym(Binary *bin)
 {
     Symbol *sym;
 
-    printf("[+] Dynamic symbol(\033[32m\033[1mFUNC\033[0m)\n");
+    printf("[+] Dynamic symbol (\033[32mFUNC\033[0m)\n");
     printf("    %-31s %18s   %s\n", "name", "address", "type");
     printf("======================================================================\n");
 
@@ -79,7 +79,7 @@ void show_elf_sections_code_data(Binary *bin)
 {
     Section *sec;
 
-    printf("[+] sections(\033[32m\033[1mcode and data\033[0m)\n");
+    printf("[+] sections (\033[31mcode\033[0m | \033[35mdata\033[0m)\n");
     printf("%18s   %-8s %-20s %s\n", "vma", "size", "name", "type");
     printf("========================================================\n");
     for(int i = 0; i < bin->sections.size(); i++) 

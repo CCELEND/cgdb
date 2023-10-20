@@ -2,13 +2,13 @@
 #include "dyn_fun.h"
 
 void break_point_inject(pid_t pid, break_point& bp) {
-    char code[LONG_SIZE] = { static_cast<char>(0xcc) };// int3 中断指令
+    char code[LONG_SIZE] = { static_cast<char>(0xcc) }; // int3 中断指令
 
-    put_addr_data(pid, bp.addr, code, CODE_SIZE);    // 将中断指令 int3 注入
-    bp.break_point_state = true;     // 将断点模式标识变量置为 true
+    put_addr_data(pid, bp.addr, code, CODE_SIZE);    // 中断指令 int3 注入
+    bp.break_point_state = true;     // 启用断点
 }
 
-void set_break_point(pid_t pid, char* bp_fun, Binary *bin) 
+void set_break_point(pid_t pid, char* bp_fun, Binary* bin) 
 {
     Symbol *sym;
     unsigned long long break_point_addr;
