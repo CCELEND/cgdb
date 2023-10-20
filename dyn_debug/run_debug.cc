@@ -21,12 +21,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
 {
     pid_t pid;
     Symbol *sym;
-
-    // break_point break_point = {
-    //     //默认不进入断点模式
-    //     .break_point_state = false 
-    // };
-    break_point break_point;
+    break_point ni_break_point;
     int status, num;
 
     // fork 子进程
