@@ -92,7 +92,7 @@ void show_elf_sections_code_data(Binary *bin)
 }
 
 
-// void show_elf_plt(std::string fname)
+// void show_elf_plt(Binary *bin)
 // {
 //     std::string command = std::string("objdump -R ") + fname;
 //     // 执行命令并将标准输出连接到文件流中

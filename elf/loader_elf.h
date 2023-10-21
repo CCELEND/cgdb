@@ -7,10 +7,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <iostream>
-
 #include <string>
 #include <vector>
-
 #include <bfd.h>
 
 // 新版本的宏有问题, 需要修改
@@ -36,7 +34,7 @@ public:
   uint64_t    addr;         // 符号起始地址
 };
 
-// 这个类保存节的基本信息
+// 保存节的基本信息
 class Section {
 public:
   enum SectionType {
