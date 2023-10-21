@@ -114,38 +114,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         goto debug_stop;
                     }
-                } 
-                // else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {
-                //     //获取子进程制定区域的内存内容
-                //     ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
-                //     struct Params 
-                //     {   // 默认地址采用 rip 指针的内容，偏移默认为0，默认读取40个字节
-                //         unsigned long long addr;
-                //         long offset;
-                //         int nbytes;
-                //     } params = {regs.rip, 0, 40};
-
-                //     if (argc == 1) {
-                //         show_memory(pid, regs.rip);//显示内存内容
-                //     } else {
-                //         for (int i = 1; i < argc; i++) {//检查是否有额外参数指定
-                //             if (strcmp(arguments[i], "-addr") == 0) {//指定内存的起始地址
-                //                 params.addr = strtol(arguments[++i], nullptr, 16);
-                //                 continue;//当前参数指定功能，下一个参数指定具体的值，两项获取之后直接跳一步检查别的参数
-                //             }
-                //             if (strcmp(arguments[i], "-off") == 0) {
-                //                 params.offset = strtol(arguments[++i], nullptr, 10);
-                //                 continue;
-                //             }
-                //             if (strcmp(arguments[i], "-nb") == 0) {
-                //                 params.nbytes = strtol(arguments[++i], nullptr, 10);
-                //                 continue;
-                //             }
-                //         }
-                //         show_memory(pid, params.addr, params.offset, params.nbytes);
-                //     }
-                // } 
-                else if (strcmp(arguments[0], "x") == 0){
+                } else if (strcmp(arguments[0], "x") == 0){
                     if (argc == 3) 
                     {
                         int num = stoi(arguments[1]);

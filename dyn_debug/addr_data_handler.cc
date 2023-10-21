@@ -17,10 +17,10 @@ void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len)
         long val;
         char chars[LONG_SIZE];
     } word{};
-    while (i < j) {//每次读取1个字，8个字节，每次地址加8(LONG_SIZE)
+
+    while (i < j) { //每次读取1个字，8个字节，每次地址加8(LONG_SIZE)
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
-        if (word.val == -1)
-            err_info("Trace error!");
+        if (word.val == -1) err_info("Trace error!");
         memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进数组
         ++i;
         laddr += LONG_SIZE;
@@ -28,20 +28,21 @@ void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len)
     j = len % LONG_SIZE;//不足一个字的虚读一个字
     if (j != 0) {
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
-        if (word.val == -1)
-            err_info("Trace error!");
+        if (word.val == -1) err_info("Trace error!");
     }
     str[len] = '\0';
 }
 
 // 从 str 插入 len 字节长度数据到子进程指定地址
-void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len) {
+void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len) 
+{
     char* laddr = str;
     int i = 0, j = len / LONG_SIZE;
     union u {
         long val;
         char chars[LONG_SIZE];
     } word{};
+
     while (i < j) {
         memcpy(word.chars, laddr, LONG_SIZE);
         if (ptrace(PTRACE_POKEDATA, pid, addr + i * LONG_SIZE, word.val) == -1)
@@ -53,7 +54,7 @@ void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len) {
     if (j != 0) {
         word.val = 0;
         memcpy(word.chars, laddr, j);
-        if (ptrace(PTRACE_POKEDATA, pid, addr + i * LONG_SIZE, word.val) == -1)
+        if (ptrace(PTRACE_POKEDATA, pid, addr + i * LONG_SIZE, word.val) == -1) 
             err_info("Trace error!");
     }
 }
@@ -67,8 +68,7 @@ void print_bytes(const char* tip, char* codes, int len)
     for (i = 0; i < len; ++i) 
     {
         printf("%02x", (unsigned char) codes[i]);
-        if ((i + 1) % 8 == 0)
-            printf("\n");
+        if ((i + 1) % 8 == 0) printf("\n");
     }
 }
 
@@ -91,8 +91,7 @@ void show_memory(pid_t pid, unsigned long long addr, long offset, int nbytes) {
 // 输出带颜色的地址以标记所属地址范围 addr_flag 为真会显示地址所属文件
 void flag_addr_printf(unsigned long long addr, bool addr_flag)
 {
-    if (addr == 0)
-    {
+    if (addr == 0) {
         printf("0x%llx", addr);
         return;
     }
@@ -145,20 +144,16 @@ void show_addr_data(pid_t pid, int num , unsigned long long addr)
         printf("0x");
 
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
-        if (word.val == -1)
-            err_info("Trace error!");
+        if (word.val == -1) err_info("Trace error!");
         memcpy(laddr, word.chars, LONG_SIZE);
 
         for (int j = 7; j > -1; --j)
         {
             printf("%02x", (unsigned char) laddr[j]);
-            if (j == 0)
-                printf("      ");
+            if (j == 0) printf("      ");
         }
 
-        if (( i + 1 ) % 2 == 0){
-            printf("\n");
-        }
+        if (( i + 1 ) % 2 == 0) printf("\n");
 
     }
 }
