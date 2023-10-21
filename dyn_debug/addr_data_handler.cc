@@ -104,8 +104,11 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             printf("\033[31m0x%llx\033[0m (libc)", addr);
         } else if (addr > stack_base) {
             printf("\033[33m0x%llx\033[0m (stack)", addr);
-        } else {
+        } else if (!ld_base){
             printf("\033[31m0x%llx\033[0m (ld-linux)", addr);
+        }
+        else {
+            printf("0x%llx", addr);
         }
     }
     else

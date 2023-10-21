@@ -6,6 +6,10 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+
+#include <inttypes.h>
+#include <capstone/capstone.h>
+
 using namespace std;
 
 void execute_disasm(char* byte_codes, int num);
