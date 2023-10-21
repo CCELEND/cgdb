@@ -51,17 +51,12 @@ void set_break_point(pid_t pid, char* bp_fun, Binary* bin)
 void break_point_delete(pid_t pid, int num)
 {
     put_addr_data(pid, break_point_list[num].addr, break_point_list[num].backup, CODE_SIZE);
-    
+
     break_point_list[num].addr = 0;
     break_point_list[num].break_point_state = false;
 }
 
-/* *
- * 判断是否命中
- * pid: 子进程pid
- * status: 由外部传入，获取当前 trace 停止的状态码
- * bp: 断点结构体
- * */
+
 int break_point_handler(pid_t pid, int status, break_point& bp) 
 {
     struct user_regs_struct regs{};
