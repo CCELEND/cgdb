@@ -19,7 +19,7 @@ $(BUILDDIR)/disasm.o: disasm/disasm.cc
 	$(CXX) -std=c++11 -c $^ -o $@
 
 $(OBJ): $(objects) $(objects2) $(BUILDDIR)/disasm.o
-	$(CXX) -std=c++11 -o build/$@ cgdb.cc $^ -lbfd
+	$(CXX) -std=c++11 -o build/$@ cgdb.cc $^ -lbfd -lcapstone
 
 clean:
 	rm -f $(BUILDDIR)/$(OBJ) `find -name "*.o"`
