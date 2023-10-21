@@ -1,5 +1,5 @@
 # cgdb
-A self actualizing gdb
+A very simple gdb
 
 ## Environment
 Environment that needs to be installed: capstone
