@@ -55,60 +55,44 @@ extern struct break_point break_point_list[8];
 
 // 解析参数
 void argparse();
-
-void flag_addr_printf(unsigned long long addr, bool addr_flag);
-
-// 输出寄存器值
-void get_show_regs(pid_t pid, struct user_regs_struct* regs);
-
-int get_rip_data(pid_t pid, unsigned long long addr, char* codes);
-
-void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
-
-// 从子进程指定地址获取指定长度的数据，长度单位为字节
-void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
-
-// 将数据插入子进程指定地址处
-void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
-
-// 打印字节
-void print_bytes(const char* tip, char* codes, int len);
-
-// 显示指定地址处指定长度的内存内容
-void show_memory(pid_t pid, unsigned long long addr, long offset = 0, int nbytes = 40);
-
-void read_addr_data(pid_t pid, char* num , char* addr);
-
-void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
-
-// 判断断点是否命中
-int break_point_handler(pid_t pid, int status, break_point& bp);
-
-// 给子进程注入断点
-void break_point_inject(pid_t pid, break_point& bp);
-
-void break_point_delete(pid_t pid, char* bp_num);
-
-// 从当前子进程的虚拟地址范围获取子进程的起始地址
-void get_base_address(pid_t pid);
-
-void get_code_address(pid_t pid);
-
-void get_vmmap(pid_t pid);
-
 //显示帮助信息
 void show_help();
+void run_dyn_debug(string fname, Binary *bin);
+
+
+void get_show_regs(pid_t pid, struct user_regs_struct* regs);
+void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
+int get_rip_codes(pid_t pid, unsigned long long addr, char* codes);
+
+void show_stack(pid_t pid, struct user_regs_struct* regs);
+
+
+void flag_addr_printf(unsigned long long addr, bool addr_flag);
+void show_addr_data(pid_t pid, int num , unsigned long long addr);
+void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
+void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
+void print_bytes(const char* tip, char* codes, int len);
+unsigned long long get_addr_val(pid_t pid, unsigned long long addr);
+
+
+// void show_memory(pid_t pid, unsigned long long addr, long offset = 0, int nbytes = 40);
+
+void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
+int break_point_handler(pid_t pid, int status, break_point& bp);
+void break_point_inject(pid_t pid, break_point& bp);
+void break_point_delete(pid_t pid, char* bp_num);
+
+
+void get_base_address(pid_t pid);
+void get_code_address(pid_t pid);
+void get_vmmap(pid_t pid);
+
 
 void arg_error(const char* fname);
-
 void err_exit(const char* msg);
-
 void err_info(const char* msg);
-
 void note_info(const char* msg);
-
 void good_info(const char* msg);
 
-void run_dyn_debug(string fname, Binary *bin);
 
 #endif

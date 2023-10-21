@@ -27,7 +27,6 @@ void execute_disasm(char* byte_codes, int num)
         std::cout << result;
     }
 
-    printf("\033[34m─────────────────────────────────────[ STACK ]────────────────────────────────────\033[0m\n");
     // ►  
     // 关闭管道
     pclose(fp);

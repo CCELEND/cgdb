@@ -49,6 +49,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
             struct user_regs_struct regs{};
             regs_disasm_info(pid, &regs);
+            show_stack(pid, &regs);
 
             // 开始轮询输入的命令
             while (true) {
@@ -64,7 +65,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 //输入参数解析
                 argparse();
                 int argc = myargv.size();
-                char** arguments = new char* [argc]; //转换参数类型
+                char** arguments = new char* [argc]; // 转换参数类型
 
                 for (int i = 0; i < argc; i++) {
                     arguments[i] = (char*) myargv[i].data();
@@ -83,7 +84,8 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     wait(&status);
 
                     regs_disasm_info(pid, &regs);
-                    // 执行到最后一条指令退出循环
+                    show_stack(pid, &regs);
+                    // 执行到最后一条指令, 子进程正常结束, 退出循环
                     if (WIFEXITED(status)) {
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         break;
@@ -103,42 +105,51 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     }
                     // 没有断点, 子进程结束
                     if (WIFEXITED(status)) {
-                        // good_info("Process finished.");
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         goto debug_stop;
                     }
-                } else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {
-                    //获取子进程制定区域的内存内容
-                    ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
-                    struct Params 
-                    {   // 默认地址采用 rip 指针的内容，偏移默认为0，默认读取40个字节
-                        unsigned long long addr;
-                        long offset;
-                        int nbytes;
-                    } params = {regs.rip, 0, 40};
+                } 
+                // else if (strcmp(arguments[0], "memory") == 0 || strcmp(arguments[0], "m") == 0) {
+                //     //获取子进程制定区域的内存内容
+                //     ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
+                //     struct Params 
+                //     {   // 默认地址采用 rip 指针的内容，偏移默认为0，默认读取40个字节
+                //         unsigned long long addr;
+                //         long offset;
+                //         int nbytes;
+                //     } params = {regs.rip, 0, 40};
 
-                    if (argc == 1) {
-                        show_memory(pid, regs.rip);//显示内存内容
-                    } else {
-                        for (int i = 1; i < argc; i++) {//检查是否有额外参数指定
-                            if (strcmp(arguments[i], "-addr") == 0) {//指定内存的起始地址
-                                params.addr = strtol(arguments[++i], nullptr, 16);
-                                continue;//当前参数指定功能，下一个参数指定具体的值，两项获取之后直接跳一步检查别的参数
-                            }
-                            if (strcmp(arguments[i], "-off") == 0) {
-                                params.offset = strtol(arguments[++i], nullptr, 10);
-                                continue;
-                            }
-                            if (strcmp(arguments[i], "-nb") == 0) {
-                                params.nbytes = strtol(arguments[++i], nullptr, 10);
-                                continue;
-                            }
+                //     if (argc == 1) {
+                //         show_memory(pid, regs.rip);//显示内存内容
+                //     } else {
+                //         for (int i = 1; i < argc; i++) {//检查是否有额外参数指定
+                //             if (strcmp(arguments[i], "-addr") == 0) {//指定内存的起始地址
+                //                 params.addr = strtol(arguments[++i], nullptr, 16);
+                //                 continue;//当前参数指定功能，下一个参数指定具体的值，两项获取之后直接跳一步检查别的参数
+                //             }
+                //             if (strcmp(arguments[i], "-off") == 0) {
+                //                 params.offset = strtol(arguments[++i], nullptr, 10);
+                //                 continue;
+                //             }
+                //             if (strcmp(arguments[i], "-nb") == 0) {
+                //                 params.nbytes = strtol(arguments[++i], nullptr, 10);
+                //                 continue;
+                //             }
+                //         }
+                //         show_memory(pid, params.addr, params.offset, params.nbytes);
+                //     }
+                // } 
+                else if (strcmp(arguments[0], "x") == 0){
+                    if (argc == 3) 
+                    {
+                        int num = stoi(arguments[1]);
+                        if (num < 0){
+                            err_info("Wrong number of reads!");
                         }
-                        show_memory(pid, params.addr, params.offset, params.nbytes);
-                    }
-                } else if (strcmp(arguments[0], "x") == 0){
-                    if (argc == 3) {
-                        read_addr_data(pid, arguments[1], arguments[2]);
+                        else{
+                            unsigned long long address = strtoul(arguments[2], nullptr, 16);
+                            show_addr_data(pid, num, address);
+                        }
                     } else {
                         err_info("Please enter the address and read quantity!");
                     }
@@ -149,10 +160,9 @@ void run_dyn_debug(std::string fname, Binary *bin)
                         // 当前子进程还是暂停状态，父进程被阻塞
                         wait(&status);
                         if (WIFEXITED(status)) {
-                            good_info("Process finished.");
+                            printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                             printf("[+] Total instruction count: \033[32m\033[1m%ld\033[0m\n", 
                                 count);
-                            // 指令执行完子进程也结束运行
                             goto debug_stop;
                         }
 
