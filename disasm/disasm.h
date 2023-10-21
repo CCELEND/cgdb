@@ -13,5 +13,6 @@
 using namespace std;
 
 void execute_disasm(char* byte_codes, int num);
+void disasm(char* byte_codes, int num);
 
 #endif

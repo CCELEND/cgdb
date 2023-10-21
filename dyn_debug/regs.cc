@@ -42,9 +42,9 @@ int get_rip_codes(pid_t pid, unsigned long long addr, char* codes)
 
     for (int i = 0; i < 64; i += LONG_SIZE){
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i, nullptr);
-        if (word.val == -1)
-            err_info("Trace error!");
+        if (word.val == -1) err_info("Trace error!");
         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
+
         for (int j = i; j < i+4; j++){
             if (long((unsigned char)buf[j]) == 0xe8 || long((unsigned char)buf[j]) == 0xc3 || long((unsigned char)buf[j]) == 0xeb)  {
                 memcpy(codes, buf, i+8);
@@ -60,9 +60,9 @@ void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
     int num;
     char rip_instruct[64];
 
-    // 存储子进程当前寄存器的值
     get_show_regs(pid, regs);
     num = get_rip_codes(pid, regs->rip, rip_instruct);
-    execute_disasm(rip_instruct, num);
+    // execute_disasm(rip_instruct, num);
+    disasm(rip_instruct, num);
 }
 

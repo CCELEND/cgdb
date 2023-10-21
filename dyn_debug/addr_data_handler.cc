@@ -72,22 +72,6 @@ void print_bytes(const char* tip, char* codes, int len)
     }
 }
 
-/* *
- * 显示任意内存内容
- * pid: 子进程pid
- * addr: 指定内存基地址
- * offset: 指定相对于基地址的偏移地址
- * nbytes: 需要显示的字节数
- * */
-void show_memory(pid_t pid, unsigned long long addr, long offset, int nbytes) {
-    printf("current base address is : 0x%llx\n"//显示任意内存内容
-           "offset is : %ld\n", addr, offset);
-    auto* memory_content = new char[nbytes];
-    get_addr_data(pid, addr + offset, memory_content, nbytes);//从指定的地址按照指定的偏移量读取指定的字节数
-    printf("The %d bytes after start address: 0x%llx :\n", nbytes, addr + offset);
-    print_bytes("", memory_content, nbytes);
-}
-
 // 输出带颜色的地址以标记所属地址范围 addr_flag 为真会显示地址所属文件
 void flag_addr_printf(unsigned long long addr, bool addr_flag)
 {
@@ -104,7 +88,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             printf("\033[31m0x%llx\033[0m (libc)", addr);
         } else if (addr > stack_base) {
             printf("\033[33m0x%llx\033[0m (stack)", addr);
-        } else if (!ld_base){
+        } else if (!ld_base || addr > ld_code_start && addr < ld_code_end){
             printf("\033[31m0x%llx\033[0m (ld-linux)", addr);
         }
         else {
