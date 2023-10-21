@@ -1,37 +1,37 @@
 #include "disasm.h"
 
-void execute_disasm(char* byte_codes, int num)
-{
-    char buf[129];
-    for(int i = 0; i < num; ++i){
-        sprintf(buf+i*2, "%02x", (unsigned char) byte_codes[i]);
-    }
+// void execute_disasm(char* byte_codes, int num)
+// {
+//     char buf[129];
+//     for(int i = 0; i < num; ++i){
+//         sprintf(buf+i*2, "%02x", (unsigned char) byte_codes[i]);
+//     }
 
-    string byte_codes_str = buf;
-    string command = string("cstool -u x64 ") + "'" + byte_codes_str + "'";
+//     string byte_codes_str = buf;
+//     string command = string("cstool -u x64 ") + "'" + byte_codes_str + "'";
 
-    // 执行命令并将标准输出连接到文件流中
-    FILE* fp = popen(command.c_str(), "r");
-    if (!fp) {
-        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
-        return;
-    }
+//     // 执行命令并将标准输出连接到文件流中
+//     FILE* fp = popen(command.c_str(), "r");
+//     if (!fp) {
+//         printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+//         return;
+//     }
 
-    char* result = nullptr;
-    size_t len = 0;
-    ssize_t read;
+//     char* result = nullptr;
+//     size_t len = 0;
+//     ssize_t read;
 
-    while ((read = getline(&result, &len, fp)) != -1) {
-        // 处理每一行输出
-        std::cout << result;
-    }
+//     while ((read = getline(&result, &len, fp)) != -1) {
+//         // 处理每一行输出
+//         std::cout << result;
+//     }
 
-    // ►  
-    // 关闭管道
-    pclose(fp);
-    // 释放动态分配的内存
-    free(result);
-}
+//     // ►  
+//     // 关闭管道
+//     pclose(fp);
+//     // 释放动态分配的内存
+//     free(result);
+// }
 
 void disasm(char* byte_codes, unsigned long long addr, int num)
 {
@@ -49,18 +49,20 @@ void disasm(char* byte_codes, unsigned long long addr, int num)
         size_t j;
         for (j = 0; j < count; j++) 
         {
-            char buf[32];
+            char code[32];
             for(int i = 0; i < insn[j].size; ++i){
-                sprintf(buf + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
+                sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
             }
 
-            // 汇编代码的 address 地址，mnemonic 是操作码，op_str 是操作数
+            // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
             if (!j){
-                printf("\033[32m\033[1m ► 0x%lx\033[0m\t%-20s%-8s%s\n", insn[j].address, buf, insn[j].mnemonic,
+                printf("\033[32m\033[1m ► 0x%lx\033[0m\t%-20s%-8s\033[36m\033[1m%s\033[0m\n", 
+                    insn[j].address, code, insn[j].mnemonic,
                     insn[j].op_str);
             }
             else{
-                printf("   0x%lx\t%-20s%-8s%s\n", insn[j].address, buf, insn[j].mnemonic,
+                printf("   0x%lx\t%-20s%-8s\033[36m%s\033[0m\n", 
+                    insn[j].address, code, insn[j].mnemonic,
                     insn[j].op_str);
             }   
         }
@@ -71,3 +73,5 @@ void disasm(char* byte_codes, unsigned long long addr, int num)
 
     cs_close(&handle);
 }
+
+// puts@plt
