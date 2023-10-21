@@ -28,22 +28,20 @@ void show_stack(pid_t pid, struct user_regs_struct* regs)
 
         flag_addr_printf(stack, false);
         addr = stack;
-        while (true){
-            // flag_addr_printf(addr, false);
-            // val = get_addr_val(pid, stack);
+        while (true)
+        {
             val = get_addr_val(pid, addr);
             addr = val;
-            if (val < 0x550000000000 || val == 0xffffffffffffffff){
+            if (val < 0x550000000000 || val > 0x7fffffffffff) {
                 printf(" ◂— ");
                 flag_addr_printf(val, false);
                 break;
             }
-            else{
+            else {
                 printf(" —▸ ");
                 flag_addr_printf(val, false);
 
             }
-            // flag_addr_printf(val, false);
         }
 
         stack += 8;
