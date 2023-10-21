@@ -115,7 +115,9 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             printf("\033[31m0x%llx\033[0m", addr);
         } else if (addr > libc_code_start && addr < libc_code_end) {
             printf("\033[31m0x%llx\033[0m", addr);
-        } else if (addr > ld_code_start && addr < ld_code_end){
+        } else if (addr > ld_code_start && addr < ld_code_end) {
+            printf("\033[31m0x%llx\033[0m", addr);
+        } else if (addr > vdso_code_start && addr < vdso_code_end) {
             printf("\033[31m0x%llx\033[0m", addr);
         } else if (addr > stack_base && addr < stack_end) {
             printf("\033[33m0x%llx\033[0m", addr);

@@ -1,10 +1,8 @@
 
 #include "dyn_fun.h"
 
-// 获取子进程的各种基地址
-void get_base_address(pid_t pid) 
+void get_vma_address(pid_t pid)
 {
-
     if (libc_base) return;
 
     string maps_path = "/proc/" + to_string(pid) + "/maps";
@@ -20,55 +18,38 @@ void get_base_address(pid_t pid)
     elf_base = strtoul(line.data(), nullptr, 16);
     while(getline(inf, line))
     {
-        if (line.find("libc") != string::npos && !libc_base) {
+        if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos && !elf_code_start) {
+            elf_code_start = strtoul(line.data(), nullptr, 16);
+            elf_code_end = strtoul(line.data()+13, nullptr, 16);
+
+        } else if (line.find("libc") != string::npos && !libc_base) {
             libc_base = strtoul(line.data(), nullptr, 16);
+        } else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos && !libc_code_start) {
+            libc_code_start = strtoul(line.data(), nullptr, 16);
+            libc_code_end = strtoul(line.data()+13, nullptr, 16);
 
         } else if (line.find("ld-linux") != string::npos && !ld_base) {
             ld_base = strtoul(line.data(), nullptr, 16);
+        } else if (line.find("ld-linux") != string::npos && line.find("r-xp") != string::npos && !ld_code_start) {
+            ld_code_start = strtoul(line.data(), nullptr, 16);
+            ld_code_end = strtoul(line.data()+13, nullptr, 16);
 
         } else if (line.find("[stack]") != string::npos && !stack_base) {
             stack_base = strtoul(line.data(), nullptr, 16);
             stack_end = strtoul(line.data()+13, nullptr, 16);
 
+        } else if (line.find("[vdso]") != string::npos && line.find("r-xp") != string::npos && !vdso_code_start) {
+            vdso_code_start = strtoul(line.data(), nullptr, 16);
+            vdso_code_end = strtoul(line.data()+13, nullptr, 16);
         }
+
     }
 
     inf.close();
+
 }
 
-void get_code_address(pid_t pid) 
-{
-
-    if (libc_code_start) return;
-
-    string maps_path = "/proc/" + to_string(pid) + "/maps";
-    ifstream inf(maps_path.data());//建立输入流
-    if (!inf) {
-        err_info("Read failed!");
-        return;
-    }
-
-    string line;
-    while(getline(inf, line))
-    {
-        if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos && !elf_code_start) {
-            elf_code_start = strtoul(line.data(), nullptr, 16);
-            elf_code_end = strtoul(line.data()+13, nullptr, 16);
-
-        } else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos && !libc_code_start) {
-            libc_code_start = strtoul(line.data(), nullptr, 16);
-            libc_code_end = strtoul(line.data()+13, nullptr, 16);
-
-        } else if (line.find("ld-linux") != string::npos && line.find("r-xp") != string::npos && !ld_code_start) {
-            ld_code_start = strtoul(line.data(), nullptr, 16);
-            ld_code_end = strtoul(line.data()+13, nullptr, 16);
-        }
-    }
-
-    inf.close();
-}
-
-void get_vmmap(pid_t pid) 
+void show_vmmap(pid_t pid) 
 {
     string maps_path = "/proc/" + to_string(pid) + "/maps";
     ifstream inf(maps_path.data());//建立输入流

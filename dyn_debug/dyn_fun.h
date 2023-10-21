@@ -40,6 +40,8 @@ extern unsigned long long libc_code_end;
 extern unsigned long long ld_base;
 extern unsigned long long ld_code_start;
 extern unsigned long long ld_code_end;
+extern unsigned long long vdso_code_start;
+extern unsigned long long vdso_code_end;
 extern unsigned long long stack_base;
 extern unsigned long long stack_end;
 
@@ -77,15 +79,14 @@ unsigned long long get_addr_val(pid_t pid, unsigned long long addr);
 
 // void show_memory(pid_t pid, unsigned long long addr, long offset = 0, int nbytes = 40);
 
-void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
 int break_point_handler(pid_t pid, int status, break_point& bp);
+void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
 void break_point_inject(pid_t pid, break_point& bp);
-void break_point_delete(pid_t pid, char* bp_num);
+void break_point_delete(pid_t pid, int num);
 
 
-void get_base_address(pid_t pid);
-void get_code_address(pid_t pid);
-void get_vmmap(pid_t pid);
+void show_vmmap(pid_t pid);
+void get_vma_address(pid_t pid);
 
 
 void arg_error(const char* fname);

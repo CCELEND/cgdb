@@ -10,6 +10,8 @@ unsigned long long libc_code_end = 0;
 unsigned long long ld_base = 0;
 unsigned long long ld_code_start = 0;
 unsigned long long ld_code_end = 0;
+unsigned long long vdso_code_start = 0;
+unsigned long long vdso_code_end = 0;
 
 unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
@@ -44,7 +46,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
             sleep(1);
             // 获取子进程的起始虚拟地址
-            get_base_address(pid);
+            get_vma_address(pid);
             printf("[+] Base addr: 0x%llx\n", elf_base);
 
             struct user_regs_struct regs{};
@@ -55,8 +57,9 @@ void run_dyn_debug(std::string fname, Binary *bin)
             while (true) {
 
                 if (libc_base == 0){
-                    get_base_address(pid);
-                    get_code_address(pid);
+                    get_vma_address(pid);
+                    // get_base_address(pid);
+                    // get_code_address(pid);
                 }
 
                 printf("\033[32m\033[1mcgdb> \033[0m");
@@ -100,6 +103,9 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
                     for (int i = 0; i < 8; i++) {
                         if (break_point_list[i].break_point_state) {
+                            if (libc_base == 0){
+                                get_vma_address(pid);
+                            }
                             break_point_handler(pid, status, break_point_list[i]);
                         }
                     }
@@ -179,7 +185,13 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     }
                 } else if((strcmp(arguments[0], "delete") == 0 || strcmp(arguments[0], "d") == 0) && strcmp(arguments[1], "b") == 0){
                     if (argc == 3) {
-                        break_point_delete(pid, arguments[2]);
+                        int num = stoi(arguments[2]);
+                        if (num >= 8 || num < 0) {
+                            err_info("Error break point number!");
+                        }
+                        else {
+                            break_point_delete(pid, num);
+                        }
                     }
                     else {
                         err_info("Please enter the break point number to delete!");
@@ -197,7 +209,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     // 显示帮助信息
                     show_help();
                 } else if (strcmp(arguments[0], "vmmap") == 0) {
-                    get_vmmap(pid);
+                    show_vmmap(pid);
                 } else if (strcmp(arguments[0], "libc") == 0) {
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);
@@ -207,6 +219,11 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
                     printf("[+] Libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
                     printf("[+] Ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
+                    printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
+                } else if (strcmp(arguments[0], "base") == 0) {
+                    printf("[+] Base addr: 0x%llx\n", elf_base);
+                    printf("[+] Libc base: 0x%llx\n", libc_base);
+                    printf("[+] Ld base: 0x%llx\n", ld_base);
                 } else {
                     err_info("Invalid Argument!");
                 }

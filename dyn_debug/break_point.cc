@@ -48,17 +48,12 @@ void set_break_point(pid_t pid, char* bp_fun, Binary* bin)
     }
 }
 
-void break_point_delete(pid_t pid, char* bp_num)
+void break_point_delete(pid_t pid, int num)
 {
-    int b_num = stoi(bp_num);
-    if (b_num >= 8 || b_num < 0)
-    {
-        err_info("Error break point number!");
-        return;
-    }
-    put_addr_data(pid, break_point_list[b_num].addr, break_point_list[b_num].backup, CODE_SIZE);
-    break_point_list[b_num].addr = 0;
-    break_point_list[b_num].break_point_state = false;
+    put_addr_data(pid, break_point_list[num].addr, break_point_list[num].backup, CODE_SIZE);
+    
+    break_point_list[num].addr = 0;
+    break_point_list[num].break_point_state = false;
 }
 
 /* *
