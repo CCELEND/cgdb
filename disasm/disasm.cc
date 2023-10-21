@@ -12,8 +12,7 @@ void execute_disasm(char* byte_codes, int num)
 
     // 执行命令并将标准输出连接到文件流中
     FILE* fp = popen(command.c_str(), "r");
-    if (!fp)
-    {
+    if (!fp) {
         printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
         return;
     }
@@ -34,32 +33,41 @@ void execute_disasm(char* byte_codes, int num)
     free(result);
 }
 
-void disasm(char* byte_codes, int num)
+void disasm(char* byte_codes, unsigned long long addr, int num)
 {
-    csh handle;     // 声明一个 csh 类型的句柄变量。这个句柄将在 Capstone 的每个 API 中使用
-    cs_insn *insn;  // 声明 insn，一个 cs_insn 类型的指针变量，指向一个包含所有反汇编指令的内存
+    csh handle;
+    cs_insn *insn;
     size_t count;
 
-    // 使用函数 cs_open() 初始化 Capstone。 此 API 有3个参数：硬件架构、硬件模式和指向句柄的指针
-    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK)
+    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+        printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
         return;
-    
-    // cs_disasm() 的第2和第3个参数是要反汇编的二进制代码及其长度。 第4个参数是第一条指令的地址0x0
-    // 如果想反汇编所有的代码，直到没有更多的代码，或者它遇到一个 broken instruction，使用0作为第5个参数
-    // 在最后第5个参数 insn 中返回动态分配的内存，可用于在接下来的步骤中提取所有反汇编指令
-    // 返回值：成功反汇编的指令数
-    count = cs_disasm(handle, (uint8_t*)byte_codes, num, 0x0, 0, &insn);
+    }    
+
+    count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) {
         size_t j;
-        for (j = 0; j < count; j++) {
+        for (j = 0; j < count; j++) 
+        {
+            char buf[32];
+            for(int i = 0; i < insn[j].size; ++i){
+                sprintf(buf + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
+            }
+
             // 汇编代码的 address 地址，mnemonic 是操作码，op_str 是操作数
-            printf("0x%"PRIx64":\t%s\t\t%s\n", insn[j].address, insn[j].mnemonic,
+            if (!j){
+                printf("\033[32m\033[1m ► 0x%lx\033[0m\t%-20s%-8s%s\n", insn[j].address, buf, insn[j].mnemonic,
                     insn[j].op_str);
+            }
+            else{
+                printf("   0x%lx\t%-20s%-8s%s\n", insn[j].address, buf, insn[j].mnemonic,
+                    insn[j].op_str);
+            }   
         }
-        // 释放由 cs_disasm 分配的动态内存
+
         cs_free(insn, count);
-    } else
-        printf("ERROR: Failed to disassemble given code!\n");
-    // 关闭句柄
+    } 
+    else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+
     cs_close(&handle);
 }

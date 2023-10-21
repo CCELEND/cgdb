@@ -63,6 +63,6 @@ void regs_disasm_info(pid_t pid, struct user_regs_struct* regs){
     get_show_regs(pid, regs);
     num = get_rip_codes(pid, regs->rip, rip_instruct);
     // execute_disasm(rip_instruct, num);
-    disasm(rip_instruct, num);
+    disasm(rip_instruct, regs->rip, num);
 }
 
