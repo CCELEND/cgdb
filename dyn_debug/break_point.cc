@@ -45,9 +45,7 @@ void set_break_point(pid_t pid, char* bp_fun, Binary* bin)
 
             // 先把需要打断点的地址上指令取出备份
             get_addr_data(pid, break_point_list[i].addr, break_point_list[i].backup, CODE_SIZE);
-            // print_bytes("[+] Get trace instruction: ", break_point_list[i].backup, CODE_SIZE);
-            // execute_disasm(break_point_list[i].backup, CODE_SIZE);
-            disasm(break_point_list[i].backup, break_point_list[i].addr, CODE_SIZE);
+            disasm(break_point_list[i].backup, break_point_list[i].addr, CODE_SIZE, 2);
             // 注入断点
             break_point_inject(pid, break_point_list[i]);
             break;
@@ -93,6 +91,7 @@ int break_point_handler(pid_t pid, int status, break_point& bp)
                 // 执行流回退，重新执行正确的指令
                 regs.rip = bp.addr;
                 ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
+                
                 regs_disasm_info(pid, &regs);
                 show_stack(pid, &regs);
 

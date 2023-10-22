@@ -180,7 +180,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 } else if (strcmp(arguments[0], "libc") == 0) {
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);
-                } else if (strcmp(arguments[0], "stack") == 0) {
+                } else if (strcmp(arguments[0], "stack_addr") == 0) {
                     printf("[+] Stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
                 } else if (strcmp(arguments[0], "code") == 0) {
                     printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);

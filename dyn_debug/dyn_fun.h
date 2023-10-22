@@ -63,9 +63,10 @@ void show_help();
 void run_dyn_debug(string fname, Binary *bin);
 
 // regs
-void get_show_regs(pid_t pid, struct user_regs_struct* regs);
+void get_regs(pid_t pid, struct user_regs_struct* regs);
+void show_regs(pid_t pid, struct user_regs_struct* regs);
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
-int get_rip_codes(pid_t pid, unsigned long long addr, char* codes);
+// int get_rip_codes(pid_t pid, unsigned long long addr, char* codes);
 
 // stack
 void show_stack(pid_t pid, struct user_regs_struct* regs);
@@ -77,6 +78,8 @@ void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void print_bytes(const char* tip, char* codes, int len);
 unsigned long long get_addr_val(pid_t pid, unsigned long long addr);
+bool judg_addr_code(unsigned long long addr);
+void val_to_string(unsigned long long val);
 
 // break point
 int break_point_handler(pid_t pid, int status, break_point& bp);

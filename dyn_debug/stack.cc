@@ -31,10 +31,11 @@ void show_stack(pid_t pid, struct user_regs_struct* regs)
         while (true)
         {
             val = get_addr_val(pid, addr);
-            addr = val;
             if (val < 0x550000000000 || val > 0x7fffffffffff) {
                 printf(" ◂— ");
                 flag_addr_printf(val, false);
+                if (val > 0x7fffffffffff && !judg_addr_code(addr))
+                    val_to_string(val);
                 break;
             }
             else {
@@ -42,6 +43,7 @@ void show_stack(pid_t pid, struct user_regs_struct* regs)
                 flag_addr_printf(val, false);
 
             }
+            addr = val;
         }
 
         stack += 8;

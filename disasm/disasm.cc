@@ -36,7 +36,7 @@
 
 
 // ->11 disasm num 指令长度
-void disasm(char* byte_codes, unsigned long long addr, int num)
+void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 {
     csh handle;
     cs_insn *insn;
@@ -50,7 +50,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num)
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) {
         size_t j;
-        for (j = 0; j < count; j++) 
+        for (j = 0; j < line; j++) 
         {
             char code[32];
             for(int i = 0; i < insn[j].size; ++i){
@@ -61,18 +61,32 @@ void disasm(char* byte_codes, unsigned long long addr, int num)
             if (!j){
                 printf("\033[32m\033[1m ► 0x%lx\033[0m"
                     "\033[34m\033[1m\t%-20s\033[0m"
-                    "\033[33m%-8s\033[0m"
+                    "\033[33m\033[1m%-16s\033[0m"
                     "\033[36m\033[1m%s\033[0m\n", 
                     insn[j].address, code, insn[j].mnemonic,
                     insn[j].op_str);
             }
             else{
-                printf("   0x%lx"
-                    "\033[34m\t%-20s\033[0m"
-                    "\033[33m\033[2m%-8s\033[0m"
-                    "\033[36m%s\033[0m\n", 
-                    insn[j].address, code, insn[j].mnemonic,
-                    insn[j].op_str);
+                if ( strcmp(insn[j].mnemonic, "call") == 0 || 
+                    strcmp(insn[j].mnemonic, "ret") == 0 || 
+                    strcmp(insn[j].mnemonic, "jmp") == 0 )
+                {
+                     printf("   0x%lx"
+                        "\033[34m\t%-20s\033[0m"
+                        "\033[33m%-16s\033[0m"
+                        "\033[36m\033[2m%s\033[0m\n", 
+                        insn[j].address, code, insn[j].mnemonic,
+                        insn[j].op_str);
+
+                }
+                else {
+                    printf("   0x%lx"
+                        "\033[34m\t%-20s\033[0m"
+                        "\033[33m\033[2m%-16s\033[0m"
+                        "\033[36m\033[2m%s\033[0m\n", 
+                        insn[j].address, code, insn[j].mnemonic,
+                        insn[j].op_str);
+                }
             }   
         }
 

@@ -12,20 +12,20 @@ unsigned long long get_addr_val(pid_t pid, unsigned long long addr)
 void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len) 
 {
     char* laddr = str;
-    int i = 0, j = len / LONG_SIZE;//计算一共需要读取多少个字
+    int i = 0, j = len / LONG_SIZE; // 计算一共需要读取多少个字
     union u {
         long val;
         char chars[LONG_SIZE];
     } word{};
 
-    while (i < j) { //每次读取1个字，8个字节，每次地址加8(LONG_SIZE)
+    while (i < j) { // 每次读取1个字，8个字节，每次地址加8(LONG_SIZE)
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
         if (word.val == -1) err_info("Trace error!");
         memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进数组
         ++i;
         laddr += LONG_SIZE;
     }
-    j = len % LONG_SIZE;//不足一个字的虚读一个字
+    j = len % LONG_SIZE;// 不足一个字的虚读一个字
     if (j != 0) {
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
         if (word.val == -1) err_info("Trace error!");
@@ -97,13 +97,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
     }
     else
     {
-        if (addr > elf_code_start && addr < elf_code_end) {
-            printf("\033[31m0x%llx\033[0m", addr);
-        } else if (addr > libc_code_start && addr < libc_code_end) {
-            printf("\033[31m0x%llx\033[0m", addr);
-        } else if (addr > ld_code_start && addr < ld_code_end) {
-            printf("\033[31m0x%llx\033[0m", addr);
-        } else if (addr > vdso_code_start && addr < vdso_code_end) {
+        if (judg_addr_code(addr)){
             printf("\033[31m0x%llx\033[0m", addr);
         } else if (addr > stack_base && addr < stack_end) {
             printf("\033[33m0x%llx\033[0m", addr);
@@ -137,11 +131,38 @@ void show_addr_data(pid_t pid, int num , unsigned long long addr)
         for (int j = 7; j > -1; --j)
         {
             printf("%02x", (unsigned char) laddr[j]);
-            if (j == 0) printf("      ");
+            if (j == 0) printf("     ");
         }
 
-        if (( i + 1 ) % 2 == 0) printf("\n");
+        if (( i + 1 ) % 2 == 0 || (i + 1 ) == num) printf("\n");
 
     }
+    // printf("\n");
 }
 
+void val_to_string(unsigned long long val)
+{
+    union u {
+        unsigned long long val;
+        char chars[LONG_SIZE];
+    } word{};
+
+    word.val = val;
+    printf(" '%s'", word.chars);
+}
+
+bool judg_addr_code(unsigned long long addr)
+{
+    if (addr > elf_code_start && addr < elf_code_end) {
+        return true;
+    } else if (addr > libc_code_start && addr < libc_code_end) {
+        return true;
+    } else if (addr > ld_code_start && addr < ld_code_end) {
+        return true;
+    } else if (addr > vdso_code_start && addr < vdso_code_end) {
+        return true;
+    } 
+    else
+        return false;
+
+}
