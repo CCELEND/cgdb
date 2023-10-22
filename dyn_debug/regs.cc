@@ -1,6 +1,11 @@
 
 #include "dyn_fun.h"
 
+void get_regs(pid_t pid, struct user_regs_struct* regs)
+{
+    ptrace(PTRACE_GETREGS, pid, nullptr, regs);
+}
+
 // 输出寄存器信息
 void get_show_regs(pid_t pid, struct user_regs_struct* regs)
 {

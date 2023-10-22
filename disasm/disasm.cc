@@ -35,7 +35,7 @@
 
 
 
-// ->11 disasm
+// ->11 disasm num 指令长度
 void disasm(char* byte_codes, unsigned long long addr, int num)
 {
     csh handle;
