@@ -60,7 +60,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
             if (!j){
                 printf("\033[32m\033[1m ► 0x%lx\033[0m"
-                    "\033[34m\033[1m\t%-20s\033[0m"
+                    "\033[34m\033[1m%-20s\033[0m"
                     "\033[33m\033[1m%-16s\033[0m"
                     "\033[36m\033[1m%s\033[0m\n", 
                     insn[j].address, code, insn[j].mnemonic,
@@ -72,7 +72,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                     strcmp(insn[j].mnemonic, "jmp") == 0 )
                 {
                      printf("   0x%lx"
-                        "\033[34m\t%-20s\033[0m"
+                        "\033[34m%-20s\033[0m"
                         "\033[33m%-16s\033[0m"
                         "\033[36m\033[2m%s\033[0m\n", 
                         insn[j].address, code, insn[j].mnemonic,
