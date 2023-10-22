@@ -10,6 +10,8 @@
 #include <inttypes.h>
 #include <capstone/capstone.h>
 
+#include "../elf/loader_elf.h"
+
 using namespace std;
 
 // void execute_disasm(char* byte_codes, int num);

@@ -58,8 +58,6 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
                 if (libc_base == 0){
                     get_vma_address(pid);
-                    // get_base_address(pid);
-                    // get_code_address(pid);
                 }
 
                 printf("\033[32m\033[1mcgdb> \033[0m");

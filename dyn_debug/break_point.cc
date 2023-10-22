@@ -24,6 +24,12 @@ void set_break_point(pid_t pid, char* bp_fun, Binary* bin)
             }
         }
     }
+    if (!sym->addr){
+        err_info("There is no such function!");
+        return;
+    }
+
+
     for (int i = 0; i < 8; i++) {
         if (break_point_list[i].addr == break_point_addr){
             err_info("Break point already exists!");
