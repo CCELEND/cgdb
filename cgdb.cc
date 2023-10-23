@@ -6,6 +6,7 @@
 // 定义全局变量
 vector<string> myargv;
 string cmd;
+// 键是函数名，值是地址
 map<string, unsigned long long> fun_plt;
 
 int main(int argc, char *argv[]) 
