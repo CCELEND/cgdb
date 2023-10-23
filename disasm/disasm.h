@@ -11,6 +11,7 @@
 #include <capstone/capstone.h>
 
 #include "../elf/loader_elf.h"
+#include "../dyn_debug/dyn_fun.h"
 
 using namespace std;
 

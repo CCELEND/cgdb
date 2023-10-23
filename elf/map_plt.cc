@@ -1,6 +1,7 @@
 
 #include "loader_elf.h"
 
+// 建立函数名和 plt 地址的映射
 void map_fun_plt(std::string fname)
 {
     std::string command = std::string("objdump -d -j .plt.sec -M intel ") + fname;
@@ -34,6 +35,7 @@ void map_fun_plt(std::string fname)
     free(result); // 释放动态分配的内存
 }
 
+// 根据函数名获得 plt 地址
 unsigned long long get_fun_plt(char* funame)
 {
     if (fun_plt.find(funame) != fun_plt.end()) {

@@ -41,6 +41,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
     csh handle;
     cs_insn *insn;
     size_t count;
+    unsigned long long plt_addr;
 
     if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
         printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
@@ -71,12 +72,23 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                      strcmp(insn[j].mnemonic, "ret") == 0 || 
                      strcmp(insn[j].mnemonic, "jmp") == 0 )
                 {
+                     // printf("   0x%lx\t"
+                     //    "\033[34m%-20s\033[0m"
+                     //    "\033[33m%-16s\033[0m"
+                     //    "\033[36m\033[2m%s\033[0m\n", 
+                     //    insn[j].address, code, insn[j].mnemonic,
+                     //    insn[j].op_str);
                      printf("   0x%lx\t"
                         "\033[34m%-20s\033[0m"
-                        "\033[33m%-16s\033[0m"
-                        "\033[36m\033[2m%s\033[0m\n", 
-                        insn[j].address, code, insn[j].mnemonic,
-                        insn[j].op_str);
+                        "\033[33m%-16s\033[0m", 
+                        insn[j].address, code, insn[j].mnemonic);
+                     if (strcmp(insn[j].mnemonic, "call") == 0) {
+                        plt_addr = strtoul(insn[j].op_str, nullptr, 16);
+                        printf("\033[36m\033[2m%s\033[0m ",insn[j].op_str);
+                        cout << "\033[31m<" << get_plt_fun(plt_addr) << "@plt>\033[0m" << endl;
+                     }
+                     else
+                        printf("\033[36m\033[2m%s\033[0m\n",insn[j].op_str);
 
                 }
                 else {
@@ -96,5 +108,3 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 
     cs_close(&handle);
 }
-
-// puts@plt

@@ -196,12 +196,18 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 } else if (strcmp(arguments[0], "lplt") == 0) {
                     dyn_show_elf_lib_plt();
                 } else if (strcmp(arguments[0], "plt") == 0) {
-                    unsigned long long address = strtoul(arguments[1], nullptr, 16);
-                    cout << "<" << get_plt_fun(address) << "@plt>" << endl;
-                }
-
+                    if (argc == 2) {
+                        unsigned long long address = strtoul(arguments[1], nullptr, 16);
+                        if (get_plt_fun(address)=="")
+                            printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
+                        else
+                            cout << "<" << get_plt_fun(address) << "@plt>" << endl;
+                    } else {
+                        err_info("Please enter the function address!");
+                    }
+                } 
                 else {
-                    err_info("Invalid Argument!");
+                        err_info("Invalid Argument!");
                 }
                 next_input: myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
             }
