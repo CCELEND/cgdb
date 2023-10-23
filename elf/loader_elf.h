@@ -94,10 +94,11 @@ void show_elf_symbol(Binary *bin);
 void show_elf_dynsym(Binary *bin);
 void show_elf_got   (std::string fname);
 void show_elf_plt   (std::string fname);
+void show_elf_lib_plt();
 void show_elf_sections_code_data(Binary *bin);
 
-void map_fun_plt();
-
+void map_fun_plt(std::string fname);
+unsigned long long get_fun_plt(char* funame);
 
 #endif /* LOADER_H */
 

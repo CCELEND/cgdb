@@ -16,7 +16,6 @@ void show_elf_got(std::string fname)
     ssize_t read;
 
     while ((read = getline(&result, &len, fp)) != -1) {
-        // 处理每一行输出
         if (strcmp(result, "\n") != 0 && std::string(result).find("elf64-x86-64") == std::string::npos)
             std::cout << result;
     }
@@ -25,6 +24,7 @@ void show_elf_got(std::string fname)
     free(result); // 释放动态分配的内存
 }
 
+//libc plt
 void show_elf_plt(std::string fname)
 {
     std::string command = std::string("objdump -d -j .plt.sec -M intel ") + fname;
@@ -50,6 +50,16 @@ void show_elf_plt(std::string fname)
 
     pclose(fp);   // 关闭管道
     free(result); // 释放动态分配的内存
+}
+
+void show_elf_lib_plt()
+{
+    printf("[+] Libc function \033[32mplt<@plt>\033[0m\n");
+    printf("%-30saddress\n", "name");
+    printf("=====================================\n");
+    for (auto it : fun_plt) {
+        printf("%-30s0x%llx\n", it.first.c_str(), it.second);
+    }
 }
 
 void show_elf_symbol(Binary *bin)

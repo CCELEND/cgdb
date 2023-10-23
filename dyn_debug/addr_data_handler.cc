@@ -135,9 +135,8 @@ void show_addr_data(pid_t pid, int num , unsigned long long addr)
         }
 
         if (( i + 1 ) % 2 == 0 || (i + 1 ) == num) printf("\n");
-
     }
-    // printf("\n");
+
 }
 
 void val_to_string(unsigned long long val)

@@ -193,7 +193,14 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     printf("[+] Base addr: 0x%llx\n", elf_base);
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);
-                } else {
+                } else if (strcmp(arguments[0], "lplt") == 0) {
+                    dyn_show_elf_lib_plt();
+                } else if (strcmp(arguments[0], "plt") == 0) {
+                    unsigned long long address = strtoul(arguments[1], nullptr, 16);
+                    cout << "<" << get_plt_fun(address) << "@plt>" << endl;
+                }
+
+                else {
                     err_info("Invalid Argument!");
                 }
                 next_input: myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
