@@ -43,6 +43,9 @@ extern unsigned long long ld_code_start;
 extern unsigned long long ld_code_end;
 extern unsigned long long vdso_code_start;
 extern unsigned long long vdso_code_end;
+
+extern unsigned long long heap_base;
+extern unsigned long long heap_end;
 extern unsigned long long stack_base;
 extern unsigned long long stack_end;
 
@@ -66,7 +69,6 @@ void run_dyn_debug(string fname, Binary *bin);
 void get_regs(pid_t pid, struct user_regs_struct* regs);
 void show_regs(pid_t pid, struct user_regs_struct* regs);
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
-// int get_rip_codes(pid_t pid, unsigned long long addr, char* codes);
 
 // stack
 void show_stack(pid_t pid, struct user_regs_struct* regs);

@@ -13,6 +13,8 @@ unsigned long long ld_code_end = 0;
 unsigned long long vdso_code_start = 0;
 unsigned long long vdso_code_end = 0;
 
+unsigned long long heap_base = 0;
+unsigned long long heap_end = 0;
 unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
 
@@ -45,7 +47,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
         default:{
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
             sleep(1);
-            // 获取子进程的起始虚拟地址
+            // 获取子进程的虚拟地址
             get_vma_address(pid);
             printf("[+] Base addr: 0x%llx\n", elf_base);
 
@@ -81,7 +83,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     
                     // 发送 single step 给子进程
                     ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
-                    // 等待zhu进程收到 sigtrap 信号
+                    // 等待主进程收到 sigtrap 信号
                     wait(&status);
 
                     regs_disasm_info(pid, &regs);

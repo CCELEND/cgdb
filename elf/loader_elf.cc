@@ -84,8 +84,8 @@ load_symbols_bfd(bfd *bfd_h, Binary *bin)
         sym = &bin->symbols.back();
         sym->type = Symbol::SYM_TYPE_FUNC;
         sym->name = std::string(bfd_symtab[i]->name);
+        sym->fun_sym_type = std::string("symtab");
         // 得到函数符号的起始地址
-        sym->fun_sym_type = std::string("symtab"); //
         sym->addr = bfd_asymbol_value(bfd_symtab[i]);
       }
     }

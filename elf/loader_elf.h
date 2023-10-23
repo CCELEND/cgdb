@@ -7,12 +7,16 @@
 #include <stdio.h>
 #include <errno.h>
 #include <iostream>
+#include <unistd.h>
 #include <string>
 #include <vector>
 #include <bfd.h>
+#include <map>
 
 // 新版本的宏有问题, 需要修改
 #define bfd_get_section_flags(bfd, ptr) ((void) bfd, (ptr)->flags)
+
+extern std::map<std::string, unsigned long long> fun_plt;
 
 class Binary;
 class Section;
@@ -89,7 +93,11 @@ void unload_binary (Binary *bin);
 void show_elf_symbol(Binary *bin);
 void show_elf_dynsym(Binary *bin);
 void show_elf_got   (std::string fname);
+void show_elf_plt   (std::string fname);
 void show_elf_sections_code_data(Binary *bin);
+
+void map_fun_plt();
+
 
 #endif /* LOADER_H */
 

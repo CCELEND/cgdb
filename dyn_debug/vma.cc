@@ -38,6 +38,10 @@ void get_vma_address(pid_t pid)
             stack_base = strtoul(line.data(), nullptr, 16);
             stack_end = strtoul(line.data()+13, nullptr, 16);
 
+        } else if (line.find("[heap]") != string::npos && !heap_base) {
+            heap_base = strtoul(line.data(), nullptr, 16);
+            heap_end = strtoul(line.data()+13, nullptr, 16);
+            
         } else if (line.find("[vdso]") != string::npos && line.find("r-xp") != string::npos && !vdso_code_start) {
             vdso_code_start = strtoul(line.data(), nullptr, 16);
             vdso_code_end = strtoul(line.data()+13, nullptr, 16);
