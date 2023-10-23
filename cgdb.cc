@@ -6,6 +6,7 @@
 // 定义两个全局变量
 vector<string> myargv;
 string cmd;
+map<string, unsigned long long> fun_plt;
 
 int main(int argc, char *argv[]) 
 {
@@ -29,14 +30,16 @@ int main(int argc, char *argv[])
 
         if (cmd == "q"){
             goto cgdb_exit;
-        } else if (cmd == "symbol" || cmd == "sym"){
+        } else if (cmd == "symbol" || cmd == "sym") {
             show_elf_symbol(&bin);
-        } else if (cmd == "dynsym" || cmd == "dyn"){
+        } else if (cmd == "dynsym" || cmd == "dyn") {
             show_elf_dynsym(&bin);
         } else if (cmd == "sections") {
             show_elf_sections_code_data(&bin);
-        } else if (cmd == "got"){
+        } else if (cmd == "got") {
             show_elf_got(fname);
+        } else if (cmd == "plt") {
+            show_elf_plt(fname);
         } else if (cmd == "r") {
             run_dyn_debug(fname, &bin);
         } else {
