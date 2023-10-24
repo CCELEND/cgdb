@@ -9,6 +9,7 @@ void get_regs(pid_t pid, struct user_regs_struct* regs)
 // 输出寄存器信息
 void show_regs(pid_t pid, struct user_regs_struct* regs)
 {
+    char rip_instruct[16];
     printf("\033[34m───────────────────────────────────[ REGISTERS ]──────────────────────────────────\033[0m\n");
     printf(
         "RAX      0x%llx\nRBX      0x%llx\nRCX      0x%llx\nRDX      0x%llx\nRDI      0x%llx\n"
@@ -30,34 +31,13 @@ void show_regs(pid_t pid, struct user_regs_struct* regs)
 
     printf("RIP      ");
     flag_addr_printf(regs->rip, true);
+    printf(" ◂— ");
+    get_addr_data(pid, regs->rip, rip_instruct, 16);
+    disasm_mne_op(rip_instruct, regs->rip, 16, 1);
     printf("\n");
 
     printf("\033[34m────────────────────────────────────[ DISASM ]────────────────────────────────────\033[0m\n");
 }
-
-// 获取 rip 指令, 返回指令长度
-// int get_rip_codes(pid_t pid, unsigned long long addr, char* codes)
-// {
-//     char buf[128];
-//     union u {
-//         long val;
-//         char chars[LONG_SIZE];
-//     } word{};
-
-//     for (int i = 0; i < 64; i += LONG_SIZE){
-//         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i, nullptr);
-//         if (word.val == -1) err_info("Trace error!");
-//         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
-
-//         for (int j = i; j < i+4; j++){
-//             if (long((unsigned char)buf[j]) == 0xe8 || long((unsigned char)buf[j]) == 0xc3 || long((unsigned char)buf[j]) == 0xeb)  {
-//                 memcpy(codes, buf, i+8);
-//                 return (i+8);
-//             }
-//         }
-//     }
-//     return 0;
-// }
 
 // 反汇编 rip 指令
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs)

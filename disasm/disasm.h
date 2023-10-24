@@ -16,5 +16,6 @@
 using namespace std;
 
 void disasm(char* byte_codes, unsigned long long addr, int num, int line);
+void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line);
 
 #endif
