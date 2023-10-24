@@ -1,11 +1,6 @@
 
 #include "dyn_fun.h"
 
-void stack_point()
-{
-
-}
-
 // 输出栈信息
 void show_stack(pid_t pid, struct user_regs_struct* regs)
 {
@@ -15,6 +10,7 @@ void show_stack(pid_t pid, struct user_regs_struct* regs)
     unsigned long long stack = regs->rsp;
     unsigned long long addr;
     unsigned long long val;
+    char addr_instruct[16];
     for (int i = 0; i < 8; i++)
     {
         if (stack == regs->rsp) {
@@ -33,16 +29,23 @@ void show_stack(pid_t pid, struct user_regs_struct* regs)
             val = get_addr_val(pid, addr);
             if (val < 0x550000000000 || val > 0x7fffffffffff) {
                 printf(" ◂— ");
-                flag_addr_printf(val, false);
-                if (val > 0x7fffffffffff && !judg_addr_code(addr))
-                    val_to_string(val);
+                if (judg_addr_code(addr)) {
+                    get_addr_data(pid, addr, addr_instruct, 16);
+                    disasm_mne_op(addr_instruct, addr, 16, 1);
+                }
+                else {
+                    flag_addr_printf(val, false);
+                    if (val > 0x7fffffffffff)
+                        val_to_string(val);
+                }
+
                 break;
             }
             else {
                 printf(" —▸ ");
                 flag_addr_printf(val, false);
-
             }
+
             addr = val;
         }
 

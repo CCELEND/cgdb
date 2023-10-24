@@ -49,17 +49,9 @@ extern unsigned long long heap_end;
 extern unsigned long long stack_base;
 extern unsigned long long stack_end;
 
-// template <class T, class U> T find_key_by_value(const U Val, const std::map<T, U>& map_)
-// {
-//     auto find_item = std::find_if(map_.begin(), map_.end(),
-//         [Val](const auto& item) { return item.second == Val; });
-//     T key;
-//     if (find_item != map_.end())
-//     {
-//         key = (*find_item).first;
-//     }
-//     return key;
-// }
+extern map<string, unsigned long long> fun_end;
+
+extern map<string, unsigned long long> fun_start;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态
 struct break_point {
@@ -101,6 +93,12 @@ string get_map_key_value(map<string, unsigned long long>& myMap,
     unsigned long long fun_plt_addr);
 string get_plt_fun(unsigned long long fun_addr);
 void dyn_show_elf_lib_plt();
+unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr);
+unsigned long long get_fun_addr(char* fun_name, Binary* bin);
+void map_fun_start(pid_t pid, Binary *bin);
+void map_fun_end(pid_t pid, Binary *bin);
+string addr_find_fun(unsigned long long addr);
+int addr_find_fun_offset(unsigned long long addr);
 
 // break point
 int break_point_handler(pid_t pid, int status, break_point& bp);

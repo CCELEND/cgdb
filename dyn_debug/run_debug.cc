@@ -19,6 +19,10 @@ unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
 
 struct break_point break_point_list[8];
+// 键是函数名，值是结束地址
+map<string, unsigned long long> fun_end;
+
+map<string, unsigned long long> fun_start;
 
 void run_dyn_debug(std::string fname, Binary *bin)
 {
@@ -50,6 +54,9 @@ void run_dyn_debug(std::string fname, Binary *bin)
             // 获取子进程的虚拟地址
             get_vma_address(pid);
             printf("[+] Base addr: 0x%llx\n", elf_base);
+
+            map_fun_start(pid, bin);
+            map_fun_end(pid, bin);
 
             struct user_regs_struct regs{};
             regs_disasm_info(pid, &regs);
@@ -206,6 +213,22 @@ void run_dyn_debug(std::string fname, Binary *bin)
                         err_info("Please enter the function address!");
                     }
                 } 
+
+                else if (strcmp(arguments[0], "test") == 0) {
+                    unsigned long long address = strtoul(arguments[1], nullptr, 16);
+                    address = get_fun_end_addr(pid, address);
+                    printf("0x%llx\n", address);
+
+                    // for (auto it : fun_start) {
+                    //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
+                    // }
+                    printf("\n");
+                    for (auto i : fun_end) {
+                        printf("%-30s0x%llx\n", i.first.c_str(), i.second);
+                    }
+
+                }
+
                 else {
                         err_info("Invalid Argument!");
                 }

@@ -12,23 +12,13 @@ void break_point_inject(pid_t pid, break_point& bp)
 
 void set_break_point(pid_t pid, char* bp_fun, Binary* bin) 
 {
-    Symbol *sym;
     unsigned long long break_point_addr;
 
-    for(int i = 0; i < bin->symbols.size(); i++) {
-        sym = &bin->symbols[i];
-        if(sym->fun_sym_type == "symtab") {
-            if (bp_fun == sym->name) {
-                break_point_addr = sym->addr + elf_base;
-                break;
-            }
-        }
-    }
-    if (!sym->addr){
+    break_point_addr = get_fun_addr(bp_fun, bin);
+    if (!break_point_addr){
         err_info("There is no such function!");
         return;
     }
-
 
     for (int i = 0; i < 8; i++) {
         if (break_point_list[i].addr == break_point_addr){
@@ -40,8 +30,8 @@ void set_break_point(pid_t pid, char* bp_fun, Binary* bin)
         if (break_point_list[i].addr == 0)
         {
             break_point_list[i].addr = break_point_addr;
-            printf("[+] Break point %d at \033[31m0x%lx\033[0m: \033[31m0x%llx\033[0m\n", 
-                    i, sym->addr, break_point_list[i].addr);
+            printf("[+] Break point %d at \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m\n", 
+                    i, break_point_addr-elf_base, break_point_list[i].addr);
 
             // 先把需要打断点的地址上指令取出备份
             get_addr_data(pid, break_point_list[i].addr, break_point_list[i].backup, CODE_SIZE);

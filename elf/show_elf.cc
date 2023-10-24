@@ -24,7 +24,7 @@ void show_elf_got(std::string fname)
     free(result); // 释放动态分配的内存
 }
 
-//libc plt
+// libc plt
 void show_elf_plt(std::string fname)
 {
     std::string command = std::string("objdump -d -j .plt.sec -M intel ") + fname;
