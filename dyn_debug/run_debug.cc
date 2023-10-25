@@ -19,6 +19,8 @@ unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
 
 struct break_point break_point_list[8];
+struct break_point ni_break_point;
+
 // 键是函数名，值是结束地址
 map<string, unsigned long long> fun_end;
 
@@ -28,7 +30,6 @@ void run_dyn_debug(std::string fname, Binary *bin)
 {
     pid_t pid;
     Symbol *sym;
-    break_point ni_break_point;
     int status, num;
 
     // fork 子进程
@@ -59,6 +60,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
             map_fun_end(pid, bin);
 
             struct user_regs_struct regs{};
+            get_regs(pid, &regs);
             regs_disasm_info(pid, &regs);
             show_stack(pid, &regs);
 
@@ -93,14 +95,27 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     // 等待主进程收到 sigtrap 信号
                     wait(&status);
 
+                    get_regs(pid, &regs);
                     regs_disasm_info(pid, &regs);
                     show_stack(pid, &regs);
+
                     // 执行到最后一条指令, 子进程正常结束, 退出循环
                     if (WIFEXITED(status)) {
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         break;
                     }
-                } else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {
+                } else if (strcmp(arguments[0], "ni") == 0) {
+                    get_regs(pid, &regs);
+                    set_ni_break_point(pid, regs.rip);
+
+                    ptrace(PTRACE_CONT, pid, nullptr, nullptr);
+                    wait(&status);
+
+                    break_point_handler(pid, status, ni_break_point, false);
+
+                }
+
+                else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {
                     printf("[*] Continuing...\n");
                     // 继续执行，一直到子进程发出发出暂停或者结束信号
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
@@ -113,7 +128,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                             if (libc_base == 0){
                                 get_vma_address(pid);
                             }
-                            break_point_handler(pid, status, break_point_list[i]);
+                            break_point_handler(pid, status, break_point_list[i], true);
                         }
                     }
                     // 没有断点, 子进程结束

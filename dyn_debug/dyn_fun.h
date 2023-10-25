@@ -63,6 +63,7 @@ struct break_point {
 };
 // 断点结构体列表
 extern struct break_point break_point_list[8];
+extern struct break_point ni_break_point;
 
 // run api, help args
 void argparse();
@@ -80,6 +81,7 @@ void show_stack(pid_t pid, struct user_regs_struct* regs);
 // addr handle
 void flag_addr_printf(unsigned long long addr, bool addr_flag);
 void show_addr_data(pid_t pid, int num , unsigned long long addr);
+void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag);
 void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void print_bytes(const char* tip, char* codes, int len);
@@ -101,8 +103,9 @@ string addr_find_fun(unsigned long long addr);
 int addr_find_fun_offset(unsigned long long addr);
 
 // break point
-int break_point_handler(pid_t pid, int status, break_point& bp);
+int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
 void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
+void set_ni_break_point(pid_t pid, unsigned long long addr);
 void break_point_inject(pid_t pid, break_point& bp);
 void break_point_delete(pid_t pid, int num);
 

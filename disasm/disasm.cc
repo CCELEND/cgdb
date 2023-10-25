@@ -76,7 +76,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                             cout << "<\033[31m" << get_plt_fun(plt_addr) << "@plt\033[0m>"; 
                     }
  
-                    printf("\n");
+                    printf("\n\n");
 
                 }
                 else {
@@ -93,7 +93,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
     cs_close(&handle);
 }
 
-//汇编 mnemonic 操作码, op_str 操作数
+//反汇编, 输出 mnemonic 操作码, op_str 操作数
 void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
 {
     csh handle;
@@ -111,11 +111,11 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
         size_t j;
         for (j = 0; j < line; j++) 
         {
-            // mnemonic 操作码, op_str 操作数
             printf(
                 "\033[33m\033[1m%s\033[0m "
                 "\033[36m\033[1m%s\033[0m ", 
-                insn[j].mnemonic,insn[j].op_str);
+                insn[j].mnemonic, insn[j].op_str
+            );
 
             if ( strcmp(insn[j].mnemonic, "call") == 0 ||  
                  strcmp(insn[j].mnemonic, "jmp") == 0 )
@@ -130,4 +130,31 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
 
     cs_close(&handle);
 }
+
+ unsigned long long get_next_instruct_addr(char* byte_codes, unsigned long long addr, int num)
+ {
+    csh handle;
+    cs_insn *insn;
+    size_t count;
+    unsigned long long next_addr;
+
+    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+        printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
+        return 0;
+    }
+
+    count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
+    if (count > 0) {
+        next_addr = insn[1].address;
+        cs_free(insn, count);        
+    }
+    else {
+        printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+        return 0;
+    }
+
+    cs_close(&handle);
+
+    return next_addr;
+ }
 

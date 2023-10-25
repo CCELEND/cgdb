@@ -10,6 +10,20 @@ void break_point_inject(pid_t pid, break_point& bp)
     bp.break_point_state = true;     // 启用断点
 }
 
+void set_ni_break_point(pid_t pid, unsigned long long addr)
+{
+    char rip_instruct[32];
+    unsigned long long next_addr;
+    get_addr_data(pid, addr, rip_instruct, 32);
+    next_addr = get_next_instruct_addr(rip_instruct, addr, 32);
+
+    ni_break_point.addr = next_addr;
+    get_addr_data(pid, ni_break_point.addr, ni_break_point.backup, CODE_SIZE);
+
+    break_point_inject(pid, ni_break_point);
+
+}
+
 void set_break_point(pid_t pid, char* bp_fun, Binary* bin) 
 {
     unsigned long long break_point_addr;
@@ -52,7 +66,7 @@ void break_point_delete(pid_t pid, int num)
 }
 
 
-int break_point_handler(pid_t pid, int status, break_point& bp) 
+int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag) 
 {
     struct user_regs_struct regs{};
     // 判断信号类型
@@ -75,13 +89,15 @@ int break_point_handler(pid_t pid, int status, break_point& bp)
             } 
             else 
             {
-                printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
+                if (showbp_flag)
+                    printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
                 // 把 INT 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 // 执行流回退，重新执行正确的指令
                 regs.rip = bp.addr;
                 ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
                 
+                // get_regs(pid, &regs);
                 regs_disasm_info(pid, &regs);
                 show_stack(pid, &regs);
 
