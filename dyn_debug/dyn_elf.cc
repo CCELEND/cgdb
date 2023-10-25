@@ -63,11 +63,13 @@ unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr)
         if (word.val == -1)
             err_info("Trace error!");
         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
-        for (int j = i; j < i + 8; j++){
-            if (long((unsigned char)buf[j]) == 0xf4 ||
-                long((unsigned char)buf[j]) == 0xc3 ||
-                long((unsigned char)buf[j]) == 0xe9 && long((unsigned char)buf[j-1]) == 0xfa
-                )
+
+        for (int j = i; j < i + 8; j++)
+        {
+            if ( long((unsigned char)buf[j]) == 0xf4 ||
+                 long((unsigned char)buf[j]) == 0xc3 ||
+                 long((unsigned char)buf[j]) == 0xe9 && long((unsigned char)buf[j-1]) == 0xfa
+               )
             {
                 return j + fun_addr;
             }
@@ -81,12 +83,11 @@ unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr)
 void map_fun_end(pid_t pid, Binary *bin)
 {
     Symbol *sym;
-    for(int i = 0; i < bin->symbols.size(); i++) {
+    for(int i = 0; i < bin->symbols.size(); i++) 
+    {
         sym = &bin->symbols[i];
         if(sym->addr)
-        {
             fun_end[sym->name] = get_fun_end_addr(pid, sym->addr + elf_base);
-        }
     }
 
 }
@@ -95,34 +96,35 @@ void map_fun_end(pid_t pid, Binary *bin)
 void map_fun_start(pid_t pid, Binary *bin)
 {
     Symbol *sym;
-    for(int i = 0; i < bin->symbols.size(); i++) {
+    for(int i = 0; i < bin->symbols.size(); i++) 
+    {
         sym = &bin->symbols[i];
         if(sym->addr)
-        {
             fun_start[sym->name] = sym->addr + elf_base;
-        }
     }
 
 }
 
+// 根据地址找所在函数名
 string addr_find_fun(unsigned long long addr)
 {
-    for (auto it : fun_start) {
-        if (addr >= it.second && addr <= fun_end[it.first]) {
+    for (auto it : fun_start) 
+    {
+        if (addr >= it.second && addr <= fun_end[it.first])
             return it.first;
-        }
     }
 
     return "";
 
 }
 
+// 根据地址找所在函数偏移
 int addr_find_fun_offset(unsigned long long addr)
 {
-    for (auto it : fun_start) {
-        if (addr >= it.second && addr <= fun_end[it.first]) {
+    for (auto it : fun_start) 
+    {
+        if (addr >= it.second && addr <= fun_end[it.first])
             return addr-it.second;
-        }
     }
 
     return -1;
