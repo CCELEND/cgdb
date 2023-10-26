@@ -30,12 +30,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
             if (!j){
-                // printf("\033[32m\033[1m ► 0x%lx\033[0m\t"
-                //     "\033[34m\033[1m%-20s\033[0m"
-                //     "\033[33m\033[1m%-16s\033[0m"
-                //     "\033[36m\033[1m%s\033[0m\n", 
-                //     insn[j].address, code, insn[j].mnemonic,
-                //     insn[j].op_str);
+
                 printf("\033[32m\033[1m ► 0x%lx\033[0m ", insn[j].address);
 
                 if(fun_name != "") {
@@ -47,15 +42,13 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                         "\033[36m\033[1m%s\033[0m\n", 
                         code, insn[j].mnemonic,
                         insn[j].op_str);
-                
+
                 if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main"){
                     break;
                 }
             }
             else{
-                // printf("   0x%lx\t"
-                //     "\033[34m%-20s\033[0m", 
-                //     insn[j].address, code);
+
                 printf("   0x%lx ", insn[j].address);
 
                 if(fun_name != "") {
@@ -80,7 +73,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                             cout << "<\033[31m" << get_plt_fun(plt_addr) << "@plt\033[0m>"; 
                     }
 
-                    if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main"){
+                    if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main") {
                         printf("\n");
                         break;
                     }
@@ -140,8 +133,9 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
     cs_close(&handle);
 }
 
- unsigned long long get_next_instruct_addr(char* byte_codes, unsigned long long addr, int num)
- {
+// 获得下一条指令地址
+unsigned long long get_next_instruct_addr(char* byte_codes, unsigned long long addr, int num)
+{
     csh handle;
     cs_insn *insn;
     size_t count;
@@ -159,11 +153,12 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
     }
     else {
         printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+        cs_close(&handle);
         return 0;
     }
 
     cs_close(&handle);
 
     return next_addr;
- }
+}
 

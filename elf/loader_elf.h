@@ -100,5 +100,7 @@ void show_elf_sections_code_data(Binary *bin);
 void map_fun_plt(std::string fname);
 unsigned long long get_fun_plt(char* funame);
 
+void show_elf_help();
+
 #endif /* LOADER_H */
 

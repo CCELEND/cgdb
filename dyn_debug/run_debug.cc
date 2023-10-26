@@ -23,7 +23,7 @@ struct break_point ni_break_point;
 
 // 键是函数名，值是结束地址
 map<string, unsigned long long> fun_end;
-
+// 键是函数名，值是开始地址
 map<string, unsigned long long> fun_start;
 
 void run_dyn_debug(std::string fname, Binary *bin)
@@ -42,7 +42,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
             if (ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0) {
                 err_exit("Ptrace error in subprocess!");
             }
-            // .data 返回一个指向数组中第一个元素的指针，该指针在向量内部使用
+            // .data 返回一个指向数组中第一个元素的指针，该指针在内部使用
             if (execl(fname.data(), fname.data(), nullptr)) {
                 err_exit("Execl error in subprocess!");
             }
@@ -85,11 +85,11 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 }
 
                 // 退出操作
-                if (strcmp(arguments[0], "stop") == 0 || strcmp(arguments[0], "q") == 0) {
+                if (strcmp(arguments[0], "q") == 0) {
                     // 杀死子进程，避免出现僵尸进程
                     ptrace(PTRACE_KILL, pid, nullptr, nullptr);
                     goto debug_stop;
-                } else if (strcmp(arguments[0], "step") == 0 || strcmp(arguments[0], "si") == 0) {//单步调试
+                } else if (strcmp(arguments[0], "si") == 0) {//单步调试
                     
                     // 发送 single step 给子进程
                     ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
@@ -116,7 +116,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
                 }
 
-                else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {
+                else if (strcmp(arguments[0], "c") == 0) {
                     printf("[*] Continuing...\n");
 
                     // 继续执行，一直到子进程发出发出暂停或者结束信号
@@ -132,7 +132,6 @@ void run_dyn_debug(std::string fname, Binary *bin)
                             }
                             index = i;
                             break;
-                            // break_point_handler(pid, status, break_point_list[i], true);
                         }
                     }
                     if (index != -1)
@@ -175,13 +174,13 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
                         count++;
                     }
-                } else if (strcmp(arguments[0], "break") == 0 || strcmp(arguments[0], "b") == 0) {
+                } else if (strcmp(arguments[0], "b") == 0) {
                     if (argc == 2) { // 打断点
                         set_break_point(pid, arguments[1], bin);
                     } else {
                         err_info("Please enter the break point address or function name!");
                     }
-                } else if((strcmp(arguments[0], "delete") == 0 || strcmp(arguments[0], "d") == 0) && strcmp(arguments[1], "b") == 0){
+                } else if(strcmp(arguments[0], "d") == 0 && strcmp(arguments[1], "b") == 0){
                     if (argc == 3) {
                         int num = stoi(arguments[2]);
                         if (num >= 8 || num < 0) {
@@ -252,7 +251,8 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 }
 
                 else {
-                        err_info("Invalid Argument!");
+                    err_info("Command not found!");
+                    printf("Enter 'h' to view supported commands.\n");
                 }
                 next_input: myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
             }

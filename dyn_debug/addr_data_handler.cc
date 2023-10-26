@@ -122,7 +122,6 @@ void show_addr_data(pid_t pid, int num , unsigned long long addr)
             flag_addr_printf(addr + i * LONG_SIZE, false);
             printf(": ");
         }
-        // printf("0x");
 
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
         if (word.val == -1) {
@@ -202,8 +201,7 @@ bool judg_addr_code(unsigned long long addr)
         return true;
     } else if (addr > vdso_code_start && addr < vdso_code_end) {
         return true;
-    } 
-    else
+    } else
         return false;
 
 }
