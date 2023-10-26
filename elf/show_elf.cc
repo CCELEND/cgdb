@@ -1,5 +1,6 @@
 #include "loader_elf.h"
 
+// 显示 got
 void show_elf_got(std::string fname)
 {
     std::string command = std::string("objdump -R ") + fname;
@@ -24,7 +25,7 @@ void show_elf_got(std::string fname)
     free(result); // 释放动态分配的内存
 }
 
-// libc plt
+// 显示 libc plt
 void show_elf_plt(std::string fname)
 {
     std::string command = std::string("objdump -d -j .plt.sec -M intel ") + fname;
@@ -52,6 +53,7 @@ void show_elf_plt(std::string fname)
     free(result); // 释放动态分配的内存
 }
 
+// 显示 libc plt
 void show_elf_lib_plt()
 {
     printf("[+] Libc function \033[32mplt<@plt>\033[0m\n");
@@ -62,6 +64,7 @@ void show_elf_lib_plt()
     }
 }
 
+// 显示符号表
 void show_elf_symbol(Binary *bin)
 {
     Symbol *sym;
@@ -92,6 +95,7 @@ void show_elf_symbol(Binary *bin)
     }
 }
 
+// 显示动态符号表
 void show_elf_dynsym(Binary *bin)
 {
     Symbol *sym;
@@ -112,6 +116,7 @@ void show_elf_dynsym(Binary *bin)
     }
 }
 
+// 显示代码和数据段
 void show_elf_sections_code_data(Binary *bin)
 {
     Section *sec;

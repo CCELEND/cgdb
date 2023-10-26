@@ -63,6 +63,7 @@ struct break_point {
 };
 // 断点结构体列表
 extern struct break_point break_point_list[8];
+// ni 断点结构体
 extern struct break_point ni_break_point;
 
 // run api, help args

@@ -1,6 +1,7 @@
 
 #include "dyn_fun.h"
 
+// 得到虚拟内存地址
 void get_vma_address(pid_t pid)
 {
     if (libc_base) return;
@@ -52,7 +53,8 @@ void get_vma_address(pid_t pid)
     inf.close();
 
 }
-
+ 
+// 显示虚拟内存地址空间
 void show_vmmap(pid_t pid) 
 {
     string maps_path = "/proc/" + to_string(pid) + "/maps";

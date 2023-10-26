@@ -44,7 +44,7 @@ open_bfd(std::string &fname)
   return bfd_h;
 }
 
-// 加载静态符号表
+// 加载符号表
 static int
 load_symbols_bfd(bfd *bfd_h, Binary *bin)
 {

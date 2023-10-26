@@ -1,6 +1,7 @@
 
 #include "dyn_fun.h"
 
+// 获取地址的值
 unsigned long long get_addr_val(pid_t pid, unsigned long long addr)
 {
     unsigned long long  val;
@@ -180,6 +181,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
     }
 }
 
+// 转换字符串
 void val_to_string(unsigned long long val)
 {
     union u {
@@ -191,6 +193,7 @@ void val_to_string(unsigned long long val)
     printf(" '%s'", word.chars);
 }
 
+// 判断地址是否可执行
 bool judg_addr_code(unsigned long long addr)
 {
     if (addr > elf_code_start && addr < elf_code_end) {
