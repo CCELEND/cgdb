@@ -33,9 +33,9 @@ int main(int argc, char *argv[])
 
         if (cmd == "q") {
             goto cgdb_exit;
-        } else if (cmd == "symbol" || cmd == "sym") {
+        } else if (cmd == "sym") {
             show_elf_symbol(&bin);
-        } else if (cmd == "dynsym" || cmd == "dyn") {
+        } else if (cmd == "dyn") {
             show_elf_dynsym(&bin);
         } else if (cmd == "sections") {
             show_elf_sections_code_data(&bin);
@@ -47,8 +47,12 @@ int main(int argc, char *argv[])
             show_elf_lib_plt();
         } else if (cmd == "r") {
             run_dyn_debug(fname, &bin);
-        } else {
-            err_info("Invalid Argument!");
+        } else if (cmd == "help" || cmd == "h") {
+            show_elf_help();
+        }
+        else {
+            err_info("Command not found!");
+            printf("Enter 'h' to view supported commands.\n");
         }
     }
     cgdb_exit: return 0;
