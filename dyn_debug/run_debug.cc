@@ -56,6 +56,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
             get_vma_address(pid);
             printf("[+] Base addr: 0x%llx\n", elf_base);
 
+            // 建立函数名和开始地址，结束地址的映射
             map_fun_start(pid, bin);
             map_fun_end(pid, bin);
 
@@ -117,20 +118,26 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
                 else if (strcmp(arguments[0], "continue") == 0 || strcmp(arguments[0], "c") == 0) {
                     printf("[*] Continuing...\n");
+
                     // 继续执行，一直到子进程发出发出暂停或者结束信号
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
-
                     // 等待子进程停止或者结束，并获取子进程状态值
                     wait(&status);
+                    int index = -1;
 
                     for (int i = 0; i < 8; i++) {
                         if (break_point_list[i].break_point_state) {
                             if (libc_base == 0){
                                 get_vma_address(pid);
                             }
-                            break_point_handler(pid, status, break_point_list[i], true);
+                            index = i;
+                            break;
+                            // break_point_handler(pid, status, break_point_list[i], true);
                         }
                     }
+                    if (index != -1)
+                        break_point_handler(pid, status, break_point_list[index], true);
+
                     // 没有断点, 子进程结束
                     if (WIFEXITED(status)) {
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
@@ -140,10 +147,10 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     if (argc == 3) 
                     {
                         int num = stoi(arguments[1]);
-                        if (num < 0){
+                        if (num < 0) {
                             err_info("Wrong number of reads!");
                         }
-                        else{
+                        else {
                             unsigned long long address = strtoul(arguments[2], nullptr, 16);
                             show_addr_data(pid, num, address);
                         }
@@ -220,7 +227,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 } else if (strcmp(arguments[0], "plt") == 0) {
                     if (argc == 2) {
                         unsigned long long address = strtoul(arguments[1], nullptr, 16);
-                        if (get_plt_fun(address)=="")
+                        if ( get_plt_fun(address)=="" )
                             printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
                         else
                             cout << "<" << get_plt_fun(address) << "@plt>" << endl;

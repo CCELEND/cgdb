@@ -14,6 +14,7 @@ void set_ni_break_point(pid_t pid, unsigned long long addr)
 {
     char rip_instruct[32];
     unsigned long long next_addr;
+    
     get_addr_data(pid, addr, rip_instruct, 32);
     next_addr = get_next_instruct_addr(rip_instruct, addr, 32);
 

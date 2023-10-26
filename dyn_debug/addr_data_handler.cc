@@ -122,12 +122,16 @@ void show_addr_data(pid_t pid, int num , unsigned long long addr)
             flag_addr_printf(addr + i * LONG_SIZE, false);
             printf(": ");
         }
-        printf("0x");
+        // printf("0x");
 
         word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
-        if (word.val == -1) err_info("Trace error!");
+        if (word.val == -1) {
+            err_info("Invalid read address!");
+            return;
+        }
         memcpy(laddr, word.chars, LONG_SIZE);
 
+        printf("0x");
         for (int j = 7; j > -1; --j)
         {
             printf("%02x", (unsigned char) laddr[j]);

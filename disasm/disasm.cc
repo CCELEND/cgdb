@@ -47,6 +47,10 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                         "\033[36m\033[1m%s\033[0m\n", 
                         code, insn[j].mnemonic,
                         insn[j].op_str);
+                
+                if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main"){
+                    break;
+                }
             }
             else{
                 // printf("   0x%lx\t"
@@ -74,6 +78,11 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                         plt_addr = strtoul(insn[j].op_str, nullptr, 16);
                         if (plt_addr < 0x7f0000000000)
                             cout << "<\033[31m" << get_plt_fun(plt_addr) << "@plt\033[0m>"; 
+                    }
+
+                    if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main"){
+                        printf("\n");
+                        break;
                     }
  
                     printf("\n\n");
