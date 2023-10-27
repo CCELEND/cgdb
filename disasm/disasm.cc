@@ -1,6 +1,6 @@
 #include "disasm.h"
 
-// 指令行数 line, num 指令长度
+// 输出指令行数 line, num 指令长度
 void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 {
     csh handle;
