@@ -18,6 +18,10 @@ unsigned long long heap_end = 0;
 unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
 
+unsigned long long disasm_addr = 0;
+unsigned long long next_disasm_addr = 0;
+bool disasm_addr_synchronous = true;
+
 struct break_point break_point_list[8];
 struct break_point ni_break_point;
 

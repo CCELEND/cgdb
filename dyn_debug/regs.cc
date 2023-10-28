@@ -48,8 +48,10 @@ void regs_disasm_info(pid_t pid, struct user_regs_struct* regs)
 
     show_regs(pid, regs);
 
-    get_addr_data(pid, regs->rip, rip_instruct, 176);
-    disasm(rip_instruct, regs->rip, 176, 11);
+    // get_addr_data(pid, regs->rip, rip_instruct, 176);
+    // disasm(rip_instruct, regs->rip, 176, 11);
+
+    disasm1(pid, regs->rip);
 
 }
 
