@@ -85,7 +85,10 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
     struct user_regs_struct regs{};
     // 判断信号类型
     // exit 信号
-    if (WIFEXITED(status)) err_exit("The child process has ended!");
+    if (WIFEXITED(status)) {
+        err_info("The child process has ended!");
+        return -1;
+    }
     // 如果是 STOP 信号
     if (WIFSTOPPED(status)) 
     {

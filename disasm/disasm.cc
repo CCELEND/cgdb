@@ -102,12 +102,13 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     size_t count;
     unsigned long long plt_addr;
     string fun_name;
-    int offset;
+    int fun_offset;
 
     char addr_instruct[176];
-
+    // 反汇编开始地址与 rip 同步
     if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val)
         disasm_addr = rip_val;
+
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
 
     if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
@@ -124,18 +125,19 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             for(int i = 0; i < insn[j].size; ++i){
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
             }
-
+            // 根据地址得到函数名和偏移
             fun_name = addr_find_fun(insn[j].address);
-            offset = addr_find_fun_offset(insn[j].address);
+            fun_offset = addr_find_fun_offset(insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
+
             if (insn[j].address == rip_val){
                 next_disasm_addr = insn[j + 1].address;
 
                 printf("\033[32m\033[1m ► 0x%lx\033[0m ", insn[j].address);
 
                 if(fun_name != "") {
-                    printf("\033[32m\033[1m<%s+%d>\t", fun_name.c_str(), offset);
+                    printf("\033[32m\033[1m<%s+%d>\t", fun_name.c_str(), fun_offset);
                 }
 
                 printf( "\033[34m\033[1m%-20s\033[0m"
@@ -153,7 +155,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 printf("   0x%lx ", insn[j].address);
 
                 if(fun_name != "") {
-                    printf("<%s+%d>\t", fun_name.c_str(), offset);
+                    printf("<%s+%d>\t", fun_name.c_str(), fun_offset);
                 }
 
                 printf("\033[34m%-20s\033[0m", code);
