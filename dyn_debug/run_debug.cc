@@ -72,12 +72,14 @@ void run_dyn_debug(std::string fname, Binary *bin)
             // 开始轮询输入的命令
             while (true) {
 
+                printf("\033[32m\033[1mcgdb> \033[0m");
+                getline(cin, cmd);
+
+                debug_start:
+
                 if (libc_base == 0){
                     get_vma_address(pid);
                 }
-
-                printf("\033[32m\033[1mcgdb> \033[0m");
-                getline(cin, cmd);
 
                 //输入参数解析
                 argparse();
@@ -238,6 +240,12 @@ void run_dyn_debug(std::string fname, Binary *bin)
                         err_info("Please enter the function address!");
                     }
                 } 
+
+                else if (strcmp(arguments[0], " ") == 0) {
+                    myargv.clear();
+                    cmd = "si";
+                    goto debug_start;
+                }
 
                 else if (strcmp(arguments[0], "test") == 0) {
                     unsigned long long address = strtoul(arguments[1], nullptr, 16);

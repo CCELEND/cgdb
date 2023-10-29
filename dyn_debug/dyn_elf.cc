@@ -124,7 +124,7 @@ int addr_find_fun_offset(unsigned long long addr)
     for (auto it : fun_start) 
     {
         if (addr >= it.second && addr <= fun_end[it.first])
-            return addr-it.second;
+            return addr - it.second;
     }
 
     return -1;

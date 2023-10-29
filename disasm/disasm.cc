@@ -100,7 +100,6 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     csh handle;
     cs_insn *insn;
     size_t count;
-    unsigned long long plt_addr;
     string fun_name;
     int fun_offset;
 
@@ -171,9 +170,21 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                     if (strcmp(insn[j].mnemonic, "call") == 0 || 
                         strcmp(insn[j].mnemonic, "jmp") == 0)
                     {
-                        plt_addr = strtoul(insn[j].op_str, nullptr, 16);
-                        if (plt_addr < 0x7f0000000000)
-                            cout << "<\033[31m" << get_plt_fun(plt_addr) << "@plt\033[0m>"; 
+                        unsigned long long flow_change_addr;
+                        string flow_change_fun_name;
+                        flow_change_addr = strtoul(insn[j].op_str, nullptr, 16);
+
+                        flow_change_fun_name = addr_find_fun(flow_change_addr);
+                        if (flow_change_fun_name != "")
+                            cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+                        else{
+                            flow_change_fun_name = get_plt_fun(flow_change_addr);
+                            if (flow_change_fun_name != "")
+                                cout << "<\033[31m" << get_plt_fun(flow_change_addr) << "@plt\033[0m>";
+                        }
+
+                        // if (flow_change_addr < 0x7f0000000000)
+                        //     cout << "<\033[31m" << get_plt_fun(flow_change_addr) << "@plt\033[0m>"; 
                     }
 
                     if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main") {
