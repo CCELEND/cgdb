@@ -182,6 +182,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
             if (fun_offset == -1)
                 fun_offset = addr_find_glibc_fun_offset(insn[j].address);
+            if (fun_offset == -1)
+                fun_offset = addr_find_plt_fun_offset(insn[j].address);
 
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数

@@ -52,7 +52,8 @@ unsigned long long get_fun_addr(char* fun_name, Binary* bin)
 // 根据地址找所在 glibc 函数名 2.36
 // 704d25fbbb72fa95d517b883131828c0883fe9.debug libc
 // 2e105c0bb3ee8e8f5b917f8af764373d206659.debug ld
-string get_libc_symbol_name(unsigned long long glib_addr) {
+string get_libc_symbol_name(unsigned long long glib_addr) 
+{
     unsigned long long glib_addr_offset;
     std::string command;
 
@@ -177,6 +178,7 @@ int addr_find_glibc_fun_offset(unsigned long long addr)
 
 }
 
+
 // 通过函数地址获得函数结束地址
 unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr)
 {
@@ -234,6 +236,15 @@ void map_fun_start(pid_t pid, Binary *bin)
 
 }
 
+// 建立 plt 函数名和结束地址的映射
+void map_plt_fun_end(pid_t pid)
+{
+    for (auto it : fun_plt) {
+        plt_fun_end[it.first] = get_fun_end_addr(pid, it.second + elf_base);
+    }
+
+}
+
 // 根据地址找所在函数名
 string addr_find_fun(unsigned long long addr)
 {
@@ -257,5 +268,18 @@ int addr_find_fun_offset(unsigned long long addr)
     }
 
     return -1;
+
+}
+
+int addr_find_plt_fun_offset(unsigned long long addr)
+{
+    for (auto it : fun_plt) 
+    {
+        if (addr >= it.second + elf_base && addr <= plt_fun_end[it.first])
+            return addr - it.second - elf_base;
+    }
+
+    return -1;
+
 
 }

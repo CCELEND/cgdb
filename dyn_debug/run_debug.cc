@@ -28,10 +28,12 @@ bool disasm_addr_synchronous = true;
 struct break_point break_point_list[8];
 struct break_point ni_break_point;
 
-// 键是函数名，值是结束地址
-map<string, unsigned long long> fun_end;
 // 键是函数名，值是开始地址
 map<string, unsigned long long> fun_start;
+// 键是函数名，值是结束地址
+map<string, unsigned long long> fun_end;
+
+map<string, unsigned long long> plt_fun_end;
 
 string dis_fun_name = "";
 
@@ -68,6 +70,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
             // 建立函数名和开始地址，结束地址的映射
             map_fun_start(pid, bin);
             map_fun_end(pid, bin);
+            map_plt_fun_end(pid);
 
             struct user_regs_struct regs{};
             get_regs(pid, &regs);

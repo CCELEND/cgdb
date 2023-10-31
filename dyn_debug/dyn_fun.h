@@ -59,8 +59,10 @@ extern unsigned long long disasm_addr;
 extern unsigned long long next_disasm_addr;
 extern bool disasm_addr_synchronous;
 
-extern map<string, unsigned long long> fun_end;
 extern map<string, unsigned long long> fun_start;
+extern map<string, unsigned long long> fun_end;
+
+extern map<string, unsigned long long> plt_fun_end;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态
 struct break_point {
@@ -122,6 +124,8 @@ int addr_find_fun_offset(unsigned long long addr);
 string get_libc_symbol_name(unsigned long long lib_addr);
 string get_libc_plt_symbol_name(unsigned long long glib_addr);
 int addr_find_glibc_fun_offset(unsigned long long addr);
+void map_plt_fun_end(pid_t pid);
+int addr_find_plt_fun_offset(unsigned long long addr);
 
 // break point
 int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
