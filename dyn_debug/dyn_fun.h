@@ -60,7 +60,6 @@ extern unsigned long long next_disasm_addr;
 extern bool disasm_addr_synchronous;
 
 extern map<string, unsigned long long> fun_end;
-
 extern map<string, unsigned long long> fun_start;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态

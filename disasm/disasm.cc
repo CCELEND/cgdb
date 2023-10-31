@@ -95,12 +95,43 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
     cs_close(&handle);
 }
 
+void flow_change_op(char* ops)
+{
+    unsigned long long flow_change_addr;
+    string flow_change_fun_name;
+    flow_change_addr = strtoul(ops, nullptr, 16);
+    if (!flow_change_addr)
+        return;
+
+    flow_change_fun_name = addr_find_fun(flow_change_addr);
+    if (flow_change_fun_name != "")
+        cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+    else {
+        flow_change_fun_name = get_plt_fun(flow_change_addr);
+        if (flow_change_fun_name != "")
+            cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
+        else {
+            flow_change_fun_name = get_libc_symbol_name(flow_change_addr);
+            if (flow_change_fun_name != "")
+                cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+            else {
+                flow_change_fun_name = get_libc_plt_symbol_name(flow_change_addr);
+                if (flow_change_fun_name != "")
+                    cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+                else
+                    cout << "";
+            }
+
+        }
+    }
+
+}
+
 void disasm1(pid_t pid, unsigned long long rip_val)
 {
     csh handle;
     cs_insn *insn;
     size_t count;
-    // string fun_name = "";
     int fun_offset;
 
     char addr_instruct[176];
@@ -114,12 +145,10 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     }
 
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
-
     if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
         printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
         return;
-    }    
-
+    }
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 176, disasm_addr, 0, &insn);
     if (count > 0) {
         size_t j;
@@ -129,6 +158,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             for(int i = 0; i < insn[j].size; ++i){
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
             }
+
             // 根据地址得到函数名和偏移
             if (dis_fun_name == ""){
                 dis_fun_name = addr_find_fun(insn[j].address);
@@ -147,14 +177,16 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 printf("\033[32m\033[1m ► 0x%lx\033[0m ", insn[j].address);
 
                 if(dis_fun_name != "") {
-                    printf("\033[32m\033[1m<%s+%d>\t", dis_fun_name.c_str(), fun_offset);
+                    printf("\033[32m\033[1m<%s+%04d>   ", dis_fun_name.c_str(), fun_offset);
                 }
 
                 printf( "\033[34m\033[1m%-20s\033[0m"
                         "\033[33m\033[1m%-16s\033[0m"
-                        "\033[36m\033[1m%s\033[0m\n", 
+                        "\033[36m\033[1m%s\033[0m ", 
                         code, insn[j].mnemonic,
                         insn[j].op_str);
+                flow_change_op(insn[j].op_str);
+                printf("\n");
 
                 if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main"){
                     break;
@@ -165,7 +197,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 printf("   0x%lx ", insn[j].address);
 
                 if(dis_fun_name != "") {
-                    printf("<%s+%d>\t", dis_fun_name.c_str(), fun_offset);
+                    printf("<%s+%04d>   ", dis_fun_name.c_str(), fun_offset);
                 }
 
                 printf("\033[34m%-20s\033[0m", code);
@@ -181,24 +213,25 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                     if (strcmp(insn[j].mnemonic, "call") == 0 || 
                         strcmp(insn[j].mnemonic, "jmp") == 0)
                     {
-                        unsigned long long flow_change_addr;
-                        string flow_change_fun_name;
-                        flow_change_addr = strtoul(insn[j].op_str, nullptr, 16);
+                        flow_change_op(insn[j].op_str);
+                        // unsigned long long flow_change_addr;
+                        // string flow_change_fun_name;
+                        // flow_change_addr = strtoul(insn[j].op_str, nullptr, 16);
 
-                        flow_change_fun_name = addr_find_fun(flow_change_addr);
-                        if (flow_change_fun_name != "")
-                            cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-                        else {
-                            flow_change_fun_name = get_plt_fun(flow_change_addr);
-                            if (flow_change_fun_name != "")
-                                cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
-                            else {
-                                flow_change_fun_name = get_libc_symbol_name(flow_change_addr);
-                                if (flow_change_fun_name == "")
-                                    flow_change_fun_name = get_libc_plt_symbol_name(flow_change_addr);
-                                cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-                            }
-                        }
+                        // flow_change_fun_name = addr_find_fun(flow_change_addr);
+                        // if (flow_change_fun_name != "")
+                        //     cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+                        // else {
+                        //     flow_change_fun_name = get_plt_fun(flow_change_addr);
+                        //     if (flow_change_fun_name != "")
+                        //         cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
+                        //     else {
+                        //         flow_change_fun_name = get_libc_symbol_name(flow_change_addr);
+                        //         if (flow_change_fun_name == "")
+                        //             flow_change_fun_name = get_libc_plt_symbol_name(flow_change_addr);
+                        //         cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+                        //     }
+                        // }
  
                     }
 

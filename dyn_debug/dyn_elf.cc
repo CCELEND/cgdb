@@ -49,7 +49,7 @@ unsigned long long get_fun_addr(char* fun_name, Binary* bin)
     return 0;
 }
 
-// 根据地址找所在 glibc 函数名
+// 根据地址找所在 glibc 函数名 2.36
 // 704d25fbbb72fa95d517b883131828c0883fe9.debug libc
 // 2e105c0bb3ee8e8f5b917f8af764373d206659.debug ld
 string get_libc_symbol_name(unsigned long long glib_addr) {
@@ -113,11 +113,13 @@ string get_libc_plt_symbol_name(unsigned long long glib_addr) {
     unsigned long long glib_addr_offset;
     std::string command;
 
-    if (glib_addr < ld_code_end && glib_addr > ld_code_start){
+    if (glib_addr < ld_code_end && glib_addr > ld_code_start) 
+    {
         glib_addr_offset = glib_addr - ld_base;
         command = std::string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | grep ");
     }
-    else{
+    else 
+    {
         glib_addr_offset = glib_addr - libc_base;
         command = std::string("objdump -d -j .plt.sec libc.so.6 | grep ");
     }
