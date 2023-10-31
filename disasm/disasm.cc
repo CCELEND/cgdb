@@ -155,50 +155,49 @@ void disasm1(pid_t pid, unsigned long long rip_val)
         for (j = 0; j < 11; j++)
         {
             char code[32];
-            for(int i = 0; i < insn[j].size; ++i){
+            for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
-            }
 
             // 根据地址得到函数名和偏移
-            if (dis_fun_name == ""){
+            if (dis_fun_name == "")
                 dis_fun_name = addr_find_fun(insn[j].address);
+            if (dis_fun_name == ""){
+                dis_fun_name = get_plt_fun(insn[j].address);
+                if (dis_fun_name != "")
+                    dis_fun_name += "@plt";
             }
 
             fun_offset = addr_find_fun_offset(insn[j].address);
+
             if (fun_offset == -1)
                 fun_offset = addr_find_glibc_fun_offset(insn[j].address);
 
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
 
-            if (insn[j].address == rip_val){
+            if (insn[j].address == rip_val)
+            {
                 next_disasm_addr = insn[j + 1].address;
 
                 printf("\033[32m\033[1m ► 0x%lx\033[0m ", insn[j].address);
 
-                if(dis_fun_name != "") {
+                if(dis_fun_name != "")
                     printf("\033[32m\033[1m<%s+%04d>   ", dis_fun_name.c_str(), fun_offset);
-                }
 
-                printf( "\033[34m\033[1m%-20s\033[0m"
-                        "\033[33m\033[1m%-16s\033[0m"
-                        "\033[36m\033[1m%s\033[0m ", 
-                        code, insn[j].mnemonic,
-                        insn[j].op_str);
+                printf("\033[34m\033[1m%-20s\033[0m" "\033[33m\033[1m%-16s\033[0m" "\033[36m\033[1m%s\033[0m ", 
+                        code, insn[j].mnemonic, insn[j].op_str);
                 flow_change_op(insn[j].op_str);
                 printf("\n");
 
-                if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main"){
+                if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main")
                     break;
-                }
             }
             else{
 
                 printf("   0x%lx ", insn[j].address);
 
-                if(dis_fun_name != "") {
+                if(dis_fun_name != "")
                     printf("<%s+%04d>   ", dis_fun_name.c_str(), fun_offset);
-                }
 
                 printf("\033[34m%-20s\033[0m", code);
 
@@ -214,25 +213,6 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                         strcmp(insn[j].mnemonic, "jmp") == 0)
                     {
                         flow_change_op(insn[j].op_str);
-                        // unsigned long long flow_change_addr;
-                        // string flow_change_fun_name;
-                        // flow_change_addr = strtoul(insn[j].op_str, nullptr, 16);
-
-                        // flow_change_fun_name = addr_find_fun(flow_change_addr);
-                        // if (flow_change_fun_name != "")
-                        //     cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-                        // else {
-                        //     flow_change_fun_name = get_plt_fun(flow_change_addr);
-                        //     if (flow_change_fun_name != "")
-                        //         cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
-                        //     else {
-                        //         flow_change_fun_name = get_libc_symbol_name(flow_change_addr);
-                        //         if (flow_change_fun_name == "")
-                        //             flow_change_fun_name = get_libc_plt_symbol_name(flow_change_addr);
-                        //         cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-                        //     }
-                        // }
- 
                     }
 
                     if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main") {
@@ -244,15 +224,13 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
                 }
                 else {
-                    printf( "\033[33m\033[2m%-16s\033[0m"
-                            "\033[36m\033[2m%s\033[0m\n",
+                    printf("\033[33m\033[2m%-16s\033[0m" "\033[36m\033[2m%s\033[0m\n",
                         insn[j].mnemonic, insn[j].op_str);
                 }
             }
 
-            if (insn[5].address == rip_val) {
+            if (insn[5].address == rip_val)
                 disasm_addr = insn[1].address;
-            }
         }
         disasm_addr_synchronous = false;
         cs_free(insn, count);
