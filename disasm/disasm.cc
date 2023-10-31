@@ -155,17 +155,28 @@ void disasm1(pid_t pid, unsigned long long rip_val)
         for (j = 0; j < 11; j++)
         {
             char code[32];
+            string show_dis_fun_name = "";
             for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
-            // 根据地址得到函数名和偏移
-            if (dis_fun_name == "")
-                dis_fun_name = addr_find_fun(insn[j].address);
-            if (dis_fun_name == ""){
-                dis_fun_name = get_plt_fun(insn[j].address);
-                if (dis_fun_name != "")
-                    dis_fun_name += "@plt";
+            show_dis_fun_name = addr_find_fun(insn[j].address);
+            if (show_dis_fun_name != "")
+                dis_fun_name = show_dis_fun_name;
+            else
+            {
+                show_dis_fun_name = get_plt_fun(insn[j].address);
+                if (show_dis_fun_name != "")
+                    dis_fun_name = show_dis_fun_name + "@plt";
             }
+
+            // 根据地址得到函数名和偏移
+            // if (dis_fun_name == "")
+            //     dis_fun_name = addr_find_fun(insn[j].address);
+            // if (dis_fun_name == ""){
+            //     dis_fun_name = get_plt_fun(insn[j].address);
+            //     if (dis_fun_name != "")
+            //         dis_fun_name += "@plt";
+            // }
 
             fun_offset = addr_find_fun_offset(insn[j].address);
 
