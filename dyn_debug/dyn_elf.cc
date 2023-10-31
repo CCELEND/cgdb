@@ -196,6 +196,7 @@ unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr)
 
         for (int j = i; j < i + 8; j++)
         {
+            // 函数结束的标志的指令码
             if ( long((unsigned char)buf[j]) == 0xf4 ||
                  long((unsigned char)buf[j]) == 0xc3 ||
                  long((unsigned char)buf[j]) == 0xe9 && long((unsigned char)buf[j-1]) == 0xfa ||
@@ -280,6 +281,4 @@ int addr_find_plt_fun_offset(unsigned long long addr)
     }
 
     return -1;
-
-
 }

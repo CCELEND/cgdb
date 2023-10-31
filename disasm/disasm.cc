@@ -95,6 +95,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
     cs_close(&handle);
 }
 
+// 输出跳转指令流操作数的函数符号
 void flow_change_op(char* ops)
 {
     unsigned long long flow_change_addr;
@@ -170,16 +171,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             }
 
             // 根据地址得到函数名和偏移
-            // if (dis_fun_name == "")
-            //     dis_fun_name = addr_find_fun(insn[j].address);
-            // if (dis_fun_name == ""){
-            //     dis_fun_name = get_plt_fun(insn[j].address);
-            //     if (dis_fun_name != "")
-            //         dis_fun_name += "@plt";
-            // }
-
             fun_offset = addr_find_fun_offset(insn[j].address);
-
             if (fun_offset == -1)
                 fun_offset = addr_find_glibc_fun_offset(insn[j].address);
             if (fun_offset == -1)

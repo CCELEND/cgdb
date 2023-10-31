@@ -32,7 +32,7 @@ struct break_point ni_break_point;
 map<string, unsigned long long> fun_start;
 // 键是函数名，值是结束地址
 map<string, unsigned long long> fun_end;
-
+// 键是 plt 函数名，值是结束地址
 map<string, unsigned long long> plt_fun_end;
 
 string dis_fun_name = "";
