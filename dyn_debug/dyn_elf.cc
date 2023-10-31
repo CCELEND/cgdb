@@ -49,6 +49,132 @@ unsigned long long get_fun_addr(char* fun_name, Binary* bin)
     return 0;
 }
 
+// 根据地址找所在 glibc 函数名
+// 704d25fbbb72fa95d517b883131828c0883fe9.debug libc
+// 2e105c0bb3ee8e8f5b917f8af764373d206659.debug ld
+string get_libc_symbol_name(unsigned long long glib_addr) {
+    unsigned long long glib_addr_offset;
+    std::string command;
+
+    if (glib_addr < ld_code_end && glib_addr > ld_code_start){
+        glib_addr_offset = glib_addr - ld_base;
+        command = std::string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+    }
+    else{
+        glib_addr_offset = glib_addr - libc_base;
+        command = std::string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+    }
+
+    // 使stringstream 将十六进制数转换为字符串
+    std::stringstream ss;
+    ss << std::hex << glib_addr_offset; // 使用十六进制输出
+    std::string addr_hex_str = ss.str();
+    // 去掉前缀"0x"
+    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+        addr_hex_str = addr_hex_str.substr(2);
+    }
+
+    command += addr_hex_str;
+    FILE* fp = popen(command.c_str(), "r");
+    if (!fp)
+    {
+        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+        return "";
+    }
+
+    char* result = nullptr;
+    size_t len = 0;
+    ssize_t read;
+    int lib_fun_str_start, lib_fun_str_end;
+    std::string lib_fun_name = "";
+
+    while ((read = getline(&result, &len, fp)) != -1) 
+    {
+        if (std::string(result).find("<") != std::string::npos) 
+        {
+            lib_fun_str_start = std::string(result).find("<");
+            lib_fun_str_end = std::string(result).find(">");
+            lib_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
+        }     
+    }
+
+    pclose(fp);   // 关闭管道
+    free(result); // 释放动态分配的内存
+
+    if(lib_fun_name != ""){
+        return lib_fun_name;
+    }
+
+    return "";
+
+}
+
+string get_libc_plt_symbol_name(unsigned long long glib_addr) {
+    unsigned long long glib_addr_offset;
+    std::string command;
+
+    if (glib_addr < ld_code_end && glib_addr > ld_code_start){
+        glib_addr_offset = glib_addr - ld_base;
+        command = std::string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | grep ");
+    }
+    else{
+        glib_addr_offset = glib_addr - libc_base;
+        command = std::string("objdump -d -j .plt.sec libc.so.6 | grep ");
+    }
+
+    // 使stringstream 将十六进制数转换为字符串
+    std::stringstream ss;
+    ss << std::hex << glib_addr_offset; // 使用十六进制输出
+    std::string addr_hex_str = ss.str();
+    // 去掉前缀"0x"
+    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+        addr_hex_str = addr_hex_str.substr(2);
+    }
+
+    command += addr_hex_str;
+    FILE* fp = popen(command.c_str(), "r");
+    if (!fp)
+    {
+        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+        return "";
+    }
+
+    char* result = nullptr;
+    size_t len = 0;
+    ssize_t read;
+    int lib_fun_str_start, lib_fun_str_end;
+    std::string lib_fun_name = "";
+
+    while ((read = getline(&result, &len, fp)) != -1) 
+    {
+        if (std::string(result).find("<") != std::string::npos) 
+        {
+            lib_fun_str_start = std::string(result).find("<");
+            lib_fun_str_end = std::string(result).find(">");
+            lib_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
+        }     
+    }
+
+    pclose(fp);   // 关闭管道
+    free(result); // 释放动态分配的内存
+
+    if(lib_fun_name != ""){
+        return lib_fun_name;
+    }
+
+    return "";
+
+}
+
+int addr_find_glibc_fun_offset(unsigned long long addr)
+{
+    if (addr >= glibc_fun_start && addr <= glibc_fun_end){
+        return addr - glibc_fun_start;
+    }
+    return -1;
+
+}
+
 // 通过函数地址获得函数结束地址
 unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr)
 {

@@ -18,6 +18,9 @@ unsigned long long heap_end = 0;
 unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
 
+unsigned long long glibc_fun_start = 0;
+unsigned long long glibc_fun_end = 0;
+
 unsigned long long disasm_addr = 0;
 unsigned long long next_disasm_addr = 0;
 bool disasm_addr_synchronous = true;
@@ -29,6 +32,8 @@ struct break_point ni_break_point;
 map<string, unsigned long long> fun_end;
 // 键是函数名，值是开始地址
 map<string, unsigned long long> fun_start;
+
+string dis_fun_name = "";
 
 void run_dyn_debug(std::string fname, Binary *bin)
 {
@@ -249,6 +254,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
                 else if (strcmp(arguments[0], "test") == 0) {
                     unsigned long long address = strtoul(arguments[1], nullptr, 16);
+                    cout<<get_libc_symbol_name(address)<<endl;
                     address = get_fun_end_addr(pid, address);
                     printf("0x%llx\n", address);
 
@@ -256,9 +262,10 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
                     // }
                     printf("\n");
-                    for (auto i : fun_end) {
-                        printf("%-30s0x%llx\n", i.first.c_str(), i.second);
-                    }
+                    // for (auto i : fun_end) {
+                    //     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
+                    // }
+
 
                 }
 

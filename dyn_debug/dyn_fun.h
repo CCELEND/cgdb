@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -31,6 +32,8 @@ extern vector<string> myargv;
 // 当前命令字符串
 extern string cmd;
 
+extern string dis_fun_name;
+
 // 一些 vma 地址
 extern unsigned long long elf_base;
 extern unsigned long long elf_code_start;
@@ -48,6 +51,9 @@ extern unsigned long long heap_base;
 extern unsigned long long heap_end;
 extern unsigned long long stack_base;
 extern unsigned long long stack_end;
+
+extern unsigned long long glibc_fun_start;
+extern unsigned long long glibc_fun_end;
 
 extern unsigned long long disasm_addr;
 extern unsigned long long next_disasm_addr;
@@ -69,6 +75,14 @@ struct break_point {
 extern struct break_point break_point_list[8];
 // ni 断点结构体
 extern struct break_point ni_break_point;
+
+// typedef struct
+// {
+//   const char *dli_fname;   /* File name of defining object.  */
+//   void *dli_fbase;      /* Load address of that object.  */
+//   const char *dli_sname;   /* Name of nearest symbol.  */
+//   void *dli_saddr;      /* Exact value of nearest symbol.  */
+// } Dl_info;
 
 // run api, help args
 void argparse();
@@ -106,6 +120,9 @@ void map_fun_start(pid_t pid, Binary *bin);
 void map_fun_end(pid_t pid, Binary *bin);
 string addr_find_fun(unsigned long long addr);
 int addr_find_fun_offset(unsigned long long addr);
+string get_libc_symbol_name(unsigned long long lib_addr);
+string get_libc_plt_symbol_name(unsigned long long glib_addr);
+int addr_find_glibc_fun_offset(unsigned long long addr);
 
 // break point
 int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
