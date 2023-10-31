@@ -111,7 +111,6 @@ void disasm1(pid_t pid, unsigned long long rip_val)
         if (dis_fun_name != "")
             glibc_fun_start = rip_val;
         glibc_fun_end = get_fun_end_addr(pid, rip_val);
-        // printf("2\n");
     }
 
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
@@ -200,9 +199,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                                 cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
                             }
                         }
-
-                        // if (flow_change_addr < 0x7f0000000000)
-                        //     cout << "<\033[31m" << get_plt_fun(flow_change_addr) << "@plt\033[0m>"; 
+ 
                     }
 
                     if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main") {

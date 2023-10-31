@@ -256,7 +256,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     unsigned long long address = strtoul(arguments[1], nullptr, 16);
                     cout<<get_libc_symbol_name(address)<<endl;
                     address = get_fun_end_addr(pid, address);
-                    printf("0x%llx\n", address);
+                    printf("end: 0x%llx\n", address);
 
                     // for (auto it : fun_start) {
                     //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
