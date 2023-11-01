@@ -139,17 +139,14 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     // 反汇编开始地址与 rip 同步
     if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) {
         disasm_addr = rip_val;
-        dis_fun_name = addr_get_glibc_fun(rip_val);
-        if (dis_fun_name != ""){
-            glibc_fun_start = rip_val;
-            // glibc_fun_end = get_glibc_fun_end(rip_val);
-            // printf("0x%llx", glibc_fun_end);
-            glibc_fun_end = get_fun_end_addr(pid, rip_val);
-        }
+        // dis_fun_name = addr_get_glibc_fun(rip_val);
+        // if (dis_fun_name != ""){
+        //     glibc_fun_start = rip_val;
+        //     glibc_fun_end = get_fun_end_addr(pid, rip_val);
+        // }
         // glibc_fun_end = get_fun_end_addr(pid, rip_val);
 
         // glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
-        // glibc_fun_end = get_glibc_fun_end(rip_val);
         
     }
 
@@ -176,6 +173,15 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 show_dis_fun_name = addr_get_plt_fun(insn[j].address);
                 if (show_dis_fun_name != "")
                     dis_fun_name = show_dis_fun_name + "@plt";
+                else {
+                    show_dis_fun_name = addr_get_glibc_fun(insn[j].address);
+                    if (show_dis_fun_name != "")
+                    {
+                        dis_fun_name = show_dis_fun_name;
+                        glibc_fun_start = insn[j].address;
+                        glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
+                    }
+                }
             }
 
             // 根据地址得到函数名和偏移
