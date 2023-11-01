@@ -59,7 +59,7 @@ void show_elf_lib_plt()
     printf("[+] Libc function \033[32mplt<@plt>\033[0m\n");
     printf("%-30saddress\n", "name");
     printf("=====================================\n");
-    for (auto it : fun_plt) {
+    for (auto it : plt_fun) {
         printf("%-30s0x%llx\n", it.first.c_str(), it.second);
     }
 }

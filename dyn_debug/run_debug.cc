@@ -28,11 +28,11 @@ bool disasm_addr_synchronous = true;
 struct break_point break_point_list[8];
 struct break_point ni_break_point;
 
-// 键是函数名，值是开始地址
+// 键是 elf 函数名，值是开始地址
 map<string, unsigned long long> fun_start;
-// 键是函数名，值是结束地址
+// 键是 elf 函数名，值是结束地址
 map<string, unsigned long long> fun_end;
-// 键是 plt 函数名，值是结束地址
+// 键是 elf plt 函数名，值是结束地址
 map<string, unsigned long long> plt_fun_end;
 
 string dis_fun_name = "";
@@ -240,10 +240,10 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 } else if (strcmp(arguments[0], "plt") == 0) {
                     if (argc == 2) {
                         unsigned long long address = strtoul(arguments[1], nullptr, 16);
-                        if ( get_plt_fun(address)=="" )
+                        if ( addr_get_plt_fun(address)== "" )
                             printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
                         else
-                            cout << "<" << get_plt_fun(address) << "@plt>" << endl;
+                            cout << "<" << addr_get_plt_fun(address) << "@plt>" << endl;
                     } else {
                         err_info("Please enter the function address!");
                     }
@@ -257,8 +257,9 @@ void run_dyn_debug(std::string fname, Binary *bin)
 
                 else if (strcmp(arguments[0], "test") == 0) {
                     unsigned long long address = strtoul(arguments[1], nullptr, 16);
-                    cout<<get_libc_symbol_name(address)<<endl;
-                    address = get_fun_end_addr(pid, address);
+                    cout<< addr_get_glibc_fun(address)<<endl;
+                    // address = get_fun_end_addr(pid, address);
+                    address = get_glibc_fun_end(address);
                     printf("end: 0x%llx\n", address);
 
                     // for (auto it : fun_start) {

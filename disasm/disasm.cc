@@ -25,8 +25,8 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
             }
 
-            fun_name = addr_find_fun(insn[j].address);
-            offset = addr_find_fun_offset(insn[j].address);
+            fun_name = addr_get_fun(insn[j].address);
+            offset = addr_get_fun_offset(insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
             if (!j){
@@ -70,7 +70,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                     {
                         plt_addr = strtoul(insn[j].op_str, nullptr, 16);
                         if (plt_addr < 0x7f0000000000)
-                            cout << "<\033[31m" << get_plt_fun(plt_addr) << "@plt\033[0m>"; 
+                            cout << "<\033[31m" << addr_get_plt_fun(plt_addr) << "@plt\033[0m>"; 
                     }
 
                     if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main") {
@@ -104,19 +104,19 @@ void flow_change_op(char* ops)
     if (!flow_change_addr)
         return;
 
-    flow_change_fun_name = addr_find_fun(flow_change_addr);
+    flow_change_fun_name = addr_get_fun(flow_change_addr);
     if (flow_change_fun_name != "")
         cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
     else {
-        flow_change_fun_name = get_plt_fun(flow_change_addr);
+        flow_change_fun_name = addr_get_plt_fun(flow_change_addr);
         if (flow_change_fun_name != "")
             cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
         else {
-            flow_change_fun_name = get_libc_symbol_name(flow_change_addr);
+            flow_change_fun_name = addr_get_glibc_fun(flow_change_addr);
             if (flow_change_fun_name != "")
                 cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
             else {
-                flow_change_fun_name = get_libc_plt_symbol_name(flow_change_addr);
+                flow_change_fun_name = addr_get_glibc_plt_fun(flow_change_addr);
                 if (flow_change_fun_name != "")
                     cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
                 else
@@ -139,10 +139,18 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     // 反汇编开始地址与 rip 同步
     if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) {
         disasm_addr = rip_val;
-        dis_fun_name = get_libc_symbol_name(rip_val);
-        if (dis_fun_name != "")
+        dis_fun_name = addr_get_glibc_fun(rip_val);
+        if (dis_fun_name != ""){
             glibc_fun_start = rip_val;
-        glibc_fun_end = get_fun_end_addr(pid, rip_val);
+            // glibc_fun_end = get_glibc_fun_end(rip_val);
+            // printf("0x%llx", glibc_fun_end);
+            glibc_fun_end = get_fun_end_addr(pid, rip_val);
+        }
+        // glibc_fun_end = get_fun_end_addr(pid, rip_val);
+
+        // glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
+        // glibc_fun_end = get_glibc_fun_end(rip_val);
+        
     }
 
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
@@ -160,23 +168,22 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
-            show_dis_fun_name = addr_find_fun(insn[j].address);
+            show_dis_fun_name = addr_get_fun(insn[j].address);
             if (show_dis_fun_name != "")
                 dis_fun_name = show_dis_fun_name;
             else
             {
-                show_dis_fun_name = get_plt_fun(insn[j].address);
+                show_dis_fun_name = addr_get_plt_fun(insn[j].address);
                 if (show_dis_fun_name != "")
                     dis_fun_name = show_dis_fun_name + "@plt";
             }
 
             // 根据地址得到函数名和偏移
-            fun_offset = addr_find_fun_offset(insn[j].address);
+            fun_offset = addr_get_fun_offset(insn[j].address);
             if (fun_offset == -1)
-                fun_offset = addr_find_glibc_fun_offset(insn[j].address);
+                fun_offset = addr_get_glibc_fun_offset(insn[j].address);
             if (fun_offset == -1)
-                fun_offset = addr_find_plt_fun_offset(insn[j].address);
-
+                fun_offset = addr_get_plt_fun_offset(insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
 
@@ -226,7 +233,6 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                     }
  
                     printf("\n\n");
-
                 }
                 else {
                     printf("\033[33m\033[2m%-16s\033[0m" "\033[36m\033[2m%s\033[0m\n",
@@ -273,7 +279,7 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
                  strcmp(insn[j].mnemonic, "jmp") == 0 )
             {
                 plt_addr = strtoul(insn[j].op_str, nullptr, 16);
-                cout << "<\033[31m" << get_plt_fun(plt_addr) << "@plt\033[0m>";
+                cout << "<\033[31m" << addr_get_plt_fun(plt_addr) << "@plt\033[0m>";
             }
         }
         cs_free(insn, count);

@@ -77,14 +77,6 @@ extern struct break_point break_point_list[8];
 // ni 断点结构体
 extern struct break_point ni_break_point;
 
-// typedef struct
-// {
-//   const char *dli_fname;   /* File name of defining object.  */
-//   void *dli_fbase;      /* Load address of that object.  */
-//   const char *dli_sname;   /* Name of nearest symbol.  */
-//   void *dli_saddr;      /* Exact value of nearest symbol.  */
-// } Dl_info;
-
 // run api, help args
 void argparse();
 void show_help();
@@ -111,27 +103,32 @@ void val_to_string(unsigned long long val);
 
 
 // dyn_elf
-string get_map_key_value(map<string, unsigned long long>& myMap, 
+string get_map_key_value(map<string, unsigned long long>& Map, 
     unsigned long long fun_plt_addr);
-string get_plt_fun(unsigned long long fun_addr);
-void dyn_show_elf_lib_plt();
-unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr);
-unsigned long long get_fun_addr(char* fun_name, Binary* bin);
 void map_fun_start(pid_t pid, Binary *bin);
 void map_fun_end(pid_t pid, Binary *bin);
-string addr_find_fun(unsigned long long addr);
-int addr_find_fun_offset(unsigned long long addr);
-string get_libc_symbol_name(unsigned long long lib_addr);
-string get_libc_plt_symbol_name(unsigned long long glib_addr);
-int addr_find_glibc_fun_offset(unsigned long long addr);
 void map_plt_fun_end(pid_t pid);
-int addr_find_plt_fun_offset(unsigned long long addr);
+void dyn_show_elf_lib_plt();
+
+string addr_get_fun(unsigned long long fun_addr);
+string addr_get_plt_fun(unsigned long long plt_fun_addr);
+string addr_get_glibc_fun(unsigned long long glib_addr);
+string addr_get_glibc_plt_fun(unsigned long long glib_addr);
+
+unsigned long long get_fun_addr(char* fun_name, Binary* bin);
+unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr);
+unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr);
+
+int addr_get_fun_offset(unsigned long long addr);
+int addr_get_plt_fun_offset(unsigned long long addr);
+int addr_get_glibc_fun_offset(unsigned long long addr);
+
 
 // break point
 int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
+void break_point_inject(pid_t pid, break_point& bp);
 void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
 void set_ni_break_point(pid_t pid, unsigned long long addr);
-void break_point_inject(pid_t pid, break_point& bp);
 void break_point_delete(pid_t pid, int num);
 
 // vmmap
@@ -144,6 +141,5 @@ void err_exit(const char* msg);
 void err_info(const char* msg);
 void note_info(const char* msg);
 void good_info(const char* msg);
-
 
 #endif
