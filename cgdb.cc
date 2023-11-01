@@ -7,7 +7,7 @@
 vector<string> myargv;
 string cmd;
 // 键是函数名，值是地址
-map<string, unsigned long long> fun_plt;
+map<string, unsigned long long> plt_fun;
 
 int main(int argc, char *argv[]) 
 {
