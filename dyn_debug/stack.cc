@@ -8,7 +8,7 @@ void show_stack(pid_t pid, struct user_regs_struct* regs)
     struct winsize size;
     unsigned long long stack = regs->rsp;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
-    int count = (size.ws_col-10)/2;      // 要重复输出的次数
+    int count = (size.ws_col-9)/2;      // 要重复输出的次数
 
     show_str(count);
     printf("[ STACK ]");

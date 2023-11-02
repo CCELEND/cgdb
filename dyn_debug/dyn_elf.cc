@@ -269,19 +269,28 @@ string addr_get_fun(unsigned long long fun_addr)
 
     if (fun_addr > 0x7f0000000000) 
     {
-        if (fun_addr > glibc_fun_end || fun_addr < glibc_fun_start)
-        {
-            show_dis_fun_name = addr_get_glibc_fun(fun_addr);
-            if (show_dis_fun_name != "")
-            {
-                if (dis_fun_name != show_dis_fun_name) {
-                    glibc_fun_start = fun_addr;
-                    glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
-                    return show_dis_fun_name;
-                }
+        // if (fun_addr > glibc_fun_end || fun_addr < glibc_fun_start)
+        // {
+        //     show_dis_fun_name = addr_get_glibc_fun(fun_addr);
+        //     if (show_dis_fun_name != "")
+        //     {
+        //         if (dis_fun_name != show_dis_fun_name) {
+        //             glibc_fun_start = fun_addr;
+        //             glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
+        //             return show_dis_fun_name;
+        //         }
+        //     }
+        // }
+        for (int i = 0; i < 5; i++) {
+            if (fun_addr > dis_fun_frame[i].fun_end_addr) {
+                dis_fun_frame[i].fun_start_addr = fun_addr;
+                dis_fun_frame[i].fun_end_addr = get_glibc_fun_end(fun_addr);
+                dis_fun_frame[i].fun_name = addr_get_glibc_fun(fun_addr);
             }
+
+            if (fun_addr >= dis_fun_frame[i].fun_start_addr && fun_addr <= dis_fun_frame[i].fun_end_addr)
+                return dis_fun_frame[i].fun_name;
         }
-        
     }
     else 
     {
@@ -429,8 +438,15 @@ int addr_get_elf_plt_fun_offset(unsigned long long addr)
 // 根据地址找所在 glibc 函数偏移
 int addr_get_glibc_fun_offset(unsigned long long addr)
 {
-    if (addr >= glibc_fun_start && addr <= glibc_fun_end)
-        return addr - glibc_fun_start;
+
+    for (int i = 0; i < 5; i++)
+    {
+        if (addr >= dis_fun_frame[i].fun_start_addr && addr <= dis_fun_frame[i].fun_end_addr)
+            return addr - dis_fun_frame[i].fun_start_addr;
+
+    }
+    // if (addr >= glibc_fun_start && addr <= glibc_fun_end)
+    //     return addr - glibc_fun_start;
 
     return -1;
 }

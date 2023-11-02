@@ -35,6 +35,8 @@ map<string, unsigned long long> fun_end;
 // 键是 elf plt 函数名，值是结束地址
 map<string, unsigned long long> plt_fun_end;
 
+struct fun_frame dis_fun_frame[5];
+
 string dis_fun_name = "";
 
 void run_dyn_debug(std::string fname, Binary *bin)
