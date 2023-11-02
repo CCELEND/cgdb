@@ -11,11 +11,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
+#include <fstream>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
 #include <sys/reg.h>
 #include <sys/user.h>
-#include <fstream>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 
 #include "../elf/loader_elf.h"
 #include "../disasm/disasm.h"
@@ -142,5 +145,6 @@ void err_exit(const char* msg);
 void err_info(const char* msg);
 void note_info(const char* msg);
 void good_info(const char* msg);
+void show_str(int count);
 
 #endif

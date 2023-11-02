@@ -163,19 +163,18 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     size_t count;
     int fun_offset;
 
+    struct winsize size;
+    ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
+    int str_count = (size.ws_col-10)/2;      // 要重复输出的次数
+    show_str(str_count);
+    printf("[ DISASM ]");
+    show_str(str_count);
+    printf("\033[0m\n");
+
     char addr_instruct[176];
     // 反汇编开始地址与 rip 同步
     if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) {
         disasm_addr = rip_val;
-        // dis_fun_name = addr_get_glibc_fun(rip_val);
-        // if (dis_fun_name != ""){
-        //     glibc_fun_start = rip_val;
-        //     glibc_fun_end = get_fun_end_addr(pid, rip_val);
-        // }
-        // glibc_fun_end = get_fun_end_addr(pid, rip_val);
-
-        // glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
-        
     }
 
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
