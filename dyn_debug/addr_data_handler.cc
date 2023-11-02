@@ -158,7 +158,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
     while (true)
     {
         val = get_addr_val(pid, addr);
-        if (val < 0x550000000000 || val > 0x7fffffffffff) {
+        if (val < 0x550000000000 || val > 0x7fffffffffff || val == addr) {
             printf(" ◂— ");
             if (judg_addr_code(addr)) {
                 get_addr_data(pid, addr, addr_instruct, 16);

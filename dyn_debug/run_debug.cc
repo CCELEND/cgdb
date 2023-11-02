@@ -240,10 +240,10 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 } else if (strcmp(arguments[0], "plt") == 0) {
                     if (argc == 2) {
                         unsigned long long address = strtoul(arguments[1], nullptr, 16);
-                        if ( addr_get_plt_fun(address)== "" )
+                        if ( addr_get_elf_plt_fun(address)== "" )
                             printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
                         else
-                            cout << "<" << addr_get_plt_fun(address) << "@plt>" << endl;
+                            cout << "<" << addr_get_elf_plt_fun(address) << "@plt>" << endl;
                     } else {
                         err_info("Please enter the function address!");
                     }

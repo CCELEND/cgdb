@@ -25,8 +25,8 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
             }
 
-            fun_name = addr_get_fun(insn[j].address);
-            offset = addr_get_fun_offset(insn[j].address);
+            fun_name = addr_get_elf_fun(insn[j].address);
+            offset = addr_get_elf_fun_offset(insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
             if (!j){
@@ -70,7 +70,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                     {
                         plt_addr = strtoul(insn[j].op_str, nullptr, 16);
                         if (plt_addr < 0x7f0000000000)
-                            cout << "<\033[31m" << addr_get_plt_fun(plt_addr) << "@plt\033[0m>"; 
+                            cout << "<\033[31m" << addr_get_elf_plt_fun(plt_addr) << "@plt\033[0m>"; 
                     }
 
                     if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main") {
@@ -99,32 +99,60 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 void flow_change_op(char* ops)
 {
     unsigned long long flow_change_addr;
-    string flow_change_fun_name;
+    string flow_change_fun_name = "";
     flow_change_addr = strtoul(ops, nullptr, 16);
     if (!flow_change_addr)
         return;
 
-    flow_change_fun_name = addr_get_fun(flow_change_addr);
-    if (flow_change_fun_name != "")
-        cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-    else {
-        flow_change_fun_name = addr_get_plt_fun(flow_change_addr);
+    if (flow_change_addr > 0x7f0000000000) {
+        flow_change_fun_name = addr_get_glibc_plt_fun(flow_change_addr);
         if (flow_change_fun_name != "")
-            cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
+            cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
         else {
             flow_change_fun_name = addr_get_glibc_fun(flow_change_addr);
             if (flow_change_fun_name != "")
                 cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-            else {
-                flow_change_fun_name = addr_get_glibc_plt_fun(flow_change_addr);
-                if (flow_change_fun_name != "")
-                    cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-                else
-                    cout << "";
-            }
-
+            else
+                cout << "";
         }
     }
+    else
+    {
+        flow_change_fun_name = addr_get_elf_fun(flow_change_addr);
+        if (flow_change_fun_name != "")
+            cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+        else {
+            flow_change_fun_name = addr_get_elf_plt_fun(flow_change_addr);
+            if (flow_change_fun_name != "")
+                cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
+            else
+                cout << "";
+
+        }
+
+    }
+
+    // flow_change_fun_name = addr_get_elf_fun(flow_change_addr);
+    // if (flow_change_fun_name != "")
+    //     cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+    // else {
+    //     flow_change_fun_name = addr_get_elf_plt_fun(flow_change_addr);
+    //     if (flow_change_fun_name != "")
+    //         cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
+    //     else {
+    //         flow_change_fun_name = addr_get_glibc_plt_fun(flow_change_addr);
+    //         if (flow_change_fun_name != "")
+    //             cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+    //         else {
+    //             flow_change_fun_name = addr_get_glibc_fun(flow_change_addr);
+    //             if (flow_change_fun_name != "")
+    //                 cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+    //             else
+    //                 cout << "";
+    //         }
+
+    //     }
+    // }
 
 }
 
@@ -161,35 +189,45 @@ void disasm1(pid_t pid, unsigned long long rip_val)
         for (j = 0; j < 11; j++)
         {
             char code[32];
-            string show_dis_fun_name = "";
+            // string show_dis_fun_name = "";
             for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
-            show_dis_fun_name = addr_get_fun(insn[j].address);
-            if (show_dis_fun_name != "")
-                dis_fun_name = show_dis_fun_name;
-            else
-            {
-                show_dis_fun_name = addr_get_plt_fun(insn[j].address);
-                if (show_dis_fun_name != "")
-                    dis_fun_name = show_dis_fun_name + "@plt";
-                else {
-                    show_dis_fun_name = addr_get_glibc_fun(insn[j].address);
-                    if (show_dis_fun_name != "")
-                    {
-                        dis_fun_name = show_dis_fun_name;
-                        glibc_fun_start = insn[j].address;
-                        glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
-                    }
-                }
-            }
+            dis_fun_name = addr_get_fun(insn[j].address);
+            // printf("11%s\n", dis_fun_name.c_str());
+
+            // if (insn[j].address > 0x7f0000000000) {
+            //     if (insn[j].address > glibc_fun_end || insn[j].address < glibc_fun_start){
+            //         show_dis_fun_name = addr_get_glibc_fun(insn[j].address);
+            //         if (show_dis_fun_name != "")
+            //         {
+            //             if (dis_fun_name != show_dis_fun_name) {
+            //                 dis_fun_name = show_dis_fun_name;
+            //                 glibc_fun_start = insn[j].address;
+            //                 glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
+            //                 // printf("0x%llx\n", glibc_fun_end);
+            //             }
+            //         }
+            // }
+            // }
+            // else {
+            //     show_dis_fun_name = addr_get_elf_fun(insn[j].address);
+            //     if (show_dis_fun_name != ""){
+            //         dis_fun_name = show_dis_fun_name;
+            //     }
+            //     else {
+            //         show_dis_fun_name = addr_get_elf_plt_fun(insn[j].address);
+            //         if (show_dis_fun_name != "")
+            //             dis_fun_name = show_dis_fun_name + "@plt";
+            //     }
+            // }
 
             // 根据地址得到函数名和偏移
-            fun_offset = addr_get_fun_offset(insn[j].address);
+            fun_offset = addr_get_elf_fun_offset(insn[j].address);
             if (fun_offset == -1)
                 fun_offset = addr_get_glibc_fun_offset(insn[j].address);
             if (fun_offset == -1)
-                fun_offset = addr_get_plt_fun_offset(insn[j].address);
+                fun_offset = addr_get_elf_plt_fun_offset(insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
 
@@ -285,7 +323,7 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
                  strcmp(insn[j].mnemonic, "jmp") == 0 )
             {
                 plt_addr = strtoul(insn[j].op_str, nullptr, 16);
-                cout << "<\033[31m" << addr_get_plt_fun(plt_addr) << "@plt\033[0m>";
+                cout << "<\033[31m" << addr_get_elf_plt_fun(plt_addr) << "@plt\033[0m>";
             }
         }
         cs_free(insn, count);

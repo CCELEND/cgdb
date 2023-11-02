@@ -39,7 +39,7 @@ void set_break_point(pid_t pid, char* bp_fun, Binary* bin)
 {
     unsigned long long break_point_addr;
 
-    break_point_addr = get_fun_addr(bp_fun, bin);
+    break_point_addr = get_elf_fun_addr(bp_fun, bin);
     if (!break_point_addr){
         err_info("There is no such function!");
         return;

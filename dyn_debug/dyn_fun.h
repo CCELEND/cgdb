@@ -110,17 +110,18 @@ void map_fun_end(pid_t pid, Binary *bin);
 void map_plt_fun_end(pid_t pid);
 void dyn_show_elf_lib_plt();
 
+string addr_get_elf_fun(unsigned long long elf_fun_addr);
+string addr_get_elf_plt_fun(unsigned long long elf_plt_fun_addr);
+string addr_get_glibc_fun(unsigned long long glibc_fun_addr);
+string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
 string addr_get_fun(unsigned long long fun_addr);
-string addr_get_plt_fun(unsigned long long plt_fun_addr);
-string addr_get_glibc_fun(unsigned long long glib_addr);
-string addr_get_glibc_plt_fun(unsigned long long glib_addr);
 
-unsigned long long get_fun_addr(char* fun_name, Binary* bin);
-unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr);
+unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin);
+unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr);
 
-int addr_get_fun_offset(unsigned long long addr);
-int addr_get_plt_fun_offset(unsigned long long addr);
+int addr_get_elf_fun_offset(unsigned long long addr);
+int addr_get_elf_plt_fun_offset(unsigned long long addr);
 int addr_get_glibc_fun_offset(unsigned long long addr);
 
 

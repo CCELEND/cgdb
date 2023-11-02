@@ -14,7 +14,7 @@ string get_map_key_value(map<string, unsigned long long>& Map, unsigned long lon
 }
 
 // 通过 elf 函数名获得 elf 函数地址
-unsigned long long get_fun_addr(char* fun_name, Binary* bin)
+unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin)
 {
     Symbol *sym;
 
@@ -42,7 +42,7 @@ void dyn_show_elf_lib_plt()
 }
 
 // 根据地址找所在 elf 函数名
-string addr_get_fun(unsigned long long addr)
+string addr_get_elf_fun(unsigned long long addr)
 {
     for (auto it : fun_start) 
     {
@@ -55,7 +55,7 @@ string addr_get_fun(unsigned long long addr)
 }
 
 // 根据实际 elf plt 函数地址找函数名
-string addr_get_plt_fun(unsigned long long fun_addr)
+string addr_get_elf_plt_fun(unsigned long long fun_addr)
 {
     unsigned long long fun_plt_addr = fun_addr - elf_base;
     return get_map_key_value(plt_fun, fun_plt_addr);
@@ -65,62 +65,138 @@ string addr_get_plt_fun(unsigned long long fun_addr)
 // 根据地址找所在 glibc 函数名 2.36
 // 704d25fbbb72fa95d517b883131828c0883fe9.debug libc
 // 2e105c0bb3ee8e8f5b917f8af764373d206659.debug ld
-string addr_get_glibc_fun(unsigned long long glibc_fun_addr) 
+// string addr_get_glibc_fun(unsigned long long glibc_fun_addr) 
+// {
+//     unsigned long long glibc_fun_addr_offset;
+//     std::string command;
+
+//     if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
+//         glibc_fun_addr_offset = glibc_fun_addr - ld_base;
+//         command = std::string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+//     }
+//     else {
+//         glibc_fun_addr_offset = glibc_fun_addr - libc_base;
+//         command = std::string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+//     }
+
+//     // 使stringstream 将十六进制数转换为字符串
+//     std::stringstream ss;
+//     ss << std::hex << glibc_fun_addr_offset; // 使用十六进制输出
+//     std::string addr_hex_str = ss.str();
+//     // 去掉前缀"0x"
+//     if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+//         addr_hex_str = addr_hex_str.substr(2);
+//         addr_hex_str = "0" + addr_hex_str;
+//     }
+
+//     command += addr_hex_str;
+//     FILE* fp = popen(command.c_str(), "r");
+//     if (!fp)
+//     {
+//         printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+//         return "";
+//     }
+
+//     char* result = nullptr;
+//     size_t len = 0;
+//     ssize_t read;
+//     int lib_fun_str_start, lib_fun_str_end;
+//     std::string glibc_fun_name = "";
+
+//     while ((read = getline(&result, &len, fp)) != -1) 
+//     {
+//         if (std::string(result).find("<") != std::string::npos) 
+//         {
+//             lib_fun_str_start = std::string(result).find("<");
+//             lib_fun_str_end = std::string(result).find(">");
+//             glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
+//         }     
+//     }
+
+//     pclose(fp);   // 关闭管道
+//     free(result); // 释放动态分配的内存
+
+//     if(glibc_fun_name != ""){
+//         return glibc_fun_name;
+//     }
+
+//     return "";
+
+// }
+
+string addr_get_glibc_fun(unsigned long long glibc_fun_addr)
 {
+    if (glibc_fun_addr % 0x8 != 0)
+        return "";
+
     unsigned long long glibc_fun_addr_offset;
     std::string command;
+    std::string glibc_fun_name = "";
+    bool is_libc, break_flag = false;
 
     if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
+        is_libc = false;
         glibc_fun_addr_offset = glibc_fun_addr - ld_base;
         command = std::string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
     else {
+        is_libc = true;
         glibc_fun_addr_offset = glibc_fun_addr - libc_base;
         command = std::string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
     }
 
-    // 使stringstream 将十六进制数转换为字符串
     std::stringstream ss;
-    ss << std::hex << glibc_fun_addr_offset; // 使用十六进制输出
-    std::string addr_hex_str = ss.str();
-    // 去掉前缀"0x"
-    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
-        addr_hex_str = addr_hex_str.substr(2);
+    FILE* fp;
+    while (!break_flag)
+    {
+        ss.clear();
+        ss.str("");
+
+        std::string exe_command = command;
+        // 使stringstream 将十六进制数转换为字符串
+        
+        ss << std::hex << glibc_fun_addr_offset; // 使用十六进制输出
+        std::string addr_hex_str = ss.str();
+        // 去掉前缀"0x"
+        if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+            addr_hex_str = addr_hex_str.substr(2);
+        }
+
         addr_hex_str = "0" + addr_hex_str;
-    }
-
-    command += addr_hex_str;
-    FILE* fp = popen(command.c_str(), "r");
-    if (!fp)
-    {
-        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
-        return "";
-    }
-
-    char* result = nullptr;
-    size_t len = 0;
-    ssize_t read;
-    int lib_fun_str_start, lib_fun_str_end;
-    std::string glibc_fun_name = "";
-
-    while ((read = getline(&result, &len, fp)) != -1) 
-    {
-        if (std::string(result).find("<") != std::string::npos) 
+        exe_command += addr_hex_str;
+        fp = popen(exe_command.c_str(), "r");
+        if (!fp)
         {
-            lib_fun_str_start = std::string(result).find("<");
-            lib_fun_str_end = std::string(result).find(">");
-            glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
-        }     
+            printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+            break;
+        }
+
+        char* result = nullptr;
+        size_t len = 0;
+        ssize_t read;
+        int lib_fun_str_start, lib_fun_str_end;
+        
+        while ((read = getline(&result, &len, fp)) != -1) 
+        {
+            if (std::string(result).find("<") != std::string::npos) 
+            {
+                lib_fun_str_start = std::string(result).find("<");
+                lib_fun_str_end = std::string(result).find(">");
+                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
+                // printf("%s\n", glibc_fun_name.c_str());
+                break_flag = true;
+                break;
+            }     
+        }
+        // printf("0x%llx\n", glibc_fun_addr_offset);
+
+        glibc_fun_addr_offset -= 0x8;
+        pclose(fp);   // 关闭管道
+        free(result); // 释放动态分配的内存
     }
 
-    pclose(fp);   // 关闭管道
-    free(result); // 释放动态分配的内存
+    return glibc_fun_name;
 
-    if(glibc_fun_name != ""){
-        return glibc_fun_name;
-    }
-
-    return "";
 
 }
 
@@ -187,9 +263,45 @@ string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr)
 
 }
 
+string addr_get_fun(unsigned long long fun_addr)
+{
+    string show_dis_fun_name = "";
+
+    if (fun_addr > 0x7f0000000000) 
+    {
+        if (fun_addr > glibc_fun_end || fun_addr < glibc_fun_start)
+        {
+            show_dis_fun_name = addr_get_glibc_fun(fun_addr);
+            if (show_dis_fun_name != "")
+            {
+                if (dis_fun_name != show_dis_fun_name) {
+                    glibc_fun_start = fun_addr;
+                    glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
+                    return show_dis_fun_name;
+                }
+            }
+        }
+        
+    }
+    else 
+    {
+        show_dis_fun_name = addr_get_elf_fun(fun_addr);
+        if (show_dis_fun_name != "") {
+            return show_dis_fun_name;
+        }
+        else {
+            show_dis_fun_name = addr_get_elf_plt_fun(fun_addr);
+            if (show_dis_fun_name != ""){
+                return show_dis_fun_name + "@plt";
+            }
+        }
+    }
+    return dis_fun_name;
+}
+
 
 // 通过 elf 函数地址获得函数结束地址
-unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr)
+unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr)
 {
     char buf[0x1000];
     union u 
@@ -221,12 +333,13 @@ unsigned long long get_fun_end_addr(pid_t pid, unsigned long long fun_addr)
     return 0;
 }
 
+// 通过 glibc 函数地址获得函数结束地址
 unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
 {
     unsigned long long glibc_fun_addr_offset;
     unsigned long long glibc_fun_end_addr = 0;
     std::string command;
-    bool is_libc;
+    bool is_libc, break_flag = false;
 
     if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
         is_libc = false;
@@ -241,7 +354,7 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
 
     std::stringstream ss;
     FILE* fp;
-    while (true)
+    while (!break_flag)
     {
         ss.clear();
         ss.str("");
@@ -258,7 +371,6 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
 
         addr_hex_str = "0" + addr_hex_str;
         exe_command += addr_hex_str;
-        // cout<< exe_command << endl;
         fp = popen(exe_command.c_str(), "r");
         if (!fp)
         {
@@ -269,30 +381,28 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
         char* result = nullptr;
         size_t len = 0;
         ssize_t read;
-
-        read = getline(&result, &len, fp);
-        if (std::string(result).find("<") != std::string::npos) 
+        while ((read = getline(&result, &len, fp)) != -1) 
         {
-            glibc_fun_end_addr = strtoul(result, nullptr, 16) - 1;
-            printf("0x%llx\n", glibc_fun_end_addr);
-            pclose(fp);   // 关闭管道
-            free(result); // 释放动态分配的内存
-            break;
-        } 
-
+            if (std::string(result).find("<") != std::string::npos) 
+            {
+                glibc_fun_end_addr = strtoul(result, nullptr, 16) - 1;
+                break_flag = true;
+                break;
+            }   
+        }
+        pclose(fp);   // 关闭管道
+        free(result); // 释放动态分配的内存
     }
-    if (is_libc)
-        glibc_fun_end_addr = glibc_fun_end_addr + libc_base;
-    else
-        glibc_fun_end_addr = glibc_fun_end_addr + ld_base;
-    printf("0x%llx\n", glibc_fun_end_addr);
-    return glibc_fun_end_addr;
 
+    if (is_libc)
+        return glibc_fun_end_addr + libc_base;
+    else
+        return glibc_fun_end_addr + ld_base;
 }
 
 
 // 根据地址找所在 elf 函数偏移
-int addr_get_fun_offset(unsigned long long addr)
+int addr_get_elf_fun_offset(unsigned long long addr)
 {
     for (auto it : fun_start) 
     {
@@ -305,7 +415,7 @@ int addr_get_fun_offset(unsigned long long addr)
 }
 
 // 根据地址找所在 elf plt 函数偏移
-int addr_get_plt_fun_offset(unsigned long long addr)
+int addr_get_elf_plt_fun_offset(unsigned long long addr)
 {
     for (auto it : plt_fun) 
     {
@@ -357,7 +467,7 @@ void map_fun_end(pid_t pid, Binary* bin)
     {
         sym = &bin->symbols[i];
         if(sym->addr)
-            fun_end[sym->name] = get_fun_end_addr(pid, sym->addr + elf_base);
+            fun_end[sym->name] = get_fun_end(pid, sym->addr + elf_base);
     }
 
 }
@@ -366,5 +476,5 @@ void map_fun_end(pid_t pid, Binary* bin)
 void map_plt_fun_end(pid_t pid)
 {
     for (auto it : plt_fun)
-        plt_fun_end[it.first] = get_fun_end_addr(pid, it.second + elf_base);
+        plt_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
 }
