@@ -36,7 +36,7 @@ void dyn_show_elf_lib_plt()
     printf("[+] Libc function \033[32mplt<@plt>\033[0m\n");
     printf("%-30saddress\n", "name");
     printf("============================================\n");
-    for (auto it : plt_fun) {
+    for (auto it : elf_plt_fun) {
         printf("%-30s0x%llx\n", it.first.c_str(), it.second + elf_base);
     }
 }
@@ -44,9 +44,9 @@ void dyn_show_elf_lib_plt()
 // 根据地址找所在 elf 函数名
 string addr_get_elf_fun(unsigned long long addr)
 {
-    for (auto it : fun_start) 
+    for (auto it : elf_fun_start) 
     {
-        if (addr >= it.second && addr <= fun_end[it.first])
+        if (addr >= it.second && addr <= elf_fun_end[it.first])
             return it.first;
     }
 
@@ -58,7 +58,7 @@ string addr_get_elf_fun(unsigned long long addr)
 string addr_get_elf_plt_fun(unsigned long long fun_addr)
 {
     unsigned long long fun_plt_addr = fun_addr - elf_base;
-    return get_map_key_value(plt_fun, fun_plt_addr);
+    return get_map_key_value(elf_plt_fun, fun_plt_addr);
 }
 
 
@@ -321,9 +321,9 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
 // 根据地址找所在 elf 函数偏移
 int addr_get_elf_fun_offset(unsigned long long addr)
 {
-    for (auto it : fun_start) 
+    for (auto it : elf_fun_start) 
     {
-        if (addr >= it.second && addr <= fun_end[it.first])
+        if (addr >= it.second && addr <= elf_fun_end[it.first])
             return addr - it.second;
     }
 
@@ -334,9 +334,9 @@ int addr_get_elf_fun_offset(unsigned long long addr)
 // 根据地址找所在 elf plt 函数偏移
 int addr_get_elf_plt_fun_offset(unsigned long long addr)
 {
-    for (auto it : plt_fun) 
+    for (auto it : elf_plt_fun) 
     {
-        if (addr >= it.second + elf_base && addr <= plt_fun_end[it.first])
+        if (addr >= it.second + elf_base && addr <= elf_plt_fun_end[it.first])
             return addr - it.second - elf_base;
     }
 
@@ -376,7 +376,7 @@ void map_fun_start(pid_t pid, Binary* bin)
     {
         sym = &bin->symbols[i];
         if(sym->addr)
-            fun_start[sym->name] = sym->addr + elf_base;
+            elf_fun_start[sym->name] = sym->addr + elf_base;
     }
 
 }
@@ -389,7 +389,7 @@ void map_fun_end(pid_t pid, Binary* bin)
     {
         sym = &bin->symbols[i];
         if(sym->addr)
-            fun_end[sym->name] = get_fun_end(pid, sym->addr + elf_base);
+            elf_fun_end[sym->name] = get_fun_end(pid, sym->addr + elf_base);
     }
 
 }
@@ -397,8 +397,8 @@ void map_fun_end(pid_t pid, Binary* bin)
 // 建立 elf plt 函数名和结束地址的映射
 void map_plt_fun_end(pid_t pid)
 {
-    for (auto it : plt_fun)
-        plt_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
+    for (auto it : elf_plt_fun)
+        elf_plt_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
 }
 
 void clear_dis_fun_list()
@@ -426,7 +426,6 @@ void set_dis_fun_list(unsigned long long fun_addr)
             // glibc
             if (fun_addr > 0x7f0000000000)
             {
-                // fun_addr > dis_fun_info.dis_fun_list[i-1].fun_end_addr
                 dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
                 dis_fun_info.dis_fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr);
                 dis_fun_info.dis_fun_list[i].fun_name = addr_get_glibc_fun(fun_addr);
@@ -441,8 +440,8 @@ void set_dis_fun_list(unsigned long long fun_addr)
                 string fun_name;
                 fun_name = addr_get_elf_fun(fun_addr);
                 if (fun_name != "") {
-                    dis_fun_info.dis_fun_list[i].fun_start_addr = fun_start[fun_name];
-                    dis_fun_info.dis_fun_list[i].fun_end_addr = fun_end[fun_name];
+                    dis_fun_info.dis_fun_list[i].fun_start_addr = elf_fun_start[fun_name];
+                    dis_fun_info.dis_fun_list[i].fun_end_addr = elf_fun_end[fun_name];
                     dis_fun_info.dis_fun_list[i].fun_name = fun_name;
                     dis_fun_info.dis_fun_num++;
                     break;
@@ -450,8 +449,8 @@ void set_dis_fun_list(unsigned long long fun_addr)
                 else {
                     fun_name = addr_get_elf_plt_fun(fun_addr);
                     if (fun_name != "") {
-                        dis_fun_info.dis_fun_list[i].fun_start_addr = plt_fun[fun_name] + elf_base;
-                        dis_fun_info.dis_fun_list[i].fun_end_addr = plt_fun_end[fun_name];
+                        dis_fun_info.dis_fun_list[i].fun_start_addr = elf_plt_fun[fun_name] + elf_base;
+                        dis_fun_info.dis_fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
                         fun_name += "@plt";
                         dis_fun_info.dis_fun_list[i].fun_name = fun_name;
                         dis_fun_info.dis_fun_num++;
@@ -472,11 +471,11 @@ void show_dis_fun_list()
     {
         if (dis_fun_info.dis_fun_list[i].fun_start_addr == 0)
             break;
-        cout << i << endl;
-        printf("start: 0x%llx\n", dis_fun_info.dis_fun_list[i].fun_start_addr);
-        printf("end: 0x%llx\n", dis_fun_info.dis_fun_list[i].fun_end_addr);
-        printf("name: %s\n", dis_fun_info.dis_fun_list[i].fun_name.c_str());
-        printf("num: %d\n", dis_fun_info.dis_fun_num);
-
+        printf("idx: %d\n", i);
+        printf("fun start: 0x%llx\n", dis_fun_info.dis_fun_list[i].fun_start_addr);
+        printf("fun end:   0x%llx\n", dis_fun_info.dis_fun_list[i].fun_end_addr);
+        printf("fun name:  %s\n", dis_fun_info.dis_fun_list[i].fun_name.c_str());
     }
+
+    printf("num: %d\n", dis_fun_info.dis_fun_num);
 }

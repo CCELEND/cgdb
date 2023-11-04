@@ -55,16 +55,14 @@ extern unsigned long long heap_end;
 extern unsigned long long stack_base;
 extern unsigned long long stack_end;
 
-// extern unsigned long long glibc_fun_start;
-// extern unsigned long long glibc_fun_end;
-
+// 每次反汇编的开始地址
 extern unsigned long long disasm_addr;
 extern unsigned long long next_disasm_addr;
 extern bool disasm_addr_synchronous;
 
-extern map<string, unsigned long long> fun_start;
-extern map<string, unsigned long long> fun_end;
-extern map<string, unsigned long long> plt_fun_end;
+extern map<string, unsigned long long> elf_fun_start;
+extern map<string, unsigned long long> elf_fun_end;
+extern map<string, unsigned long long> elf_plt_fun_end;
 
 struct fun_frame {
     unsigned long long fun_start_addr;
@@ -72,13 +70,12 @@ struct fun_frame {
     string fun_name;
     fun_frame(): fun_start_addr(0), fun_end_addr(0), fun_name("") {}
 };
-
 struct dis_fun_info_type {
     struct fun_frame dis_fun_list[5];
     int dis_fun_num;
     dis_fun_info_type(): dis_fun_num(0) {}
 };
-// extern struct fun_frame dis_fun_list[5];
+// 反汇编窗口的函数信息
 extern struct dis_fun_info_type dis_fun_info;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态

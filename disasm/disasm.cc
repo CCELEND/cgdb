@@ -288,8 +288,7 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
             if ( strcmp(insn[j].mnemonic, "call") == 0 ||  
                  strcmp(insn[j].mnemonic, "jmp" ) == 0 )
             {
-                plt_addr = strtoul(insn[j].op_str, nullptr, 16);
-                cout << "<\033[31m" << addr_get_elf_plt_fun(plt_addr) << "@plt\033[0m>";
+                flow_change_op(insn[j].op_str);
             }
         }
         cs_free(insn, count);

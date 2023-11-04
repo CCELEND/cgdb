@@ -87,8 +87,10 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             printf("\033[31m0x%llx\033[0m (elf)", addr);
         } else if (addr > libc_code_start && addr < libc_code_end) {
             printf("\033[31m0x%llx\033[0m (libc)", addr);
-        } else if (addr > stack_base) {
+        } else if (addr > stack_base && addr < stack_end) {
             printf("\033[33m0x%llx\033[0m (stack)", addr);
+        } else if (addr > heap_base && addr < heap_end) {
+            printf("\033[34m0x%llx\033[0m (heap)", addr);
         } else if (!ld_base || addr > ld_code_start && addr < ld_code_end){
             printf("\033[31m0x%llx\033[0m (ld-linux)", addr);
         }
@@ -151,7 +153,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
     char addr_instruct[16];
     flag_addr_printf(address, addr_flag);
 
-    if (address < 0x550000000000)
+    if (address < 0x550000000000 || address > 0x7fffffffffff)
         return;
 
     addr = address;

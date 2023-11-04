@@ -18,9 +18,6 @@ unsigned long long heap_end = 0;
 unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
 
-// unsigned long long glibc_fun_start = 0;
-// unsigned long long glibc_fun_end = 0;
-
 unsigned long long disasm_addr = 0;
 unsigned long long next_disasm_addr = 0;
 bool disasm_addr_synchronous = true;
@@ -29,11 +26,11 @@ struct break_point break_point_list[8];
 struct break_point ni_break_point;
 
 // 键是 elf 函数名，值是开始地址
-map<string, unsigned long long> fun_start;
+map<string, unsigned long long> elf_fun_start;
 // 键是 elf 函数名，值是结束地址
-map<string, unsigned long long> fun_end;
+map<string, unsigned long long> elf_fun_end;
 // 键是 elf plt 函数名，值是结束地址
-map<string, unsigned long long> plt_fun_end;
+map<string, unsigned long long> elf_plt_fun_end;
 
 struct dis_fun_info_type dis_fun_info;
 
@@ -226,6 +223,8 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     printf("[+] Ld base: 0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "stack_addr") == 0) {
                     printf("[+] Stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
+                } else if (strcmp(arguments[0], "heap_addr") == 0) {
+                    printf("[+] Heap: \033[34m0x%llx-0x%llx\033[0m\n", heap_base, heap_end);
                 } else if (strcmp(arguments[0], "code") == 0) {
                     printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
                     printf("[+] Libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
