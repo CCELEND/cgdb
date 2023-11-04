@@ -181,7 +181,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
         for (j = 0; j < 11; j++)
         {
             char code[32];
-            // string show_dis_fun_name = "";
+            string dis_fun_name = "";
+            
             for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 

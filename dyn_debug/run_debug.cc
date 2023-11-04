@@ -18,8 +18,8 @@ unsigned long long heap_end = 0;
 unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
 
-unsigned long long glibc_fun_start = 0;
-unsigned long long glibc_fun_end = 0;
+// unsigned long long glibc_fun_start = 0;
+// unsigned long long glibc_fun_end = 0;
 
 unsigned long long disasm_addr = 0;
 unsigned long long next_disasm_addr = 0;
@@ -35,10 +35,7 @@ map<string, unsigned long long> fun_end;
 // 键是 elf plt 函数名，值是结束地址
 map<string, unsigned long long> plt_fun_end;
 
-// struct fun_frame dis_fun_list[5];
 struct dis_fun_info_type dis_fun_info;
-
-string dis_fun_name = "";
 
 void run_dyn_debug(std::string fname, Binary *bin)
 {
@@ -273,8 +270,6 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     // for (auto i : fun_end) {
                     //     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
                     // }
-
-
                 }
 
                 else {

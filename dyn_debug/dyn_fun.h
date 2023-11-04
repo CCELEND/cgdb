@@ -55,8 +55,8 @@ extern unsigned long long heap_end;
 extern unsigned long long stack_base;
 extern unsigned long long stack_end;
 
-extern unsigned long long glibc_fun_start;
-extern unsigned long long glibc_fun_end;
+// extern unsigned long long glibc_fun_start;
+// extern unsigned long long glibc_fun_end;
 
 extern unsigned long long disasm_addr;
 extern unsigned long long next_disasm_addr;
