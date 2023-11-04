@@ -172,7 +172,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             insn[10].address <= dis_fun_info.dis_fun_list[num-1].fun_end_addr)
           )
         {
-            // printf("113\n");
+            printf("113\n");
             clear_dis_fun_list(); // 清空函数列表
             for(int i = 0; i < 11; i++)
                 set_dis_fun_list(insn[i].address);
