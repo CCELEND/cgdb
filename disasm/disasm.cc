@@ -163,22 +163,28 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     if (count > 0) {
         size_t j;
         int num;
+        int line = 0;
         num = dis_fun_info.dis_fun_num;
+
+        for (int i = 0; i < 11 && i < count-1; i++ )
+            line++;
+
+        // printf("%d\n", line);
 
         if( !(insn[0].address >= dis_fun_info.dis_fun_list[0].fun_start_addr &&
             insn[0].address <= dis_fun_info.dis_fun_list[0].fun_end_addr
             &&
-            insn[10].address >= dis_fun_info.dis_fun_list[num-1].fun_start_addr &&
-            insn[10].address <= dis_fun_info.dis_fun_list[num-1].fun_end_addr)
+            insn[line-1].address >= dis_fun_info.dis_fun_list[num-1].fun_start_addr &&
+            insn[line-1].address <= dis_fun_info.dis_fun_list[num-1].fun_end_addr)
           )
         {
-            printf("113\n");
+            // printf("---0x%lx\n", insn[line-1].address);
             clear_dis_fun_list(); // 清空函数列表
-            for(int i = 0; i < 11; i++)
+            for(int i = 0; i < 11 && i < count-1; i++)
                 set_dis_fun_list(insn[i].address);
         }
 
-        for (j = 0; j < 11; j++)
+        for (j = 0; j < 11 && j < count-1; j++)
         {
             char code[32];
             string dis_fun_name = "";
@@ -211,8 +217,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 flow_change_op(insn[j].op_str);
                 printf("\n");
 
-                if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main")
-                    break;
+                // if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main")
+                //     break;
             }
             else{
 
@@ -237,10 +243,10 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                         flow_change_op(insn[j].op_str);
                     }
 
-                    if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main") {
-                        printf("\n");
-                        break;
-                    }
+                    // if (strcmp(insn[j].mnemonic, "ret") == 0 && dis_fun_name == "main") {
+                    //     printf("\n");
+                    //     break;
+                    // }
  
                     printf("\n\n");
                 }
