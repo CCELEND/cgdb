@@ -510,43 +510,44 @@ void set_dis_fun_list(unsigned long long fun_addr)
             fun_addr <= dis_fun_info.dis_fun_list[i].fun_end_addr )
             break;
 
-        // glibc
-        if (fun_addr > 0x7f0000000000)
+        if ( dis_fun_info.dis_fun_list[i].fun_start_addr == 0 ) 
         {
-            // fun_addr > dis_fun_info.dis_fun_list[i-1].fun_end_addr
-            // if ( dis_fun_info.dis_fun_list[i].fun_start_addr == 0 ) 
-            // {
+            // glibc
+            if (fun_addr > 0x7f0000000000)
+            {
+                // fun_addr > dis_fun_info.dis_fun_list[i-1].fun_end_addr
                 dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
                 dis_fun_info.dis_fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr);
                 dis_fun_info.dis_fun_list[i].fun_name = addr_get_glibc_fun(fun_addr);
                 dis_fun_info.dis_fun_num++;
                 break;
-            // }
-        }
 
-        // elf
-        else
-        {
-            string fun_name;
-
-            fun_name = addr_get_elf_fun(fun_addr);
-            if (fun_name != "") {
-                dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
-                dis_fun_info.dis_fun_list[i].fun_end_addr = fun_end[fun_name];
-                dis_fun_info.dis_fun_list[i].fun_name = fun_name;
-                dis_fun_info.dis_fun_num++;
-                break;
             }
-            else {
-                fun_name = addr_get_elf_plt_fun(fun_addr);
+
+            // elf
+            else
+            {
+                string fun_name;
+                fun_name = addr_get_elf_fun(fun_addr);
                 if (fun_name != "") {
                     dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
-                    dis_fun_info.dis_fun_list[i].fun_end_addr = plt_fun_end[fun_name];
-                    fun_name += "@plt";
+                    dis_fun_info.dis_fun_list[i].fun_end_addr = fun_end[fun_name];
                     dis_fun_info.dis_fun_list[i].fun_name = fun_name;
                     dis_fun_info.dis_fun_num++;
                     break;
                 }
+                else {
+                    fun_name = addr_get_elf_plt_fun(fun_addr);
+                    if (fun_name != "") {
+                        dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
+                        dis_fun_info.dis_fun_list[i].fun_end_addr = plt_fun_end[fun_name];
+                        fun_name += "@plt";
+                        dis_fun_info.dis_fun_list[i].fun_name = fun_name;
+                        dis_fun_info.dis_fun_num++;
+                        break;
+                    }
+                }
+
             }
         }
 
@@ -564,6 +565,7 @@ void show_dis_fun_list()
         printf("start: 0x%llx\n", dis_fun_info.dis_fun_list[i].fun_start_addr);
         printf("end: 0x%llx\n", dis_fun_info.dis_fun_list[i].fun_end_addr);
         printf("name: %s\n", dis_fun_info.dis_fun_list[i].fun_name.c_str());
+        printf("num: %d\n", dis_fun_info.dis_fun_num);
 
     }
 }

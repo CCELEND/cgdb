@@ -169,14 +169,15 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             insn[0].address <= dis_fun_info.dis_fun_list[0].fun_end_addr
             &&
             insn[10].address >= dis_fun_info.dis_fun_list[num-1].fun_start_addr &&
-            insn[10].address >= dis_fun_info.dis_fun_list[num-1].fun_end_addr)
+            insn[10].address <= dis_fun_info.dis_fun_list[num-1].fun_end_addr)
           )
         {
+            // printf("113\n");
             clear_dis_fun_list(); // 清空函数列表
             for(int i = 0; i < 11; i++)
                 set_dis_fun_list(insn[i].address);
         }
-        
+
         for (j = 0; j < 11; j++)
         {
             char code[32];
@@ -185,33 +186,6 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
             dis_fun_name = addr_get_fun(insn[j].address);
-            // printf("11%s\n", dis_fun_name.c_str());
-
-            // if (insn[j].address > 0x7f0000000000) {
-            //     if (insn[j].address > glibc_fun_end || insn[j].address < glibc_fun_start){
-            //         show_dis_fun_name = addr_get_glibc_fun(insn[j].address);
-            //         if (show_dis_fun_name != "")
-            //         {
-            //             if (dis_fun_name != show_dis_fun_name) {
-            //                 dis_fun_name = show_dis_fun_name;
-            //                 glibc_fun_start = insn[j].address;
-            //                 glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
-            //                 // printf("0x%llx\n", glibc_fun_end);
-            //             }
-            //         }
-            // }
-            // }
-            // else {
-            //     show_dis_fun_name = addr_get_elf_fun(insn[j].address);
-            //     if (show_dis_fun_name != ""){
-            //         dis_fun_name = show_dis_fun_name;
-            //     }
-            //     else {
-            //         show_dis_fun_name = addr_get_elf_plt_fun(insn[j].address);
-            //         if (show_dis_fun_name != "")
-            //             dis_fun_name = show_dis_fun_name + "@plt";
-            //     }
-            // }
 
             // 根据地址得到函数名和偏移
             fun_offset = addr_get_elf_fun_offset(insn[j].address);
