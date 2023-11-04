@@ -131,29 +131,6 @@ void flow_change_op(char* ops)
         }
 
     }
-
-    // flow_change_fun_name = addr_get_elf_fun(flow_change_addr);
-    // if (flow_change_fun_name != "")
-    //     cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-    // else {
-    //     flow_change_fun_name = addr_get_elf_plt_fun(flow_change_addr);
-    //     if (flow_change_fun_name != "")
-    //         cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
-    //     else {
-    //         flow_change_fun_name = addr_get_glibc_plt_fun(flow_change_addr);
-    //         if (flow_change_fun_name != "")
-    //             cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-    //         else {
-    //             flow_change_fun_name = addr_get_glibc_fun(flow_change_addr);
-    //             if (flow_change_fun_name != "")
-    //                 cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-    //             else
-    //                 cout << "";
-    //         }
-
-    //     }
-    // }
-
 }
 
 void disasm1(pid_t pid, unsigned long long rip_val)
@@ -185,6 +162,21 @@ void disasm1(pid_t pid, unsigned long long rip_val)
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 176, disasm_addr, 0, &insn);
     if (count > 0) {
         size_t j;
+        int num;
+        num = dis_fun_info.dis_fun_num;
+
+        if( !(insn[0].address >= dis_fun_info.dis_fun_list[0].fun_start_addr &&
+            insn[0].address <= dis_fun_info.dis_fun_list[0].fun_end_addr
+            &&
+            insn[10].address >= dis_fun_info.dis_fun_list[num-1].fun_start_addr &&
+            insn[10].address >= dis_fun_info.dis_fun_list[num-1].fun_end_addr)
+          )
+        {
+            clear_dis_fun_list(); // 清空函数列表
+            for(int i = 0; i < 11; i++)
+                set_dis_fun_list(insn[i].address);
+        }
+        
         for (j = 0; j < 11; j++)
         {
             char code[32];
@@ -257,15 +249,15 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 printf("\033[34m%-20s\033[0m", code);
 
                 if ( strcmp(insn[j].mnemonic, "call") == 0 || 
-                     strcmp(insn[j].mnemonic, "ret") == 0  || 
-                     strcmp(insn[j].mnemonic, "jmp") == 0 )
+                     strcmp(insn[j].mnemonic, "ret" ) == 0 || 
+                     strcmp(insn[j].mnemonic, "jmp" ) == 0 )
                 {
                     printf( "\033[33m%-16s\033[0m"
                             "\033[36m%s\033[0m ",
                         insn[j].mnemonic, insn[j].op_str);
 
                     if (strcmp(insn[j].mnemonic, "call") == 0 || 
-                        strcmp(insn[j].mnemonic, "jmp") == 0)
+                        strcmp(insn[j].mnemonic, "jmp" ) == 0 )
                     {
                         flow_change_op(insn[j].op_str);
                     }
@@ -319,7 +311,7 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
             );
 
             if ( strcmp(insn[j].mnemonic, "call") == 0 ||  
-                 strcmp(insn[j].mnemonic, "jmp") == 0 )
+                 strcmp(insn[j].mnemonic, "jmp" ) == 0 )
             {
                 plt_addr = strtoul(insn[j].op_str, nullptr, 16);
                 cout << "<\033[31m" << addr_get_elf_plt_fun(plt_addr) << "@plt\033[0m>";

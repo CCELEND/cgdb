@@ -263,49 +263,45 @@ string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr)
 
 }
 
-string addr_get_fun(unsigned long long fun_addr)
+string addr_get_fun(unsigned long long addr)
 {
-    string show_dis_fun_name = "";
-
-    if (fun_addr > 0x7f0000000000) 
+    for (int i = 0; i < 5; i++)
     {
-        // if (fun_addr > glibc_fun_end || fun_addr < glibc_fun_start)
-        // {
-        //     show_dis_fun_name = addr_get_glibc_fun(fun_addr);
-        //     if (show_dis_fun_name != "")
-        //     {
-        //         if (dis_fun_name != show_dis_fun_name) {
-        //             glibc_fun_start = fun_addr;
-        //             glibc_fun_end = get_glibc_fun_end(glibc_fun_start);
-        //             return show_dis_fun_name;
-        //         }
-        //     }
-        // }
-        for (int i = 0; i < 5; i++) {
-            if (fun_addr > dis_fun_frame[i].fun_end_addr) {
-                dis_fun_frame[i].fun_start_addr = fun_addr;
-                dis_fun_frame[i].fun_end_addr = get_glibc_fun_end(fun_addr);
-                dis_fun_frame[i].fun_name = addr_get_glibc_fun(fun_addr);
-            }
+        if(addr >= dis_fun_info.dis_fun_list[i].fun_start_addr && 
+            addr <= dis_fun_info.dis_fun_list[i].fun_end_addr )
+            return dis_fun_info.dis_fun_list[i].fun_name;
+    }
+    return "";
 
-            if (fun_addr >= dis_fun_frame[i].fun_start_addr && fun_addr <= dis_fun_frame[i].fun_end_addr)
-                return dis_fun_frame[i].fun_name;
-        }
-    }
-    else 
-    {
-        show_dis_fun_name = addr_get_elf_fun(fun_addr);
-        if (show_dis_fun_name != "") {
-            return show_dis_fun_name;
-        }
-        else {
-            show_dis_fun_name = addr_get_elf_plt_fun(fun_addr);
-            if (show_dis_fun_name != ""){
-                return show_dis_fun_name + "@plt";
-            }
-        }
-    }
-    return dis_fun_name;
+    // string show_dis_fun_name = "";
+
+    // if (fun_addr > 0x7f0000000000) 
+    // {
+    //     for (int i = 0; i < 5; i++) {
+    //         if (fun_addr > dis_fun_frame[i].fun_end_addr) {
+    //             dis_fun_frame[i].fun_start_addr = fun_addr;
+    //             dis_fun_frame[i].fun_end_addr = get_glibc_fun_end(fun_addr);
+    //             dis_fun_frame[i].fun_name = addr_get_glibc_fun(fun_addr);
+    //         }
+
+    //         if (fun_addr >= dis_fun_frame[i].fun_start_addr && fun_addr <= dis_fun_frame[i].fun_end_addr)
+    //             return dis_fun_frame[i].fun_name;
+    //     }
+    // }
+    // else 
+    // {
+    //     show_dis_fun_name = addr_get_elf_fun(fun_addr);
+    //     if (show_dis_fun_name != "") {
+    //         return show_dis_fun_name;
+    //     }
+    //     else {
+    //         show_dis_fun_name = addr_get_elf_plt_fun(fun_addr);
+    //         if (show_dis_fun_name != ""){
+    //             return show_dis_fun_name + "@plt";
+    //         }
+    //     }
+    // }
+    // return show_dis_fun_name;
 }
 
 
@@ -441,12 +437,11 @@ int addr_get_glibc_fun_offset(unsigned long long addr)
 
     for (int i = 0; i < 5; i++)
     {
-        if (addr >= dis_fun_frame[i].fun_start_addr && addr <= dis_fun_frame[i].fun_end_addr)
-            return addr - dis_fun_frame[i].fun_start_addr;
+        if (addr >= dis_fun_info.dis_fun_list[i].fun_start_addr && 
+            addr <= dis_fun_info.dis_fun_list[i].fun_end_addr)
+            return addr - dis_fun_info.dis_fun_list[i].fun_start_addr;
 
     }
-    // if (addr >= glibc_fun_start && addr <= glibc_fun_end)
-    //     return addr - glibc_fun_start;
 
     return -1;
 }
@@ -493,4 +488,82 @@ void map_plt_fun_end(pid_t pid)
 {
     for (auto it : plt_fun)
         plt_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
+}
+
+void clear_dis_fun_list()
+{
+    for (int i = 0; i < 5; i++)
+    {
+        dis_fun_info.dis_fun_list[i].fun_start_addr = 0;
+        dis_fun_info.dis_fun_list[i].fun_end_addr = 0;
+        dis_fun_info.dis_fun_list[i].fun_name = "";
+    }
+    dis_fun_info.dis_fun_num = 0;
+}
+
+void set_dis_fun_list(unsigned long long fun_addr)
+{
+    for (int i = 0; i < 5; i++) 
+    {
+        // 地址在列表某个函数范围内就直接退出
+        if (fun_addr >= dis_fun_info.dis_fun_list[i].fun_start_addr && 
+            fun_addr <= dis_fun_info.dis_fun_list[i].fun_end_addr )
+            break;
+
+        // glibc
+        if (fun_addr > 0x7f0000000000)
+        {
+            // fun_addr > dis_fun_info.dis_fun_list[i-1].fun_end_addr
+            // if ( dis_fun_info.dis_fun_list[i].fun_start_addr == 0 ) 
+            // {
+                dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
+                dis_fun_info.dis_fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr);
+                dis_fun_info.dis_fun_list[i].fun_name = addr_get_glibc_fun(fun_addr);
+                dis_fun_info.dis_fun_num++;
+                break;
+            // }
+        }
+
+        // elf
+        else
+        {
+            string fun_name;
+
+            fun_name = addr_get_elf_fun(fun_addr);
+            if (fun_name != "") {
+                dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
+                dis_fun_info.dis_fun_list[i].fun_end_addr = fun_end[fun_name];
+                dis_fun_info.dis_fun_list[i].fun_name = fun_name;
+                dis_fun_info.dis_fun_num++;
+                break;
+            }
+            else {
+                fun_name = addr_get_elf_plt_fun(fun_addr);
+                if (fun_name != "") {
+                    dis_fun_info.dis_fun_list[i].fun_start_addr = fun_addr;
+                    dis_fun_info.dis_fun_list[i].fun_end_addr = plt_fun_end[fun_name];
+                    fun_name += "@plt";
+                    dis_fun_info.dis_fun_list[i].fun_name = fun_name;
+                    dis_fun_info.dis_fun_num++;
+                    break;
+                }
+            }
+        }
+
+    }
+}
+
+// test
+void show_dis_fun_list()
+{
+    for (int i = 0; i < 5; i++ )
+    {
+        if (dis_fun_info.dis_fun_list[i].fun_start_addr == 0)
+            break;
+        cout << i << endl;
+        printf("start: 0x%llx\n", dis_fun_info.dis_fun_list[i].fun_start_addr);
+        printf("end: 0x%llx\n", dis_fun_info.dis_fun_list[i].fun_end_addr);
+        printf("name: %s\n", dis_fun_info.dis_fun_list[i].fun_name.c_str());
+
+    }
 }

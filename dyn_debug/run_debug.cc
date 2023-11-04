@@ -35,7 +35,8 @@ map<string, unsigned long long> fun_end;
 // 键是 elf plt 函数名，值是结束地址
 map<string, unsigned long long> plt_fun_end;
 
-struct fun_frame dis_fun_frame[5];
+// struct fun_frame dis_fun_list[5];
+struct dis_fun_info_type dis_fun_info;
 
 string dis_fun_name = "";
 
@@ -258,16 +259,17 @@ void run_dyn_debug(std::string fname, Binary *bin)
                 }
 
                 else if (strcmp(arguments[0], "test") == 0) {
-                    unsigned long long address = strtoul(arguments[1], nullptr, 16);
-                    cout<< addr_get_glibc_fun(address)<<endl;
-                    // address = get_fun_end_addr(pid, address);
-                    address = get_glibc_fun_end(address);
-                    printf("end: 0x%llx\n", address);
+                    // unsigned long long address = strtoul(arguments[1], nullptr, 16);
+                    // cout<< addr_get_glibc_fun(address)<<endl;
+                    // // address = get_fun_end_addr(pid, address);
+                    // address = get_glibc_fun_end(address);
+                    // printf("end: 0x%llx\n", address);
+                    show_dis_fun_list();
 
                     // for (auto it : fun_start) {
                     //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
                     // }
-                    printf("\n");
+                    // printf("\n");
                     // for (auto i : fun_end) {
                     //     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
                     // }

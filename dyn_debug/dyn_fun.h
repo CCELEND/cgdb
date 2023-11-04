@@ -72,7 +72,14 @@ struct fun_frame {
     string fun_name;
     fun_frame(): fun_start_addr(0), fun_end_addr(0), fun_name("") {}
 };
-extern struct fun_frame dis_fun_frame[5];
+
+struct dis_fun_info_type {
+    struct fun_frame dis_fun_list[5];
+    int dis_fun_num;
+    dis_fun_info_type(): dis_fun_num(0) {}
+};
+// extern struct fun_frame dis_fun_list[5];
+extern struct dis_fun_info_type dis_fun_info;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态
 struct break_point {
@@ -136,7 +143,11 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr);
 int addr_get_elf_fun_offset(unsigned long long addr);
 int addr_get_elf_plt_fun_offset(unsigned long long addr);
 int addr_get_glibc_fun_offset(unsigned long long addr);
+// int addr_get_glibc_plt_fun_offset(unsigned long long addr);
 
+void set_dis_fun_list(unsigned long long fun_addr);
+void clear_dis_fun_list();
+void show_dis_fun_list();
 
 // break point
 int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
