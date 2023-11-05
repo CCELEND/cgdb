@@ -7,6 +7,7 @@ void get_regs(pid_t pid, struct user_regs_struct* regs)
     ptrace(PTRACE_GETREGS, pid, nullptr, regs);
 }
 
+
 // 输出寄存器信息
 void show_regs(pid_t pid, struct user_regs_struct* regs)
 {
@@ -49,12 +50,7 @@ void show_regs(pid_t pid, struct user_regs_struct* regs)
 // 反汇编 rip 指令
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs)
 {
-    // 一条指令最长15字节, 最大11行 
-    char rip_instruct[176];
-
     show_regs(pid, regs);
-
     disasm1(pid, regs->rip);
-
 }
 

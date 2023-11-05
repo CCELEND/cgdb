@@ -70,13 +70,15 @@ struct fun_frame {
     string fun_name;
     fun_frame(): fun_start_addr(0), fun_end_addr(0), fun_name("") {}
 };
-struct dis_fun_info_type {
-    struct fun_frame dis_fun_list[5];
-    int dis_fun_num;
-    dis_fun_info_type(): dis_fun_num(0) {}
+struct fun_info_type {
+    struct fun_frame fun_list[10];
+    int fun_num;
+    fun_info_type(): fun_num(0) {}
 };
+// regs 窗口的函数信息
+extern struct fun_info_type regs_fun_info;
 // 反汇编窗口的函数信息
-extern struct dis_fun_info_type dis_fun_info;
+extern struct fun_info_type dis_fun_info;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态
 struct break_point {
@@ -100,6 +102,7 @@ void run_dyn_debug(string fname, Binary *bin);
 void get_regs(pid_t pid, struct user_regs_struct* regs);
 void show_regs(pid_t pid, struct user_regs_struct* regs);
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
+string regs_addr_get_fun(unsigned long long addr, int* offset);
 
 // stack
 void show_stack(pid_t pid, struct user_regs_struct* regs);
@@ -145,6 +148,7 @@ int addr_get_glibc_fun_offset(unsigned long long addr);
 void set_dis_fun_list(unsigned long long fun_addr);
 void clear_dis_fun_list();
 void show_dis_fun_list();
+int  addr_get_dis_fun_offset(unsigned long long addr);
 
 // break point
 int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);

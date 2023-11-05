@@ -164,18 +164,18 @@ void disasm1(pid_t pid, unsigned long long rip_val)
         size_t j;
         int num;
         int line = 0;
-        num = dis_fun_info.dis_fun_num;
+        num = dis_fun_info.fun_num;
 
         for (int i = 0; i < 11 && i < count-1; i++ )
             line++;
 
         // printf("%d\n", line);
 
-        if( !(insn[0].address >= dis_fun_info.dis_fun_list[0].fun_start_addr &&
-            insn[0].address <= dis_fun_info.dis_fun_list[0].fun_end_addr
+        if( !(insn[0].address >= dis_fun_info.fun_list[0].fun_start_addr &&
+            insn[0].address <= dis_fun_info.fun_list[0].fun_end_addr
             &&
-            insn[line-1].address >= dis_fun_info.dis_fun_list[num-1].fun_start_addr &&
-            insn[line-1].address <= dis_fun_info.dis_fun_list[num-1].fun_end_addr)
+            insn[line-1].address >= dis_fun_info.fun_list[num-1].fun_start_addr &&
+            insn[line-1].address <= dis_fun_info.fun_list[num-1].fun_end_addr)
           )
         {
             // printf("---0x%lx\n", insn[line-1].address);
@@ -195,11 +195,13 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             dis_fun_name = addr_get_fun(insn[j].address);
 
             // 根据地址得到函数名和偏移
-            fun_offset = addr_get_elf_fun_offset(insn[j].address);
-            if (fun_offset == -1)
-                fun_offset = addr_get_glibc_fun_offset(insn[j].address);
-            if (fun_offset == -1)
-                fun_offset = addr_get_elf_plt_fun_offset(insn[j].address);
+            fun_offset = addr_get_dis_fun_offset(insn[j].address);
+            // fun_offset = addr_get_elf_fun_offset(insn[j].address);
+            // if (fun_offset == -1)
+            //     // fun_offset = addr_get_glibc_fun_offset(insn[j].address);
+            //     fun_offset = addr_get_dis_fun_offset(insn[j].address);
+            // if (fun_offset == -1)
+            //     fun_offset = addr_get_elf_plt_fun_offset(insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
 
@@ -214,13 +216,15 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
                 printf("\033[34m\033[1m%-20s\033[0m" "\033[33m\033[1m%-16s\033[0m" "\033[36m\033[1m%s\033[0m ", 
                         code, insn[j].mnemonic, insn[j].op_str);
+
                 if (strcmp(insn[j].mnemonic, "call") == 0 || 
-                    strcmp(insn[j].mnemonic, "jmp" ) == 0 )
+                    strcmp(insn[j].mnemonic, "jmp" ) == 0 ||
+                    strcmp(insn[j].mnemonic, "ret" ) == 0 )
                 {
                     flow_change_op(insn[j].op_str);
                     printf("\n");
                 }
-                // flow_change_op(insn[j].op_str);
+
                 printf("\n");
 
             }

@@ -80,19 +80,27 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
         printf("0x%llx", addr);
         return;
     }
+    string fun_name;
+    int offset;
 
+    // libc 第一次加载的 info, dis_fun_info
     if (addr_flag)  // true
     {
         if (addr > elf_code_start && addr < elf_code_end) {
-            printf("\033[31m0x%llx\033[0m (elf)", addr);
+            fun_name = addr_get_fun(addr);
+            offset = addr_get_dis_fun_offset(addr);
+            printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
         } else if (addr > libc_code_start && addr < libc_code_end) {
-            printf("\033[31m0x%llx\033[0m (libc)", addr);
+            printf("\033[31m0x%llx (libc)\033[0m", addr);
         } else if (addr > stack_base && addr < stack_end) {
-            printf("\033[33m0x%llx\033[0m (stack)", addr);
+            printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-stack_base);
         } else if (addr > heap_base && addr < heap_end) {
-            printf("\033[34m0x%llx\033[0m (heap)", addr);
+            printf("\033[34m0x%llx (heap)\033[0m", addr);
         } else if (!ld_base || addr > ld_code_start && addr < ld_code_end){
-            printf("\033[31m0x%llx\033[0m (ld-linux)", addr);
+            fun_name = addr_get_fun(addr);
+            offset = addr_get_dis_fun_offset(addr);
+            // printf("\033[31m0x%llx (ld._dl_start_user+56)\033[0m", addr);
+            printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
         }
         else {
             printf("0x%llx", addr);
@@ -150,7 +158,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
 {
     unsigned long long addr;
     unsigned long long val;
-    char addr_instruct[16];
+    char addr_instruct[16]; // one line dis
     flag_addr_printf(address, addr_flag);
 
     if (address < 0x550000000000 || address > 0x7fffffffffff)
@@ -162,6 +170,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
         val = get_addr_val(pid, addr);
         if (val < 0x550000000000 || val > 0x7fffffffffff || val == addr) {
             printf(" ◂— ");
+            
             if (judg_addr_code(addr)) {
                 get_addr_data(pid, addr, addr_instruct, 16);
                 disasm_mne_op(addr_instruct, addr, 16, 1);
@@ -183,7 +192,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
     }
 }
 
-// 转换字符串
+// 字节流转换字符串
 void val_to_string(unsigned long long val)
 {
     union u {
