@@ -147,18 +147,3 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
         return glibc_fun_end_addr + ld_base;
 }
 
-
-// 根据地址找所在 glibc 函数偏移
-// int addr_get_glibc_fun_offset(unsigned long long addr)
-// {
-
-//     for (int i = 0; i < 5; i++)
-//     {
-//         if (addr >= dis_fun_info.fun_list[i].fun_start_addr && 
-//             addr <= dis_fun_info.fun_list[i].fun_end_addr)
-//             return addr - dis_fun_info.fun_list[i].fun_start_addr;
-
-//     }
-
-//     return -1;
-// }

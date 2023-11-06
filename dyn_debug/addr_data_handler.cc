@@ -99,7 +99,6 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
         } else if (!ld_base || addr > ld_code_start && addr < ld_code_end){
             fun_name = addr_get_fun(addr);
             offset = addr_get_dis_fun_offset(addr);
-            // printf("\033[31m0x%llx (ld._dl_start_user+56)\033[0m", addr);
             printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
         }
         else {
@@ -199,9 +198,16 @@ void val_to_string(unsigned long long val)
         unsigned long long val;
         char chars[LONG_SIZE];
     } word{};
-
     word.val = val;
-    printf(" '%s'", word.chars);
+
+    printf(" '");
+    for(int i = 0; i < CODE_SIZE; ++i)
+    {
+        if ( long((unsigned char)word.chars[i]) == 0x00 ) break;
+        if ( long((unsigned char)word.chars[i]) >= 0x21 &&
+             long((unsigned char)word.chars[i]) <= 0x7e ) printf("%c", word.chars[i]);
+    }
+    printf("'");
 }
 
 // 判断地址是否可执行

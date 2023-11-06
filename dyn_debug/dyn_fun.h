@@ -96,66 +96,73 @@ extern struct break_point ni_break_point;
 // run api, help args
 void argparse();
 void show_help();
-void run_dyn_debug(string fname, Binary *bin);
+void run_dyn_debug(string fname, Binary* bin);
 
 // regs
 void get_regs(pid_t pid, struct user_regs_struct* regs);
 void show_regs(pid_t pid, struct user_regs_struct* regs);
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
-string regs_addr_get_fun(unsigned long long addr, int* offset);
 
 // stack
 void show_stack(pid_t pid, struct user_regs_struct* regs);
 
 // addr handle
-
 unsigned long long get_addr_val(pid_t pid, unsigned long long addr);
 bool judg_addr_code(unsigned long long addr);
 
 void val_to_string(unsigned long long val);
 void flag_addr_printf(unsigned long long addr, bool addr_flag);
 void show_addr_data(pid_t pid, int num , unsigned long long addr);
-void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag);
+void show_addr_point(pid_t pid, unsigned long long addr, bool addr_flag);
 void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void print_bytes(const char* tip, char* codes, int len);
 
-
 // dyn_elf
+string get_map_key_value(map<string, unsigned long long>& Map, unsigned long long fun_plt_addr);
+string addr_get_fun(unsigned long long fun_addr);
+unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
+
+// elf_fun
+string addr_get_elf_fun(unsigned long long elf_fun_addr);
 void map_fun_start(pid_t pid, Binary *bin);
 void map_fun_end(pid_t pid, Binary *bin);
-void map_plt_fun_end(pid_t pid);
-void dyn_show_elf_lib_plt();
-
-string get_map_key_value(map<string, unsigned long long>& Map, 
-    unsigned long long fun_plt_addr);
-string addr_get_elf_fun(unsigned long long elf_fun_addr);
-string addr_get_elf_plt_fun(unsigned long long elf_plt_fun_addr);
-string addr_get_glibc_fun(unsigned long long glibc_fun_addr);
-string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
-string addr_get_fun(unsigned long long fun_addr);
-
 unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin);
-unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
-unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr);
-// unsigned long long get_glibc_plt_fun_end(unsigned long long glibc_plt_fun_addr);
-
 int addr_get_elf_fun_offset(unsigned long long addr);
-int addr_get_elf_plt_fun_offset(unsigned long long addr);
-int addr_get_glibc_fun_offset(unsigned long long addr);
-// int addr_get_glibc_plt_fun_offset(unsigned long long addr);
 
+
+// elf_plt_fun
+string addr_get_elf_plt_fun(unsigned long long elf_plt_fun_addr);
+void show_elf_plt_fun();
+void map_plt_fun_end(pid_t pid);
+int addr_get_elf_plt_fun_offset(unsigned long long addr);
+
+
+// glibc_fun
+string addr_get_glibc_fun(unsigned long long glibc_fun_addr);
+unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr);
+
+// glibc_plt_fun
+string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
+
+// dis_fun_list
 void set_dis_fun_list(unsigned long long fun_addr);
 void clear_dis_fun_list();
 void show_dis_fun_list();
 int  addr_get_dis_fun_offset(unsigned long long addr);
 
+// regs_fun_list
+void set_regs_fun_list(unsigned long long fun_addr);
+void show_regs_fun_list();
+void clear_regs_fun_list();
+int  addr_get_regs_fun_offset(unsigned long long addr);
+
 // break point
-int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
+int  break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
 void break_point_inject(pid_t pid, break_point& bp);
-void set_break_point(pid_t pid, char* bp_fun, Binary *bin);
+void set_break_point(pid_t pid, char* bp_fun, Binary* bin);
 void set_ni_break_point(pid_t pid, unsigned long long addr);
-void break_point_delete(pid_t pid, int num);
+void break_point_delete(pid_t pid, int idx);
 
 // vmmap
 void get_vma_address(pid_t pid);

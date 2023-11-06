@@ -57,7 +57,8 @@ string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr)
     pclose(fp);   // 关闭管道
     free(result); // 释放动态分配的内存
 
-    if(lib_plt_fun_name != ""){
+    if(lib_plt_fun_name != "")
+    {
         return lib_plt_fun_name;
     }
 

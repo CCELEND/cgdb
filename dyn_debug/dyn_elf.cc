@@ -47,8 +47,7 @@ unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr)
             if ( long((unsigned char)buf[j]) == 0xf4 ||
                  long((unsigned char)buf[j]) == 0xc3 ||
                  long((unsigned char)buf[j]) == 0xe9 && long((unsigned char)buf[j-1]) == 0xfa ||
-                 long((unsigned char)buf[j]) == 0x0f && long((unsigned char)buf[j-1]) == 0x00
-               )
+                 long((unsigned char)buf[j]) == 0x0f && long((unsigned char)buf[j-1]) == 0x00 )
             {
                 return j + fun_addr;
             }

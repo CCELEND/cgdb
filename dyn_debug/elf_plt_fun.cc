@@ -1,9 +1,8 @@
 
 #include "dyn_fun.h"
 
-
-// 输出 elf 中 libc 函数的函数名和地址
-void dyn_show_elf_lib_plt()
+// 输出 elf plt 函数的函数名和地址
+void show_elf_plt_fun()
 {
     printf("[+] Libc function \033[32mplt<@plt>\033[0m\n");
     printf("%-30saddress\n", "name");
@@ -37,5 +36,5 @@ int addr_get_elf_plt_fun_offset(unsigned long long addr)
 void map_plt_fun_end(pid_t pid)
 {
     for (auto it : elf_plt_fun)
-        elf_plt_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
+         elf_plt_fun_end[it.first] = it.second + elf_base + 0xb;
 }

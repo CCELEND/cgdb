@@ -194,14 +194,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
             dis_fun_name = addr_get_fun(insn[j].address);
 
-            // 根据地址得到函数名和偏移
+            // 根据地址得到函数偏移
             fun_offset = addr_get_dis_fun_offset(insn[j].address);
-            // fun_offset = addr_get_elf_fun_offset(insn[j].address);
-            // if (fun_offset == -1)
-            //     // fun_offset = addr_get_glibc_fun_offset(insn[j].address);
-            //     fun_offset = addr_get_dis_fun_offset(insn[j].address);
-            // if (fun_offset == -1)
-            //     fun_offset = addr_get_elf_plt_fun_offset(insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
 
@@ -219,7 +213,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
                 if (strcmp(insn[j].mnemonic, "call") == 0 || 
                     strcmp(insn[j].mnemonic, "jmp" ) == 0 ||
-                    strcmp(insn[j].mnemonic, "ret" ) == 0 )
+                    strcmp(insn[j].mnemonic, "ret" ) == 0 ||
+                    strcmp(insn[j].mnemonic, "je" ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0)
                 {
                     flow_change_op(insn[j].op_str);
                     printf("\n");

@@ -5,6 +5,8 @@ void clear_dis_fun_list()
 {
     for (int i = 0; i < 5; i++)
     {
+        if (dis_fun_info.fun_list[i].fun_start_addr == 0) break;
+
         dis_fun_info.fun_list[i].fun_start_addr = 0;
         dis_fun_info.fun_list[i].fun_end_addr = 0;
         dis_fun_info.fun_list[i].fun_name = "";
@@ -23,39 +25,54 @@ void set_dis_fun_list(unsigned long long fun_addr)
 
         if ( dis_fun_info.fun_list[i].fun_start_addr == 0 ) 
         {
+            string fun_name;
             // glibc
             if (fun_addr > 0x7f0000000000)
             {
-                dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
-                dis_fun_info.fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr);
-                dis_fun_info.fun_list[i].fun_name = addr_get_glibc_fun(fun_addr);
-                dis_fun_info.fun_num++;
-                break;
-
+                fun_name = addr_get_glibc_plt_fun(fun_addr);
+                if (fun_name != "") 
+                {
+                    dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
+                    dis_fun_info.fun_list[i].fun_end_addr = fun_addr + 0xb;
+                    dis_fun_info.fun_list[i].fun_name = fun_name;
+                    dis_fun_info.fun_num++;
+                    break;
+                }
+                else
+                {
+                    dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
+                    dis_fun_info.fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr);
+                    dis_fun_info.fun_list[i].fun_name = addr_get_glibc_fun(fun_addr);
+                    dis_fun_info.fun_num++;
+                    break;
+                }
             }
 
             // elf
             else
             {
-                string fun_name;
                 fun_name = addr_get_elf_fun(fun_addr);
-                if (fun_name != "") {
-                    dis_fun_info.fun_list[i].fun_start_addr = elf_fun_start[fun_name];
+                if (fun_name != "") 
+                {
+                    // dis_fun_info.fun_list[i].fun_start_addr = elf_fun_start[fun_name];
+                    dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
                     dis_fun_info.fun_list[i].fun_end_addr = elf_fun_end[fun_name];
                     dis_fun_info.fun_list[i].fun_name = fun_name;
                     dis_fun_info.fun_num++;
                     break;
                 }
-                else {
+                else 
+                {
                     fun_name = addr_get_elf_plt_fun(fun_addr);
-                    if (fun_name != "") {
-                        dis_fun_info.fun_list[i].fun_start_addr = elf_plt_fun[fun_name] + elf_base;
-                        dis_fun_info.fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
-                        fun_name += "@plt";
-                        dis_fun_info.fun_list[i].fun_name = fun_name;
-                        dis_fun_info.fun_num++;
-                        break;
-                    }
+                    fun_name += "@plt";
+                    // dis_fun_info.fun_list[i].fun_start_addr = elf_plt_fun[fun_name] + elf_base;
+                    dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
+                    // dis_fun_info.fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
+                    dis_fun_info.fun_list[i].fun_end_addr = fun_addr + 0xb;
+                    dis_fun_info.fun_list[i].fun_name = fun_name;
+                    dis_fun_info.fun_num++;
+                    break;
+
                 }
 
             }
@@ -85,8 +102,8 @@ int addr_get_dis_fun_offset(unsigned long long addr)
 
     for (int i = 0; i < 5; i++)
     {
-        if (addr >= dis_fun_info.fun_list[i].fun_start_addr && 
-            addr <= dis_fun_info.fun_list[i].fun_end_addr)
+        if ( addr >= dis_fun_info.fun_list[i].fun_start_addr && 
+             addr <= dis_fun_info.fun_list[i].fun_end_addr )
             return addr - dis_fun_info.fun_list[i].fun_start_addr;
 
     }

@@ -236,7 +236,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "lplt") == 0) {
-                    dyn_show_elf_lib_plt();
+                    show_elf_plt_fun();
                 } else if (strcmp(arguments[0], "plt") == 0) {
                     if (argc == 2) {
                         unsigned long long address = strtoul(arguments[1], nullptr, 16);
