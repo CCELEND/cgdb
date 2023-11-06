@@ -192,7 +192,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
-            dis_fun_name = addr_get_fun(insn[j].address);
+            dis_fun_name = addr_get_dis_fun(insn[j].address);
 
             // 根据地址得到函数偏移
             fun_offset = addr_get_dis_fun_offset(insn[j].address);
@@ -214,7 +214,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 if (strcmp(insn[j].mnemonic, "call") == 0 || 
                     strcmp(insn[j].mnemonic, "jmp" ) == 0 ||
                     strcmp(insn[j].mnemonic, "ret" ) == 0 ||
-                    strcmp(insn[j].mnemonic, "je" ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0)
+                    strcmp(insn[j].mnemonic, "je"  ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0)
                 {
                     flow_change_op(insn[j].op_str);
                     printf("\n");

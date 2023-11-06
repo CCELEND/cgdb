@@ -80,26 +80,40 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
         printf("0x%llx", addr);
         return;
     }
-    string fun_name;
+    string fun_name, data_name;
     int offset;
 
     // libc 第一次加载的 info, dis_fun_info
     if (addr_flag)  // true
     {
         if (addr > elf_code_start && addr < elf_code_end) {
-            fun_name = addr_get_fun(addr);
-            offset = addr_get_dis_fun_offset(addr);
+            set_regs_fun_list(addr);
+            fun_name = addr_get_regs_fun(addr);
+            offset = addr_get_regs_fun_offset(addr);
             printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+
         } else if (addr > libc_code_start && addr < libc_code_end) {
-            printf("\033[31m0x%llx (libc)\033[0m", addr);
+            // printf("\033[31m0x%llx (libc)\033[0m", addr);
+            set_regs_fun_list(addr);
+            fun_name = addr_get_regs_fun(addr);
+            offset = addr_get_regs_fun_offset(addr);
+            printf("\033[31m0x%llx (libc.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+
         } else if (addr > stack_base && addr < stack_end) {
             printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-stack_base);
+
         } else if (addr > heap_base && addr < heap_end) {
             printf("\033[34m0x%llx (heap)\033[0m", addr);
-        } else if (!ld_base || addr > ld_code_start && addr < ld_code_end){
-            fun_name = addr_get_fun(addr);
-            offset = addr_get_dis_fun_offset(addr);
+
+        } else if (!ld_base || addr > ld_code_start && addr < ld_code_end) {
+            set_regs_fun_list(addr);
+            fun_name = addr_get_regs_fun(addr);
+            offset = addr_get_regs_fun_offset(addr);
             printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+
+        } else if (addr > ld_data_start && addr < ld_data_end || addr > libc_data_start && addr < libc_data_end){
+            data_name = addr_get_glibc_data(addr); 
+            printf("\033[35m0x%llx (ld.%s)\033[0m", addr, data_name.c_str());
         }
         else {
             printf("0x%llx", addr);
@@ -184,7 +198,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
         }
         else {
             printf(" —▸ ");
-            flag_addr_printf(val, false);
+            flag_addr_printf(val, true);
         }
 
         addr = val;

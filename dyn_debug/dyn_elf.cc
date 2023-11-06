@@ -13,7 +13,19 @@ string get_map_key_value(map<string, unsigned long long>& Map, unsigned long lon
     return "";
 }
 
-string addr_get_fun(unsigned long long addr)
+string addr_get_regs_fun(unsigned long long addr)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        if(addr >= regs_fun_info.fun_list[i].fun_start_addr && 
+            addr <= regs_fun_info.fun_list[i].fun_end_addr )
+            return regs_fun_info.fun_list[i].fun_name;
+    }
+
+    return "";
+}
+
+string addr_get_dis_fun(unsigned long long addr)
 {
     for (int i = 0; i < 5; i++)
     {

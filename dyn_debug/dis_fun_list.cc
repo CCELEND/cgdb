@@ -54,8 +54,7 @@ void set_dis_fun_list(unsigned long long fun_addr)
                 fun_name = addr_get_elf_fun(fun_addr);
                 if (fun_name != "") 
                 {
-                    // dis_fun_info.fun_list[i].fun_start_addr = elf_fun_start[fun_name];
-                    dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
+                    dis_fun_info.fun_list[i].fun_start_addr = elf_fun_start[fun_name];
                     dis_fun_info.fun_list[i].fun_end_addr = elf_fun_end[fun_name];
                     dis_fun_info.fun_list[i].fun_name = fun_name;
                     dis_fun_info.fun_num++;
@@ -65,10 +64,8 @@ void set_dis_fun_list(unsigned long long fun_addr)
                 {
                     fun_name = addr_get_elf_plt_fun(fun_addr);
                     fun_name += "@plt";
-                    // dis_fun_info.fun_list[i].fun_start_addr = elf_plt_fun[fun_name] + elf_base;
-                    dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
-                    // dis_fun_info.fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
-                    dis_fun_info.fun_list[i].fun_end_addr = fun_addr + 0xb;
+                    dis_fun_info.fun_list[i].fun_start_addr = elf_plt_fun[fun_name] + elf_base;
+                    dis_fun_info.fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
                     dis_fun_info.fun_list[i].fun_name = fun_name;
                     dis_fun_info.fun_num++;
                     break;

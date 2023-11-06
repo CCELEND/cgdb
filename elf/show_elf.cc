@@ -56,7 +56,7 @@ void show_elf_plt(std::string fname)
 // 显示 libc plt
 void show_elf_lib_plt()
 {
-    printf("[+] Libc function \033[32mplt<@plt>\033[0m\n");
+    printf("[+] Libc function \033[32m<@plt>\033[0m\n");
     printf("%-30saddress\n", "name");
     printf("=====================================\n");
     for (auto it : elf_plt_fun) {

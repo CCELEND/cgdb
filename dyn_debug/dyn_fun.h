@@ -50,6 +50,11 @@ extern unsigned long long ld_code_end;
 extern unsigned long long vdso_code_start;
 extern unsigned long long vdso_code_end;
 
+extern unsigned long long ld_data_start;
+extern unsigned long long ld_data_end;
+extern unsigned long long libc_data_start;
+extern unsigned long long libc_data_end;
+
 extern unsigned long long heap_base;
 extern unsigned long long heap_end;
 extern unsigned long long stack_base;
@@ -120,7 +125,8 @@ void print_bytes(const char* tip, char* codes, int len);
 
 // dyn_elf
 string get_map_key_value(map<string, unsigned long long>& Map, unsigned long long fun_plt_addr);
-string addr_get_fun(unsigned long long fun_addr);
+string addr_get_dis_fun(unsigned long long fun_addr);
+string addr_get_regs_fun(unsigned long long fun_addr);
 unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 
 // elf_fun
@@ -156,6 +162,8 @@ void set_regs_fun_list(unsigned long long fun_addr);
 void show_regs_fun_list();
 void clear_regs_fun_list();
 int  addr_get_regs_fun_offset(unsigned long long addr);
+
+string addr_get_glibc_data(unsigned long long glibc_data_addr);
 
 // break point
 int  break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);

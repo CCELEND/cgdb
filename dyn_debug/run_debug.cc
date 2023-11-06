@@ -13,6 +13,11 @@ unsigned long long ld_code_end = 0;
 unsigned long long vdso_code_start = 0;
 unsigned long long vdso_code_end = 0;
 
+unsigned long long ld_data_start = 0;
+unsigned long long ld_data_end = 0;
+unsigned long long libc_data_start = 0;
+unsigned long long libc_data_end = 0;
+
 unsigned long long heap_base = 0;
 unsigned long long heap_end = 0;
 unsigned long long stack_base = 0;
@@ -261,6 +266,9 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     // // address = get_fun_end_addr(pid, address);
                     // address = get_glibc_fun_end(address);
                     // printf("end: 0x%llx\n", address);
+                    printf("regs:\n");
+                    show_regs_fun_list();
+                    printf("dis:\n");
                     show_dis_fun_list();
 
                     // for (auto it : fun_start) {
