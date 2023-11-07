@@ -83,7 +83,7 @@ struct fun_frame {
     fun_frame(): fun_start_addr(0), fun_end_addr(0), fun_name("") {}
 };
 struct fun_info_type {
-    struct fun_frame fun_list[10];
+    struct fun_frame fun_list[0x10];
     int fun_num;
     fun_info_type(): fun_num(0) {}
 };
@@ -153,7 +153,7 @@ int addr_get_elf_plt_fun_offset(unsigned long long addr);
 
 // glibc_fun
 string addr_get_glibc_fun(unsigned long long glibc_fun_addr);
-unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr);
+unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, string fun_name);
 
 // glibc_plt_fun
 string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
@@ -190,7 +190,7 @@ void get_vma_address(pid_t pid);
 void show_vmmap(pid_t pid);
 
 // elf rodata
-void set_elf_rodata(Binary* bin)
+void set_elf_rdata(Binary* bin);
 
 // info
 void arg_error(const char* cgdb);

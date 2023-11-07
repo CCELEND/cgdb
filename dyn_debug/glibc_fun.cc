@@ -7,8 +7,10 @@
 string addr_get_glibc_fun(unsigned long long glibc_fun_addr)
 {
     if (glibc_fun_addr % 0x8 != 0)
-        return "";
+        glibc_fun_addr = glibc_fun_addr &~ 0xf;
+        // return "";
 
+    
     unsigned long long glibc_fun_addr_offset;
     std::string command;
     std::string glibc_fun_name = "";
@@ -81,11 +83,16 @@ string addr_get_glibc_fun(unsigned long long glibc_fun_addr)
 }
 
 // 通过 glibc 函数地址获得函数结束地址
-unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
+unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, string fun_name)
 {
+    if (glibc_fun_addr % 0x8 != 0)
+        glibc_fun_addr = glibc_fun_addr &~ 0xf;
+    // glibc_fun_addr = glibc_fun_addr &~ 0xf;
+
     unsigned long long glibc_fun_addr_offset;
     unsigned long long glibc_fun_end_addr = 0;
     std::string command;
+    std::string glibc_fun_name = "";
     bool is_libc, break_flag = false;
 
     if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
@@ -128,13 +135,23 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr)
         char* result = nullptr;
         size_t len = 0;
         ssize_t read;
+        int lib_fun_str_start, lib_fun_str_end;
         while ((read = getline(&result, &len, fp)) != -1) 
         {
             if (std::string(result).find("<") != std::string::npos) 
             {
-                glibc_fun_end_addr = strtoul(result, nullptr, 16) - 1;
-                break_flag = true;
-                break;
+
+                lib_fun_str_start = std::string(result).find("<");
+                lib_fun_str_end = std::string(result).find(">");
+                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
+                if (glibc_fun_name != fun_name)
+                {
+                    glibc_fun_end_addr = strtoul(result, nullptr, 16) - 1;
+                    break_flag = true;
+                    break;                  
+                }
+
+
             }   
         }
         pclose(fp);   // 关闭管道

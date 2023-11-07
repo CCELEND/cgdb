@@ -86,6 +86,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
     // libc 第一次加载的 info, dis_fun_info
     if (addr_flag)  // true
     {
+        
         if (addr > elf_code_start && addr < elf_code_end) {
             set_regs_fun_list(addr);
             fun_name = addr_get_regs_fun(addr);
@@ -103,7 +104,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-stack_base);
 
         } else if (addr > heap_base && addr < heap_end) {
-            printf("\033[34m0x%llx (heap)\033[0m", addr);
+            printf("\033[34m0x%llx (heap+0x%llx)\033[0m", addr, addr-heap_base);
 
         } else if (!ld_base || addr > ld_code_start && addr < ld_code_end) {
             set_regs_fun_list(addr);
@@ -134,7 +135,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
                 printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
             }
         } else if (addr > elf_rodata_start && addr < elf_rodata_end) {
-            printf("0x%llx (elf.rodata)", addr);
+            printf("0x%llx (elf[rodata])", addr);
         }
         else
             printf("0x%llx", addr);
@@ -210,7 +211,7 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
             }
             else {
                 flag_addr_printf(val, false);
-                if (val > 0x7fffffffffff)
+                if (val > 0x7fffffffffff && val != 0xffffffffffffffff)
                     val_to_string(val);
             }
 

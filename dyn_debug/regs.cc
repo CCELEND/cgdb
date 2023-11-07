@@ -50,6 +50,10 @@ void show_regs(pid_t pid, struct user_regs_struct* regs)
 // 反汇编 rip 指令
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs)
 {
+    if (libc_base == 0) {
+        get_vma_address(pid);
+    }
+
     show_regs(pid, regs);
     disasm1(pid, regs->rip);
 }

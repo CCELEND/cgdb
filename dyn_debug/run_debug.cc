@@ -75,7 +75,7 @@ void run_dyn_debug(Binary* bin)
             get_vma_address(pid);
             printf("[+] Base addr: 0x%llx\n", elf_base);
 
-            set_elf_rodata(bin);
+            set_elf_rdata(bin);
 
             // 建立函数名和开始地址，结束地址的映射
             map_fun_start(pid, bin);
@@ -95,9 +95,9 @@ void run_dyn_debug(Binary* bin)
 
                 debug_start:
 
-                if (libc_base == 0){
-                    get_vma_address(pid);
-                }
+                // if (libc_base == 0){
+                //     get_vma_address(pid);
+                // }
 
                 //输入参数解析
                 argparse();

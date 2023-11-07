@@ -40,9 +40,10 @@ void set_dis_fun_list(unsigned long long fun_addr)
                 }
                 else
                 {
+                    fun_name = addr_get_glibc_fun(fun_addr);
                     dis_fun_info.fun_list[i].fun_start_addr = fun_addr;
-                    dis_fun_info.fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr);
-                    dis_fun_info.fun_list[i].fun_name = addr_get_glibc_fun(fun_addr);
+                    dis_fun_info.fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr, fun_name);
+                    dis_fun_info.fun_list[i].fun_name = fun_name;
                     dis_fun_info.fun_num++;
                     break;
                 }

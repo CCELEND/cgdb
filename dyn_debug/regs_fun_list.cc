@@ -3,7 +3,7 @@
 
 void clear_regs_fun_list()
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 0x10; i++)
     {
         if (regs_fun_info.fun_list[i].fun_start_addr == 0)
             break;
@@ -16,7 +16,7 @@ void clear_regs_fun_list()
 
 void set_regs_fun_list(unsigned long long fun_addr)
 {
-    for (int i = 0; i < 10; i++) 
+    for (int i = 0; i < 0x10; i++) 
     {
         // 地址在列表某个函数范围内就直接退出
         if (fun_addr >= regs_fun_info.fun_list[i].fun_start_addr && 
@@ -40,9 +40,10 @@ void set_regs_fun_list(unsigned long long fun_addr)
                 }
                 else
                 {
+                    fun_name = addr_get_glibc_fun(fun_addr);
                     regs_fun_info.fun_list[i].fun_start_addr = fun_addr;
-                    regs_fun_info.fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr);
-                    regs_fun_info.fun_list[i].fun_name = addr_get_glibc_fun(fun_addr);
+                    regs_fun_info.fun_list[i].fun_name = fun_name;
+                    regs_fun_info.fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr, fun_name);
                     regs_fun_info.fun_num++;
                     break;
                 }
@@ -81,7 +82,7 @@ void set_regs_fun_list(unsigned long long fun_addr)
 // test
 void show_regs_fun_list()
 {
-    for (int i = 0; i < 10; i++ )
+    for (int i = 0; i < 0x10; i++ )
     {
         if (regs_fun_info.fun_list[i].fun_start_addr == 0) break;
 
@@ -97,7 +98,7 @@ void show_regs_fun_list()
 int addr_get_regs_fun_offset(unsigned long long addr)
 {
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 0x10; i++)
     {
         if ( addr >= regs_fun_info.fun_list[i].fun_start_addr && 
              addr <= regs_fun_info.fun_list[i].fun_end_addr )
