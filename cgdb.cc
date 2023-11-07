@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
         err_exit("Program loading failed!");
     }
 
-    map_fun_plt(fname);
+    map_fun_plt();
 
     while (true) {
         printf("\033[34m\033[1mcgdb> \033[0m");
@@ -41,13 +41,13 @@ int main(int argc, char *argv[])
         } else if (cmd == "sections") {
             show_elf_sections_code_data(&bin);
         } else if (cmd == "got") {
-            show_elf_got(fname);
+            show_elf_got();
         } else if (cmd == "plt") {
-            show_elf_plt(fname);
+            show_elf_plt();
         } else if (cmd == "lplt") {
             show_elf_lib_plt();
         } else if (cmd == "r") {
-            run_dyn_debug(fname, &bin);
+            run_dyn_debug(&bin);
         } else if (cmd == "help" || cmd == "h") {
             show_elf_help();
         }
