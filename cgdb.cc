@@ -6,10 +6,10 @@
 // 定义全局变量
 vector<string> myargv;
 string cmd;
+string fname;
+
 // 键是函数名，值是地址
 map<string, unsigned long long> elf_plt_fun;
-
-string fname;
 
 int main(int argc, char *argv[]) 
 {
@@ -36,20 +36,28 @@ int main(int argc, char *argv[])
             goto cgdb_exit;
         } else if (cmd == "sym") {
             show_elf_symbol(&bin);
+
         } else if (cmd == "dyn") {
             show_elf_dynsym(&bin);
+
         } else if (cmd == "sections") {
             show_elf_sections_code_data(&bin);
+
         } else if (cmd == "got") {
             show_elf_got();
+
         } else if (cmd == "plt") {
             show_elf_plt();
+
         } else if (cmd == "lplt") {
             show_elf_lib_plt();
+
         } else if (cmd == "r") {
             run_dyn_debug(&bin);
+
         } else if (cmd == "help" || cmd == "h") {
             show_elf_help();
+
         }
         else {
             err_info("Command not found!");
