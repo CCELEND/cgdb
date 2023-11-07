@@ -43,7 +43,7 @@ map<string, unsigned long long> elf_plt_fun_end;
 struct fun_info_type regs_fun_info;
 struct fun_info_type dis_fun_info;
 
-void run_dyn_debug(std::string fname, Binary *bin)
+void run_dyn_debug(Binary* bin)
 {
     pid_t pid;
     Symbol *sym;

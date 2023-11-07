@@ -19,6 +19,8 @@
 // 键为 plt 函数名，值为地址
 extern std::map<std::string, unsigned long long> elf_plt_fun;
 
+extern std::string fname;
+
 class Binary;
 class Section;
 class Symbol;
@@ -94,11 +96,11 @@ void unload_binary (Binary* bin);
 void show_elf_symbol(Binary* bin);
 void show_elf_dynsym(Binary* bin);
 void show_elf_sections_code_data(Binary* bin);
-void show_elf_got   (std::string fname);
-void show_elf_plt   (std::string fname);
+void show_elf_got   ();
+void show_elf_plt   ();
 void show_elf_lib_plt();
 
-void map_fun_plt(std::string fname);
+void map_fun_plt();
 unsigned long long get_plt_fun_addr(char* funame);
 
 void show_elf_help();

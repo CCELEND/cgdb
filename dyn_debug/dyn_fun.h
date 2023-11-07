@@ -106,7 +106,7 @@ extern struct break_point ni_break_point;
 // run api, help args
 void argparse();
 void show_help();
-void run_dyn_debug(string fname, Binary* bin);
+void run_dyn_debug(Binary* bin);
 
 // regs
 void get_regs(pid_t pid, struct user_regs_struct* regs);
@@ -136,8 +136,8 @@ unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 
 // elf_fun
 string addr_get_elf_fun(unsigned long long elf_fun_addr);
-void map_fun_start(pid_t pid, Binary *bin);
-void map_fun_end(pid_t pid, Binary *bin);
+void map_fun_start(pid_t pid, Binary* bin);
+void map_fun_end  (pid_t pid, Binary* bin);
 unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin);
 int addr_get_elf_fun_offset(unsigned long long addr);
 

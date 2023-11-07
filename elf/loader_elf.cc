@@ -46,7 +46,7 @@ open_bfd(std::string &fname)
 
 // 加载符号表
 static int
-load_symbols_bfd(bfd *bfd_h, Binary *bin)
+load_symbols_bfd(bfd* bfd_h, Binary* bin)
 {
   int ret;
   long n, nsyms, i;
@@ -106,7 +106,7 @@ cleanup:
 
 // 加载动态符号表
 static int
-load_dynsym_bfd(bfd *bfd_h, Binary *bin)
+load_dynsym_bfd(bfd* bfd_h, Binary* bin)
 {
   int ret;
   long n, nsyms, i;
@@ -161,7 +161,7 @@ cleanup:
 
 // 加载节信息
 static int
-load_sections_bfd(bfd *bfd_h, Binary *bin)
+load_sections_bfd(bfd* bfd_h, Binary* bin)
 {
   int bfd_flags;
   uint64_t vma, size;
@@ -223,7 +223,7 @@ load_sections_bfd(bfd *bfd_h, Binary *bin)
 
 
 static int
-load_binary_bfd(std::string &fname, Binary *bin, Binary::BinaryType type)
+load_binary_bfd(std::string &fname, Binary* bin, Binary::BinaryType type)
 {
   int ret;
   bfd *bfd_h;
@@ -299,14 +299,14 @@ cleanup:
 
 // 是解析由文件名指定的二进制文件，并将其加载到指定的 Binary 对象中
 int
-load_binary(std::string &fname, Binary *bin, Binary::BinaryType type)
+load_binary(std::string &fname, Binary* bin, Binary::BinaryType type)
 {
   return load_binary_bfd(fname, bin, type);
 }
 
 // 释放 Binary 动态分配的所有组件
 void
-unload_binary(Binary *bin)
+unload_binary(Binary* bin)
 {
   size_t i;
   Section *sec;
