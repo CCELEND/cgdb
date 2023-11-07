@@ -9,13 +9,14 @@ string cmd;
 // 键是函数名，值是地址
 map<string, unsigned long long> elf_plt_fun;
 
+string fname;
+
 int main(int argc, char *argv[]) 
 {
     Binary bin;
     Section *sec;
     Symbol *sym;
     pid_t pid;
-    string fname;
 
     if(argc < 2) arg_error(argv[0]);
 
