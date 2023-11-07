@@ -1,8 +1,8 @@
 
 #include "dyn_fun.h"
 
-void arg_error(const char* fname){
-    printf("\033[31m\033[1m[-] Usage: %s <binary>\033[0m\n", fname);
+void arg_error(const char* cgdb){
+    printf("[-] Usage: %s <binary>\n", cgdb);
     exit(EXIT_FAILURE);
 }
 

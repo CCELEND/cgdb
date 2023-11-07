@@ -35,12 +35,17 @@ extern vector<string> myargv;
 // 当前命令字符串
 extern string cmd;
 
-extern string dis_fun_name;
+extern string fname;
+
+// extern string dis_fun_name;
 
 // 一些 vma 地址
 extern unsigned long long elf_base;
 extern unsigned long long elf_code_start;
 extern unsigned long long elf_code_end;
+extern unsigned long long elf_ini_base;
+extern unsigned long long elf_ini_end;
+
 extern unsigned long long libc_base;
 extern unsigned long long libc_code_start;
 extern unsigned long long libc_code_end;
@@ -151,6 +156,13 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr);
 // glibc_plt_fun
 string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
 
+//
+string addr_get_elf_init(unsigned long long elf_init_addr);
+string addr_get_elf_fini(unsigned long long elf_fini_addr);
+
+// glibc data
+string addr_get_glibc_data(unsigned long long glibc_data_addr);
+
 // dis_fun_list
 void set_dis_fun_list(unsigned long long fun_addr);
 void clear_dis_fun_list();
@@ -163,7 +175,6 @@ void show_regs_fun_list();
 void clear_regs_fun_list();
 int  addr_get_regs_fun_offset(unsigned long long addr);
 
-string addr_get_glibc_data(unsigned long long glibc_data_addr);
 
 // break point
 int  break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
@@ -177,7 +188,7 @@ void get_vma_address(pid_t pid);
 void show_vmmap(pid_t pid);
 
 // info
-void arg_error(const char* fname);
+void arg_error(const char* cgdb);
 void err_exit(const char* msg);
 void err_info(const char* msg);
 void note_info(const char* msg);

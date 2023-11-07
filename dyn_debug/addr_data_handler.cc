@@ -80,7 +80,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
         printf("0x%llx", addr);
         return;
     }
-    string fun_name, data_name;
+    string fun_name, data_name, ini_name;
     int offset;
 
     // libc 第一次加载的 info, dis_fun_info
@@ -111,13 +111,31 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             offset = addr_get_regs_fun_offset(addr);
             printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
-        } else if (addr > ld_data_start && addr < ld_data_end || addr > libc_data_start && addr < libc_data_end){
+        } else if (addr > ld_data_start && addr < ld_data_end){
             data_name = addr_get_glibc_data(addr); 
-            printf("\033[35m0x%llx (ld.%s)\033[0m", addr, data_name.c_str());
+            if (data_name != "")
+                printf("\033[35m0x%llx (ld.%s)\033[0m", addr, data_name.c_str());
+            else
+                printf("\033[35m0x%llx (ld)\033[0m", addr);
+
+        } else if (addr > libc_data_start && addr < libc_data_end) {
+            data_name = addr_get_glibc_data(addr);
+            if (data_name != "")
+                printf("\033[35m0x%llx (libc.%s)\033[0m", addr, data_name.c_str());
+            else
+                printf("\033[35m0x%llx (libc)\033[0m", addr);
+
+        } else if (addr > elf_ini_base && addr < elf_ini_end){
+            ini_name = addr_get_elf_fini(addr);
+            if (ini_name != "")
+                printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
+            else {
+                ini_name = addr_get_elf_init(addr);
+                printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
+            }
         }
-        else {
+        else
             printf("0x%llx", addr);
-        }
     }
     else
     {

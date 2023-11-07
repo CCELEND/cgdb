@@ -4,6 +4,9 @@
 unsigned long long elf_base = 0;
 unsigned long long elf_code_start = 0;
 unsigned long long elf_code_end = 0;
+unsigned long long elf_ini_base = 0;
+unsigned long long elf_ini_end = 0;
+
 unsigned long long libc_base = 0;
 unsigned long long libc_code_start = 0;
 unsigned long long libc_code_end = 0;
@@ -237,6 +240,7 @@ void run_dyn_debug(std::string fname, Binary *bin)
                     printf("[+] Ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
                     printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
                 } else if (strcmp(arguments[0], "base") == 0) {
+                    printf("[+] Ini Base addr: 0x%llx\n", elf_ini_base);
                     printf("[+] Base addr: 0x%llx\n", elf_base);
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);

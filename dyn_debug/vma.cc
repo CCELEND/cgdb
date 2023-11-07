@@ -22,6 +22,9 @@ void get_vma_address(pid_t pid)
         if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos && !elf_code_start) {
             elf_code_start = strtoul(line.data(), nullptr, 16);
             elf_code_end = strtoul(line.data()+13, nullptr, 16);
+        } else if (line.find("-7f") == string::npos && line.find("r--p") != string::npos && !elf_ini_base) {
+            elf_ini_base = strtoul(line.data(), nullptr, 16);
+            elf_ini_end = elf_ini_base + 0x2000;
 
         } else if (line.find("libc") != string::npos && !libc_base) {
             libc_base = strtoul(line.data(), nullptr, 16);

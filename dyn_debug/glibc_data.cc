@@ -8,7 +8,7 @@ string addr_get_glibc_data(unsigned long long glibc_data_addr)
     unsigned long long glibc_data_addr_offset;
     std::string command;
 
-    if (glibc_data_addr < ld_data_end && glibc_data_addr > ld_data_start) 
+    if (glibc_data_addr > ld_data_start && glibc_data_addr < ld_data_end) 
     {
         glibc_data_addr_offset = glibc_data_addr - ld_base;
         command = std::string("objdump -d -j .data ld-linux-x86-64.so.2 | grep ");
