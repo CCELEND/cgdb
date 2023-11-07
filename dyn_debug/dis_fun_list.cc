@@ -64,9 +64,9 @@ void set_dis_fun_list(unsigned long long fun_addr)
                 else 
                 {
                     fun_name = addr_get_elf_plt_fun(fun_addr);
-                    fun_name += "@plt";
                     dis_fun_info.fun_list[i].fun_start_addr = elf_plt_fun[fun_name] + elf_base;
                     dis_fun_info.fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
+                    fun_name += "@plt";
                     dis_fun_info.fun_list[i].fun_name = fun_name;
                     dis_fun_info.fun_num++;
                     break;

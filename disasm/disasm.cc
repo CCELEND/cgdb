@@ -234,14 +234,16 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
                 if ( strcmp(insn[j].mnemonic, "call") == 0 || 
                      strcmp(insn[j].mnemonic, "ret" ) == 0 || 
-                     strcmp(insn[j].mnemonic, "jmp" ) == 0 )
+                     strcmp(insn[j].mnemonic, "jmp" ) == 0 || 
+                     strcmp(insn[j].mnemonic, "je"  ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0 )
                 {
                     printf( "\033[33m%-16s\033[0m"
                             "\033[36m%s\033[0m ",
                         insn[j].mnemonic, insn[j].op_str);
 
                     if (strcmp(insn[j].mnemonic, "call") == 0 || 
-                        strcmp(insn[j].mnemonic, "jmp" ) == 0 )
+                        strcmp(insn[j].mnemonic, "jmp" ) == 0 || 
+                        strcmp(insn[j].mnemonic, "je"  ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0 )
                     {
                         flow_change_op(insn[j].op_str);
                     }
