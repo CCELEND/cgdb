@@ -4,8 +4,10 @@
 unsigned long long elf_base = 0;
 unsigned long long elf_code_start = 0;
 unsigned long long elf_code_end = 0;
-unsigned long long elf_ini_base = 0;
+unsigned long long elf_ini_start = 0;
 unsigned long long elf_ini_end = 0;
+unsigned long long elf_rodata_start = 0;
+unsigned long long elf_rodata_end = 0;
 
 unsigned long long libc_base = 0;
 unsigned long long libc_code_start = 0;
@@ -72,6 +74,8 @@ void run_dyn_debug(Binary* bin)
             // 获取子进程的虚拟地址
             get_vma_address(pid);
             printf("[+] Base addr: 0x%llx\n", elf_base);
+
+            set_elf_rodata(bin);
 
             // 建立函数名和开始地址，结束地址的映射
             map_fun_start(pid, bin);
@@ -240,7 +244,7 @@ void run_dyn_debug(Binary* bin)
                     printf("[+] Ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
                     printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
                 } else if (strcmp(arguments[0], "base") == 0) {
-                    printf("[+] Ini Base addr: 0x%llx\n", elf_ini_base);
+                    printf("[+] Ini Base addr: 0x%llx\n", elf_ini_start);
                     printf("[+] Base addr: 0x%llx\n", elf_base);
                     printf("[+] Libc base: 0x%llx\n", libc_base);
                     printf("[+] Ld base: 0x%llx\n", ld_base);

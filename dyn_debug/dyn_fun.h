@@ -43,8 +43,10 @@ extern string fname;
 extern unsigned long long elf_base;
 extern unsigned long long elf_code_start;
 extern unsigned long long elf_code_end;
-extern unsigned long long elf_ini_base;
+extern unsigned long long elf_ini_start;
 extern unsigned long long elf_ini_end;
+extern unsigned long long elf_rodata_start;
+extern unsigned long long elf_rodata_end;
 
 extern unsigned long long libc_base;
 extern unsigned long long libc_code_start;
@@ -186,6 +188,9 @@ void break_point_delete(pid_t pid, int idx);
 // vmmap
 void get_vma_address(pid_t pid);
 void show_vmmap(pid_t pid);
+
+// elf rodata
+void set_elf_rodata(Binary* bin)
 
 // info
 void arg_error(const char* cgdb);

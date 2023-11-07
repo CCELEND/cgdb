@@ -125,7 +125,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             else
                 printf("\033[35m0x%llx (libc)\033[0m", addr);
 
-        } else if (addr > elf_ini_base && addr < elf_ini_end){
+        } else if (addr > elf_ini_start && addr < elf_ini_end){
             ini_name = addr_get_elf_fini(addr);
             if (ini_name != "")
                 printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
@@ -133,6 +133,8 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
                 ini_name = addr_get_elf_init(addr);
                 printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
             }
+        } else if (addr > elf_rodata_start && addr < elf_rodata_end) {
+            printf("0x%llx (elf.rodata)", addr);
         }
         else
             printf("0x%llx", addr);
