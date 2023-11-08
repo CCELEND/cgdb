@@ -15,7 +15,7 @@ string get_map_key_value(map<string, unsigned long long>& Map, unsigned long lon
 
 string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr)
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 0x10; i++)
     {
         if(addr >= fun_info->fun_list[i].fun_start_addr && 
             addr <= fun_info->fun_list[i].fun_end_addr )

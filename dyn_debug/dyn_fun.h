@@ -91,6 +91,8 @@ struct fun_info_type {
 extern struct fun_info_type regs_fun_info;
 // 反汇编窗口的函数信息
 extern struct fun_info_type dis_fun_info;
+// flow_change 的函数信息
+extern struct fun_info_type flow_change_fun_info;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态
 struct break_point {
@@ -117,6 +119,7 @@ void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
 
 // stack
 void show_stack(pid_t pid, struct user_regs_struct* regs);
+void show_num_stack(pid_t pid, struct user_regs_struct* regs, int num);
 
 // addr handle
 unsigned long long get_addr_val(pid_t pid, unsigned long long addr);
@@ -131,9 +134,8 @@ void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void print_bytes(const char* tip, char* codes, int len);
 
 // dyn_elf
-string get_map_key_value(map<string, unsigned long long>& Map, unsigned long long fun_plt_addr);
-// string addr_get_dis_fun(unsigned long long fun_addr);
-// string addr_get_regs_fun(unsigned long long fun_addr);
+string get_map_key_value(map<string, unsigned long long>& Map, 
+    unsigned long long fun_plt_addr);
 string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr);
 unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 
@@ -153,8 +155,11 @@ int addr_get_elf_plt_fun_offset(unsigned long long addr);
 
 
 // glibc_fun
-string addr_get_glibc_fun(unsigned long long glibc_fun_addr);
-unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, string fun_name);
+// string addr_get_glibc_fun(unsigned long long glibc_fun_addr);
+string addr_get_glibc_fun(unsigned long long glibc_fun_addr, 
+    unsigned long long* glibc_fun_start);
+unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, 
+    string fun_name);
 
 // glibc_plt_fun
 string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
@@ -173,7 +178,8 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr);
 int  addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr);
 
 // break point
-int  break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
+int  break_point_handler(pid_t pid, int status, break_point& bp, 
+    bool showbp_flag);
 void break_point_inject(pid_t pid, break_point& bp);
 void set_break_point(pid_t pid, char* bp_fun, Binary* bin);
 void set_ni_break_point(pid_t pid, unsigned long long addr);

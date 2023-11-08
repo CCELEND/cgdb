@@ -4,13 +4,12 @@
 // 根据地址找所在 glibc 函数名 2.36
 // 704d25fbbb72fa95d517b883131828c0883fe9.debug libc
 // 2e105c0bb3ee8e8f5b917f8af764373d206659.debug ld
-string addr_get_glibc_fun(unsigned long long glibc_fun_addr)
+string addr_get_glibc_fun(unsigned long long glibc_fun_addr, 
+    unsigned long long* glibc_fun_start)
 {
     if (glibc_fun_addr % 0x8 != 0)
         glibc_fun_addr = glibc_fun_addr &~ 0xf;
-        // return "";
 
-    
     unsigned long long glibc_fun_addr_offset;
     std::string command;
     std::string glibc_fun_name = "";
@@ -64,7 +63,8 @@ string addr_get_glibc_fun(unsigned long long glibc_fun_addr)
             {
                 lib_fun_str_start = std::string(result).find("<");
                 lib_fun_str_end = std::string(result).find(">");
-                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
+                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, 
+                    lib_fun_str_end-lib_fun_str_start-1);
                 // printf("%s\n", glibc_fun_name.c_str());
                 break_flag = true;
                 break;
@@ -77,17 +77,22 @@ string addr_get_glibc_fun(unsigned long long glibc_fun_addr)
         free(result); // 释放动态分配的内存
     }
 
+    if (is_libc)
+        *glibc_fun_start = glibc_fun_addr_offset + libc_base + 0x8;
+    else
+        *glibc_fun_start = glibc_fun_addr_offset + ld_base + 0x8;
+
     return glibc_fun_name;
 
 
 }
 
 // 通过 glibc 函数地址获得函数结束地址
-unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, string fun_name)
+unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, 
+    string fun_name)
 {
     if (glibc_fun_addr % 0x8 != 0)
         glibc_fun_addr = glibc_fun_addr &~ 0xf;
-    // glibc_fun_addr = glibc_fun_addr &~ 0xf;
 
     unsigned long long glibc_fun_addr_offset;
     unsigned long long glibc_fun_end_addr = 0;
@@ -143,7 +148,9 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, string f
 
                 lib_fun_str_start = std::string(result).find("<");
                 lib_fun_str_end = std::string(result).find(">");
-                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, lib_fun_str_end-lib_fun_str_start-1);
+                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, 
+                    lib_fun_str_end-lib_fun_str_start-1);
+
                 if (glibc_fun_name != fun_name)
                 {
                     glibc_fun_end_addr = strtoul(result, nullptr, 16) - 1;

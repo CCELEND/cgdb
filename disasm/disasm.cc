@@ -1,7 +1,8 @@
 #include "disasm.h"
 
 // 输出指令行数 line, num 指令长度
-void disasm(char* byte_codes, unsigned long long addr, int num, int line)
+void disasm(char* byte_codes, 
+    unsigned long long addr, int num, int line)
 {
     csh handle;
     cs_insn *insn;
@@ -58,15 +59,15 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                 printf("\033[34m%-20s\033[0m", code);
 
                 if ( strcmp(insn[j].mnemonic, "call") == 0 || 
-                     strcmp(insn[j].mnemonic, "ret") == 0  || 
-                     strcmp(insn[j].mnemonic, "jmp") == 0 )
+                     strcmp(insn[j].mnemonic, "ret")  == 0 || 
+                     strcmp(insn[j].mnemonic, "jmp")  == 0 )
                 {
                     printf( "\033[33m%-16s\033[0m"
                             "\033[36m%s\033[0m ",
                         insn[j].mnemonic, insn[j].op_str);
 
                     if (strcmp(insn[j].mnemonic, "call") == 0 || 
-                        strcmp(insn[j].mnemonic, "jmp") == 0)
+                        strcmp(insn[j].mnemonic, "jmp")  == 0 )
                     {
                         plt_addr = strtoul(insn[j].op_str, nullptr, 16);
                         if (plt_addr < 0x7f0000000000)
@@ -95,7 +96,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
     cs_close(&handle);
 }
 
-// 输出跳转指令流操作数的函数符号
+// 输出跳转指令流操作数的函数符号和偏移
 void flow_change_op(char* ops)
 {
     unsigned long long flow_change_addr;
@@ -105,41 +106,13 @@ void flow_change_op(char* ops)
     if (!flow_change_addr)
         return;
 
-    if (flow_change_addr > 0x7f0000000000) {
-        flow_change_fun_name = addr_get_glibc_plt_fun(flow_change_addr);
-        if (flow_change_fun_name != "")
-            cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-        else {
-            flow_change_fun_name = addr_get_glibc_fun(flow_change_addr);
-            if (flow_change_fun_name != "")
-                cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-            else
-                cout << "";
-        }
-    }
+    set_fun_list(&flow_change_fun_info, flow_change_addr);
+    flow_change_fun_name = addr_get_fun(&flow_change_fun_info, flow_change_addr);
+    offset = addr_get_fun_offset(&flow_change_fun_info, flow_change_addr);
+    if (!offset)
+        cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
     else
-    {
-        flow_change_fun_name = addr_get_elf_fun(flow_change_addr);
-        if (flow_change_fun_name != "")
-            cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-        else {
-            flow_change_fun_name = addr_get_elf_plt_fun(flow_change_addr);
-            if (flow_change_fun_name != "")
-                cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
-            else
-                cout << "";
-
-        }
-
-    }
-
-    // set_dis_fun_list(flow_change_addr);
-    // flow_change_fun_name = addr_get_dis_fun(flow_change_addr);
-    // offset = addr_get_dis_fun_offset(flow_change_addr);
-    // if (!offset)
-    //     cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
-    // else
-    //     printf("<\033[31m%s+%d\033[0m>", flow_change_fun_name.c_str(), offset);
+        printf("<\033[31m%s+%d\033[0m>", flow_change_fun_name.c_str(), offset);
 }
 
 void disasm1(pid_t pid, unsigned long long rip_val)
@@ -177,7 +150,6 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
         for (int i = 0; i < 11 && i < count-1; i++ )
             line++;
-
         // printf("%d\n", line);
 
         if( !(insn[0].address >= dis_fun_info.fun_list[0].fun_start_addr &&
@@ -188,10 +160,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
           )
         {
             // printf("---0x%lx\n", insn[line-1].address);
-            // clear_dis_fun_list(); // 清空函数列表
-            clear_fun_list(&dis_fun_info);
+            clear_fun_list(&dis_fun_info); // 清空函数列表
             for(int i = 0; i < 11 && i < count-1; i++)
-                // set_dis_fun_list(insn[i].address);
                 set_fun_list(&dis_fun_info, insn[i].address);
         }
 
@@ -204,9 +174,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
             dis_fun_name = addr_get_fun(&dis_fun_info, insn[j].address);
-
             // 根据地址得到函数偏移
-
             fun_offset = addr_get_fun_offset(&dis_fun_info, insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
@@ -219,13 +187,15 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 if(dis_fun_name != "")
                     printf("\033[32m\033[1m<%s+%04d>   ", dis_fun_name.c_str(), fun_offset);
 
-                printf("\033[34m\033[1m%-20s\033[0m" "\033[33m\033[1m%-16s\033[0m" "\033[36m\033[1m%s\033[0m ", 
+                printf("\033[34m\033[1m%-20s\033[0m" "\033[33m\033[1m%-16s\033[0m" 
+                    "\033[36m\033[1m%s\033[0m ", 
                         code, insn[j].mnemonic, insn[j].op_str);
 
                 if (strcmp(insn[j].mnemonic, "call") == 0 || 
                     strcmp(insn[j].mnemonic, "jmp" ) == 0 ||
                     strcmp(insn[j].mnemonic, "ret" ) == 0 ||
-                    strcmp(insn[j].mnemonic, "je"  ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0)
+                    strcmp(insn[j].mnemonic, "je"  ) == 0 || 
+                    strcmp(insn[j].mnemonic, "ja" )  == 0 )
                 {
                     flow_change_op(insn[j].op_str);
                     printf("\n");
@@ -246,7 +216,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                 if ( strcmp(insn[j].mnemonic, "call") == 0 || 
                      strcmp(insn[j].mnemonic, "ret" ) == 0 || 
                      strcmp(insn[j].mnemonic, "jmp" ) == 0 || 
-                     strcmp(insn[j].mnemonic, "je"  ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0 )
+                     strcmp(insn[j].mnemonic, "je"  ) == 0 || 
+                     strcmp(insn[j].mnemonic, "ja" ) == 0 )
                 {
                     printf( "\033[33m%-16s\033[0m"
                             "\033[36m%s\033[0m ",
@@ -254,7 +225,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 
                     if (strcmp(insn[j].mnemonic, "call") == 0 || 
                         strcmp(insn[j].mnemonic, "jmp" ) == 0 || 
-                        strcmp(insn[j].mnemonic, "je"  ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0 )
+                        strcmp(insn[j].mnemonic, "je"  ) == 0 || 
+                        strcmp(insn[j].mnemonic, "ja" ) == 0 )
                     {
 
                         flow_change_op(insn[j].op_str);
@@ -280,7 +252,8 @@ void disasm1(pid_t pid, unsigned long long rip_val)
 }
 
 //输出 line 行反汇编, 只输出 mnemonic 操作码, op_str 操作数
-void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
+void disasm_mne_op(char* byte_codes, 
+    unsigned long long addr, int num, int line)
 {
     csh handle;
     cs_insn *insn;
@@ -302,7 +275,6 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
                 "\033[36m\033[1m%s\033[0m ", 
                 insn[j].mnemonic, insn[j].op_str
             );
-
             if ( strcmp(insn[j].mnemonic, "call") == 0 ||  
                  strcmp(insn[j].mnemonic, "jmp" ) == 0 )
             {
@@ -317,7 +289,8 @@ void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line)
 }
 
 // 获得下一条指令地址
-unsigned long long get_next_instruct_addr(char* byte_codes, unsigned long long addr, int num)
+unsigned long long get_next_instruct_addr(char* byte_codes, 
+    unsigned long long addr, int num)
 {
     csh handle;
     cs_insn *insn;
@@ -345,3 +318,28 @@ unsigned long long get_next_instruct_addr(char* byte_codes, unsigned long long a
     return next_addr;
 }
 
+// if (flow_change_addr > 0x7f0000000000) {
+//     flow_change_fun_name = addr_get_glibc_plt_fun(flow_change_addr);
+//     if (flow_change_fun_name != "")
+//         cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+//     else {
+//         flow_change_fun_name = addr_get_glibc_fun(flow_change_addr);
+//         if (flow_change_fun_name != "")
+//             cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+//         else
+//             cout << "";
+//     }
+// }
+// else
+// {
+//     flow_change_fun_name = addr_get_elf_fun(flow_change_addr);
+//     if (flow_change_fun_name != "")
+//         cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+//     else {
+//         flow_change_fun_name = addr_get_elf_plt_fun(flow_change_addr);
+//         if (flow_change_fun_name != "")
+//             cout << "<\033[31m" << flow_change_fun_name << "@plt\033[0m>";
+//         else
+//             cout << "";
+//     }
+// }

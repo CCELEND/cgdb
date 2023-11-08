@@ -44,6 +44,7 @@ map<string, unsigned long long> elf_plt_fun_end;
 
 struct fun_info_type regs_fun_info;
 struct fun_info_type dis_fun_info;
+struct fun_info_type flow_change_fun_info;
 
 void run_dyn_debug(Binary* bin)
 {
@@ -94,10 +95,6 @@ void run_dyn_debug(Binary* bin)
                 getline(cin, cmd);
 
                 debug_start:
-
-                // if (libc_base == 0){
-                //     get_vma_address(pid);
-                // }
 
                 //输入参数解析
                 argparse();
@@ -226,7 +223,17 @@ void run_dyn_debug(Binary* bin)
                             );
                         }
                     }
-                } else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {
+                } else if (strcmp(arguments[0], "stack") == 0){
+                    if (argc == 2) { // 打断点
+                        get_regs(pid, &regs);
+                        int num = stoi(arguments[1]);
+                        show_num_stack(pid, &regs, num);
+                    } else {
+                        err_info("Please Enter the correct quantity!");
+                    }
+                }
+
+                else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {
                     // 显示帮助信息
                     show_help();
                 } else if (strcmp(arguments[0], "vmmap") == 0) {
@@ -267,11 +274,11 @@ void run_dyn_debug(Binary* bin)
                     }
                 } 
 
-                else if (strcmp(arguments[0], " ") == 0) {
-                    myargv.clear();
-                    cmd = "si";
-                    goto debug_start;
-                }
+                // else if (strcmp(arguments[0], " ") == 0) {
+                //     myargv.clear();
+                //     cmd = "si";
+                //     goto debug_start;
+                // }
 
                 else if (strcmp(arguments[0], "test") == 0) {
                     // unsigned long long address = strtoul(arguments[1], nullptr, 16);
@@ -280,6 +287,8 @@ void run_dyn_debug(Binary* bin)
                     show_fun_list(&regs_fun_info);
                     printf("--------------dis:\n");
                     show_fun_list(&dis_fun_info);
+                    printf("--------------flow_change_fun:\n");
+                    show_fun_list(&flow_change_fun_info);
 
                     // for (auto it : fun_start) {
                     //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);

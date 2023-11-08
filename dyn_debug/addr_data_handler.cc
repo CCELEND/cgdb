@@ -83,7 +83,6 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
     string fun_name, data_name, ini_name;
     int offset;
 
-    // libc 第一次加载的 info, dis_fun_info
     if (addr_flag)  // true
     {
         

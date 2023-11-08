@@ -40,10 +40,11 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
                 }
                 else
                 {
-                    fun_name = addr_get_glibc_fun(fun_addr);
-                    fun_info->fun_list[i].fun_start_addr = fun_addr;
+                    unsigned long long glibc_fun_start;
+                    fun_name = addr_get_glibc_fun(fun_addr, &glibc_fun_start);
+                    fun_info->fun_list[i].fun_start_addr = glibc_fun_start;
                     fun_info->fun_list[i].fun_name = fun_name;
-                    fun_info->fun_list[i].fun_end_addr = get_glibc_fun_end(fun_addr, fun_name);
+                    fun_info->fun_list[i].fun_end_addr = get_glibc_fun_end(glibc_fun_start, fun_name);
                     fun_info->fun_num++;
                     break;
                 }
@@ -82,7 +83,7 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
 // show
 void show_fun_list(struct fun_info_type* fun_info)
 {
-    for (int i = 0; i < 0x10; i++ )
+    for (int i = 0; i < 0x10; i++)
     {
         if (fun_info->fun_list[i].fun_start_addr == 0) break;
 
