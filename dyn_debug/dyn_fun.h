@@ -76,6 +76,10 @@ extern map<string, unsigned long long> elf_fun_start;
 extern map<string, unsigned long long> elf_fun_end;
 extern map<string, unsigned long long> elf_plt_fun_end;
 
+// extern unsigned long long last_regs_val[17];
+extern struct user_regs_struct regs;
+extern struct user_regs_struct last_regs;
+
 struct fun_frame {
     unsigned long long fun_start_addr;
     unsigned long long fun_end_addr;
@@ -116,6 +120,8 @@ void run_dyn_debug(Binary* bin);
 void get_regs (pid_t pid, struct user_regs_struct* regs);
 void show_regs(pid_t pid, struct user_regs_struct* regs);
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
+void copy_regs_to_last_regs(struct user_regs_struct* last_regs, 
+    struct user_regs_struct* regs);
 
 // stack
 void show_stack(pid_t pid, struct user_regs_struct* regs);

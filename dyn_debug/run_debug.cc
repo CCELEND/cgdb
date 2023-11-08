@@ -32,6 +32,10 @@ unsigned long long disasm_addr = 0;
 unsigned long long next_disasm_addr = 0;
 bool disasm_addr_synchronous = true;
 
+// unsigned long long last_regs_val[17] = {0};
+struct user_regs_struct regs{};
+struct user_regs_struct last_regs{};
+
 struct break_point break_point_list[8];
 struct break_point ni_break_point;
 
@@ -83,7 +87,7 @@ void run_dyn_debug(Binary* bin)
             map_fun_end(pid, bin);
             map_plt_fun_end(pid);
 
-            struct user_regs_struct regs{};
+            // struct user_regs_struct regs{};
             get_regs(pid, &regs);
             regs_disasm_info(pid, &regs);
             show_stack(pid, &regs);

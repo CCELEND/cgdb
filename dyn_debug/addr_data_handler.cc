@@ -105,7 +105,10 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
                 printf("\033[31m0x%llx (libc.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
         } else if (addr > stack_base && addr < stack_end) {
-            printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-stack_base);
+            if (addr > regs.rbp)
+                printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-regs.rbp);
+            else
+                printf("\033[33m0x%llx (stack-0x%llx)\033[0m", addr, regs.rbp-addr);
 
         } else if (addr > heap_base && addr < heap_end) {
             printf("\033[34m0x%llx (heap+0x%llx)\033[0m", addr, addr-heap_base);
