@@ -113,7 +113,7 @@ void show_help();
 void run_dyn_debug(Binary* bin);
 
 // regs
-void get_regs(pid_t pid, struct user_regs_struct* regs);
+void get_regs (pid_t pid, struct user_regs_struct* regs);
 void show_regs(pid_t pid, struct user_regs_struct* regs);
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
 
@@ -127,7 +127,7 @@ bool judg_addr_code(unsigned long long addr);
 
 void val_to_string(unsigned long long val);
 void flag_addr_printf(unsigned long long addr, bool addr_flag);
-void show_addr_data(pid_t pid, int num , unsigned long long addr);
+void show_addr_data (pid_t pid, int num , unsigned long long addr);
 void show_addr_point(pid_t pid, unsigned long long addr, bool addr_flag);
 void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
@@ -155,7 +155,6 @@ int addr_get_elf_plt_fun_offset(unsigned long long addr);
 
 
 // glibc_fun
-// string addr_get_glibc_fun(unsigned long long glibc_fun_addr);
 string addr_get_glibc_fun(unsigned long long glibc_fun_addr, 
     unsigned long long* glibc_fun_start);
 unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, 
@@ -172,16 +171,16 @@ string addr_get_elf_fini(unsigned long long elf_fini_addr);
 string addr_get_glibc_data(unsigned long long glibc_data_addr);
 
 // fun list
-void show_fun_list(struct fun_info_type* fun_info);
+void show_fun_list (struct fun_info_type* fun_info);
 void clear_fun_list(struct fun_info_type* fun_info);
-void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr);
+void set_fun_list  (struct fun_info_type* fun_info, unsigned long long fun_addr);
 int  addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr);
 
 // break point
 int  break_point_handler(pid_t pid, int status, break_point& bp, 
     bool showbp_flag);
 void break_point_inject(pid_t pid, break_point& bp);
-void set_break_point(pid_t pid, char* bp_fun, Binary* bin);
+void set_break_point   (pid_t pid, char* bp_fun, Binary* bin);
 void set_ni_break_point(pid_t pid, unsigned long long addr);
 void break_point_delete(pid_t pid, int idx);
 
@@ -194,10 +193,10 @@ void set_elf_rdata(Binary* bin);
 
 // info
 void arg_error(const char* cgdb);
-void err_exit(const char* msg);
-void err_info(const char* msg);
+void err_exit (const char* msg);
+void err_info (const char* msg);
 void note_info(const char* msg);
 void good_info(const char* msg);
-void show_str(int count);
+void show_str (int count);
 
 #endif
