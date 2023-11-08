@@ -114,7 +114,7 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
                 regs.rip = bp.addr;
                 ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
 
-                // get_regs(pid, &regs);
+                get_regs(pid, &regs);
                 regs_disasm_info(pid, &regs);
                 show_stack(pid, &regs);
 
