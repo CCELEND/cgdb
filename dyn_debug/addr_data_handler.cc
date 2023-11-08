@@ -88,19 +88,18 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
     {
         
         if (addr > elf_code_start && addr < elf_code_end) {
-            set_regs_fun_list(addr);
-            fun_name = addr_get_regs_fun(addr);
-            offset = addr_get_regs_fun_offset(addr);
+            set_fun_list(&regs_fun_info, addr);
+            fun_name = addr_get_fun(&regs_fun_info, addr);
+            offset = addr_get_fun_offset(&regs_fun_info, addr);
             if (!offset)
                 printf("\033[31m0x%llx (elf.%s)\033[0m", addr, fun_name.c_str());
             else
                 printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
         } else if (addr > libc_code_start && addr < libc_code_end) {
-            // printf("\033[31m0x%llx (libc)\033[0m", addr);
-            set_regs_fun_list(addr);
-            fun_name = addr_get_regs_fun(addr);
-            offset = addr_get_regs_fun_offset(addr);
+            set_fun_list(&regs_fun_info, addr);
+            fun_name = addr_get_fun(&regs_fun_info, addr);
+            offset = addr_get_fun_offset(&regs_fun_info, addr);
             if (!offset)
                 printf("\033[31m0x%llx (libc.%s)\033[0m", addr, fun_name.c_str());
             else
@@ -113,9 +112,9 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             printf("\033[34m0x%llx (heap+0x%llx)\033[0m", addr, addr-heap_base);
 
         } else if (!ld_base || addr > ld_code_start && addr < ld_code_end) {
-            set_regs_fun_list(addr);
-            fun_name = addr_get_regs_fun(addr);
-            offset = addr_get_regs_fun_offset(addr);
+            set_fun_list(&regs_fun_info, addr);
+            fun_name = addr_get_fun(&regs_fun_info, addr);
+            offset = addr_get_fun_offset(&regs_fun_info, addr);
             if (!offset)
                 printf("\033[31m0x%llx (ld.%s)\033[0m", addr, fun_name.c_str());
             else

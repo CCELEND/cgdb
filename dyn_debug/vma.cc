@@ -23,40 +23,57 @@ void get_vma_address(pid_t pid)
             elf_code_start = strtoul(line.data(), nullptr, 16);
             elf_code_end = strtoul(line.data()+13, nullptr, 16);
         } 
-
-        else if (line.find("libc") != string::npos && !libc_base) {
+        else if (line.find("libc") != string::npos && !libc_base) 
+        {
             libc_base = strtoul(line.data(), nullptr, 16);
-        } else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos && !libc_code_start) {
+        } 
+        else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos && !libc_code_start) 
+        {
             libc_code_start = strtoul(line.data(), nullptr, 16);
             libc_code_end = strtoul(line.data()+13, nullptr, 16);
-        } else if (line.find("libc") != string::npos && line.find("rw-p") != string::npos && !libc_data_start){
+        } 
+        else if (line.find("libc") != string::npos && line.find("rw-p") != string::npos && !libc_data_start)
+        {
             libc_data_start = strtoul(line.data(), nullptr, 16);
-            // libc_data_end = strtoul(line.data()+13, nullptr, 16);
-        } else if (line.find("-55") == string::npos && 
-            line.find("ld-linux") == string::npos && line.find("[stack]") == string::npos &&
-            line.find("rw-p") != string::npos ) {
+        } 
+        else if (line.find("-55") == string::npos && 
+              line.find("ld-linux") == string::npos && line.find("[stack]") == string::npos &&
+              line.find("rw-p") != string::npos ) {
             libc_data_end = strtoul(line.data()+13, nullptr, 16);
         }
 
-        else if (line.find("ld-linux") != string::npos && !ld_base) {
+        else if (line.find("ld-linux") != string::npos && !ld_base) 
+        {
             ld_base = strtoul(line.data(), nullptr, 16);
-        } else if (line.find("ld-linux") != string::npos && line.find("r-xp") != string::npos && !ld_code_start) {
+        }
+        else if (line.find("ld-linux") != string::npos && 
+                 line.find("r-xp"    ) != string::npos && 
+                 !ld_code_start) 
+        {
             ld_code_start = strtoul(line.data(), nullptr, 16);
             ld_code_end = strtoul(line.data()+13, nullptr, 16);
-        } else if (line.find("ld-linux") != string::npos && line.find("rw-p") != string::npos) {
+        }
+
+        else if (line.find("ld-linux") != string::npos && line.find("rw-p") != string::npos) 
+        {
             ld_data_start = strtoul(line.data(), nullptr, 16);
             ld_data_end = strtoul(line.data()+13, nullptr, 16);
 
         }
-        else if (line.find("[stack]") != string::npos && !stack_base) {
+        else if (line.find("[stack]") != string::npos && !stack_base) 
+        {
             stack_base = strtoul(line.data(), nullptr, 16);
             stack_end = strtoul(line.data()+13, nullptr, 16);
 
-        } else if (line.find("[heap]") != string::npos && !heap_base) {
+        } 
+        else if (line.find("[heap]") != string::npos && !heap_base) 
+        {
             heap_base = strtoul(line.data(), nullptr, 16);
             heap_end = strtoul(line.data()+13, nullptr, 16);
             
-        } else if (line.find("[vdso]") != string::npos && line.find("r-xp") != string::npos && !vdso_code_start) {
+        }
+        else if (line.find("[vdso]") != string::npos && line.find("r-xp") != string::npos && !vdso_code_start) 
+        {
             vdso_code_start = strtoul(line.data(), nullptr, 16);
             vdso_code_end = strtoul(line.data()+13, nullptr, 16);
         }
@@ -89,17 +106,23 @@ void show_vmmap(pid_t pid)
     string line;
     while(getline(inf, line))
     {
-        if (line.find("-xp") != string::npos) {
+        if (line.find("-xp") != string::npos) 
+        {
             printf("\033[31m%s\033[0m\n", line.c_str());
-        } else if (line.find("rw-p") != string::npos) {
-            if (line.find("[stack]") != string::npos){
+        } else if (line.find("rw-p") != string::npos) 
+        {
+            if (line.find("[stack]") != string::npos)
+            {
                 printf("\033[33m%s\033[0m\n", line.c_str());
-            } else if (line.find("[heap]") != string::npos){
+            } else if (line.find("[heap]") != string::npos)
+            {
                 printf("\033[34m%s\033[0m\n", line.c_str());
-            } else {
+            } else 
+            {
                 printf("\033[35m%s\033[0m\n", line.c_str());
             }
-        } else {
+        } else 
+        {
             printf("%s\n", line.c_str());
         }
     }

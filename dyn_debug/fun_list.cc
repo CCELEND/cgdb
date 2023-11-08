@@ -79,7 +79,7 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
     }
 }
 
-// test
+// show
 void show_fun_list(struct fun_info_type* fun_info)
 {
     for (int i = 0; i < 0x10; i++ )

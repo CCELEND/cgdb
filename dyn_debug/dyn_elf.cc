@@ -13,25 +13,13 @@ string get_map_key_value(map<string, unsigned long long>& Map, unsigned long lon
     return "";
 }
 
-string addr_get_regs_fun(unsigned long long addr)
+string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr)
 {
     for (int i = 0; i < 10; i++)
     {
-        if(addr >= regs_fun_info.fun_list[i].fun_start_addr && 
-            addr <= regs_fun_info.fun_list[i].fun_end_addr )
-            return regs_fun_info.fun_list[i].fun_name;
-    }
-
-    return "";
-}
-
-string addr_get_dis_fun(unsigned long long addr)
-{
-    for (int i = 0; i < 5; i++)
-    {
-        if(addr >= dis_fun_info.fun_list[i].fun_start_addr && 
-            addr <= dis_fun_info.fun_list[i].fun_end_addr )
-            return dis_fun_info.fun_list[i].fun_name;
+        if(addr >= fun_info->fun_list[i].fun_start_addr && 
+            addr <= fun_info->fun_list[i].fun_end_addr )
+            return fun_info->fun_list[i].fun_name;
     }
 
     return "";

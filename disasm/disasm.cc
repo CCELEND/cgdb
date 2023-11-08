@@ -188,9 +188,11 @@ void disasm1(pid_t pid, unsigned long long rip_val)
           )
         {
             // printf("---0x%lx\n", insn[line-1].address);
-            clear_dis_fun_list(); // 清空函数列表
+            // clear_dis_fun_list(); // 清空函数列表
+            clear_fun_list(&dis_fun_info);
             for(int i = 0; i < 11 && i < count-1; i++)
-                set_dis_fun_list(insn[i].address);
+                // set_dis_fun_list(insn[i].address);
+                set_fun_list(&dis_fun_info, insn[i].address);
         }
 
         for (j = 0; j < 11 && j < count-1; j++)
@@ -201,13 +203,13 @@ void disasm1(pid_t pid, unsigned long long rip_val)
             for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
-            dis_fun_name = addr_get_dis_fun(insn[j].address);
+            dis_fun_name = addr_get_fun(&dis_fun_info, insn[j].address);
 
             // 根据地址得到函数偏移
-            fun_offset = addr_get_dis_fun_offset(insn[j].address);
+
+            fun_offset = addr_get_fun_offset(&dis_fun_info, insn[j].address);
 
             // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
-
             if (insn[j].address == rip_val)
             {
                 next_disasm_addr = insn[j + 1].address;

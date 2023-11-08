@@ -275,16 +275,10 @@ void run_dyn_debug(Binary* bin)
 
                 else if (strcmp(arguments[0], "test") == 0) {
                     // unsigned long long address = strtoul(arguments[1], nullptr, 16);
-                    // cout<< addr_get_glibc_fun(address)<<endl;
-                    // // address = get_fun_end_addr(pid, address);
-                    // address = get_glibc_fun_end(address);
-                    // printf("end: 0x%llx\n", address);
-                    printf("-------------regs:\n");
-                    show_regs_fun_list();
-                    printf("--------------dis:\n");
-                    show_dis_fun_list();
 
-                    printf("ddd\n");
+                    printf("-------------regs:\n");
+                    show_fun_list(&regs_fun_info);
+                    printf("--------------dis:\n");
                     show_fun_list(&dis_fun_info);
 
                     // for (auto it : fun_start) {

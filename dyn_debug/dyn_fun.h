@@ -132,8 +132,9 @@ void print_bytes(const char* tip, char* codes, int len);
 
 // dyn_elf
 string get_map_key_value(map<string, unsigned long long>& Map, unsigned long long fun_plt_addr);
-string addr_get_dis_fun(unsigned long long fun_addr);
-string addr_get_regs_fun(unsigned long long fun_addr);
+// string addr_get_dis_fun(unsigned long long fun_addr);
+// string addr_get_regs_fun(unsigned long long fun_addr);
+string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr);
 unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 
 // elf_fun
@@ -165,21 +166,10 @@ string addr_get_elf_fini(unsigned long long elf_fini_addr);
 // glibc data
 string addr_get_glibc_data(unsigned long long glibc_data_addr);
 
-// dis_fun_list
-void set_dis_fun_list(unsigned long long fun_addr);
-void clear_dis_fun_list();
-void show_dis_fun_list();
-int  addr_get_dis_fun_offset(unsigned long long addr);
-
-// regs_fun_list
-void set_regs_fun_list(unsigned long long fun_addr);
-void show_regs_fun_list();
-void clear_regs_fun_list();
-int  addr_get_regs_fun_offset(unsigned long long addr);
-
+// fun list
+void show_fun_list(struct fun_info_type* fun_info);
 void clear_fun_list(struct fun_info_type* fun_info);
 void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr);
-void show_fun_list(struct fun_info_type* fun_info);
 int  addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr);
 
 // break point
