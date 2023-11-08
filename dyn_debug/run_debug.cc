@@ -284,6 +284,9 @@ void run_dyn_debug(Binary* bin)
                     printf("--------------dis:\n");
                     show_dis_fun_list();
 
+                    printf("ddd\n");
+                    show_fun_list(&dis_fun_info);
+
                     // for (auto it : fun_start) {
                     //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
                     // }

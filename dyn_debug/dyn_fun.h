@@ -177,6 +177,10 @@ void show_regs_fun_list();
 void clear_regs_fun_list();
 int  addr_get_regs_fun_offset(unsigned long long addr);
 
+void clear_fun_list(struct fun_info_type* fun_info);
+void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr);
+void show_fun_list(struct fun_info_type* fun_info);
+int  addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr);
 
 // break point
 int  break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag);
