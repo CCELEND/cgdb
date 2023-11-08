@@ -31,14 +31,19 @@ void get_vma_address(pid_t pid)
             libc_code_end = strtoul(line.data()+13, nullptr, 16);
         } else if (line.find("libc") != string::npos && line.find("rw-p") != string::npos && !libc_data_start){
             libc_data_start = strtoul(line.data(), nullptr, 16);
+            // libc_data_end = strtoul(line.data()+13, nullptr, 16);
+        } else if (line.find("-55") == string::npos && 
+            line.find("ld-linux") == string::npos && line.find("[stack]") == string::npos &&
+            line.find("rw-p") != string::npos ) {
             libc_data_end = strtoul(line.data()+13, nullptr, 16);
+        }
 
-        } else if (line.find("ld-linux") != string::npos && !ld_base) {
+        else if (line.find("ld-linux") != string::npos && !ld_base) {
             ld_base = strtoul(line.data(), nullptr, 16);
         } else if (line.find("ld-linux") != string::npos && line.find("r-xp") != string::npos && !ld_code_start) {
             ld_code_start = strtoul(line.data(), nullptr, 16);
             ld_code_end = strtoul(line.data()+13, nullptr, 16);
-        } else if (line.find("ld-linux") != string::npos && line.find("rw-p") != string::npos && !ld_data_start) {
+        } else if (line.find("ld-linux") != string::npos && line.find("rw-p") != string::npos) {
             ld_data_start = strtoul(line.data(), nullptr, 16);
             ld_data_end = strtoul(line.data()+13, nullptr, 16);
 

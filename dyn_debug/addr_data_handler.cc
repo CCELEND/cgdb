@@ -91,14 +91,20 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             set_regs_fun_list(addr);
             fun_name = addr_get_regs_fun(addr);
             offset = addr_get_regs_fun_offset(addr);
-            printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+            if (!offset)
+                printf("\033[31m0x%llx (elf.%s)\033[0m", addr, fun_name.c_str());
+            else
+                printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
         } else if (addr > libc_code_start && addr < libc_code_end) {
             // printf("\033[31m0x%llx (libc)\033[0m", addr);
             set_regs_fun_list(addr);
             fun_name = addr_get_regs_fun(addr);
             offset = addr_get_regs_fun_offset(addr);
-            printf("\033[31m0x%llx (libc.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+            if (!offset)
+                printf("\033[31m0x%llx (libc.%s)\033[0m", addr, fun_name.c_str());
+            else
+                printf("\033[31m0x%llx (libc.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
         } else if (addr > stack_base && addr < stack_end) {
             printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-stack_base);
@@ -110,7 +116,10 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             set_regs_fun_list(addr);
             fun_name = addr_get_regs_fun(addr);
             offset = addr_get_regs_fun_offset(addr);
-            printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+            if (!offset)
+                printf("\033[31m0x%llx (ld.%s)\033[0m", addr, fun_name.c_str());
+            else
+                printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
         } else if (addr > ld_data_start && addr < ld_data_end){
             data_name = addr_get_glibc_data(addr); 

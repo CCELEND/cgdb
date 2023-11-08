@@ -100,6 +100,7 @@ void flow_change_op(char* ops)
 {
     unsigned long long flow_change_addr;
     string flow_change_fun_name = "";
+    int offset;
     flow_change_addr = strtoul(ops, nullptr, 16);
     if (!flow_change_addr)
         return;
@@ -131,6 +132,14 @@ void flow_change_op(char* ops)
         }
 
     }
+
+    // set_dis_fun_list(flow_change_addr);
+    // flow_change_fun_name = addr_get_dis_fun(flow_change_addr);
+    // offset = addr_get_dis_fun_offset(flow_change_addr);
+    // if (!offset)
+    //     cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+    // else
+    //     printf("<\033[31m%s+%d\033[0m>", flow_change_fun_name.c_str(), offset);
 }
 
 void disasm1(pid_t pid, unsigned long long rip_val)
@@ -245,6 +254,7 @@ void disasm1(pid_t pid, unsigned long long rip_val)
                         strcmp(insn[j].mnemonic, "jmp" ) == 0 || 
                         strcmp(insn[j].mnemonic, "je"  ) == 0 || strcmp(insn[j].mnemonic, "ja" ) == 0 )
                     {
+
                         flow_change_op(insn[j].op_str);
                     }
 

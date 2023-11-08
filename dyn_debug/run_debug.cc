@@ -232,23 +232,28 @@ void run_dyn_debug(Binary* bin)
                 } else if (strcmp(arguments[0], "vmmap") == 0) {
                     show_vmmap(pid);
                 } else if (strcmp(arguments[0], "libc") == 0) {
-                    printf("[+] Libc base: 0x%llx\n", libc_base);
-                    printf("[+] Ld base: 0x%llx\n", ld_base);
+                    printf("[+] libc base: 0x%llx\n", libc_base);
+                    printf("[+] ld base: 0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "stack_addr") == 0) {
-                    printf("[+] Stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
+                    printf("[+] stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
                 } else if (strcmp(arguments[0], "heap_addr") == 0) {
-                    printf("[+] Heap: \033[34m0x%llx-0x%llx\033[0m\n", heap_base, heap_end);
+                    printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n", heap_base, heap_end);
                 } else if (strcmp(arguments[0], "code") == 0) {
-                    printf("[+] Elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
-                    printf("[+] Libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
-                    printf("[+] Ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
+                    printf("[+] elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
+                    printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
+                    printf("[+] ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
                     printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
                 } else if (strcmp(arguments[0], "base") == 0) {
-                    printf("[+] Ini Base addr: 0x%llx\n", elf_ini_start);
-                    printf("[+] Base addr: 0x%llx\n", elf_base);
-                    printf("[+] Libc base: 0x%llx\n", libc_base);
-                    printf("[+] Ld base: 0x%llx\n", ld_base);
-                } else if (strcmp(arguments[0], "lplt") == 0) {
+                    printf("[+] elf ini base: 0x%llx\n", elf_ini_start);
+                    printf("[+] elf base: 0x%llx\n", elf_base);
+                    printf("[+] libc base: 0x%llx\n", libc_base);
+                    printf("[+] ld base: 0x%llx\n", ld_base);
+                } else if (strcmp(arguments[0], "data") == 0) {
+                    printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", libc_data_start, libc_data_end);
+                    printf("[+] ld data: \033[35m0x%llx-0x%llx\033[0m\n", ld_data_start, ld_data_end);
+
+                }
+                else if (strcmp(arguments[0], "lplt") == 0) {
                     show_elf_plt_fun();
                 } else if (strcmp(arguments[0], "plt") == 0) {
                     if (argc == 2) {
@@ -274,9 +279,9 @@ void run_dyn_debug(Binary* bin)
                     // // address = get_fun_end_addr(pid, address);
                     // address = get_glibc_fun_end(address);
                     // printf("end: 0x%llx\n", address);
-                    printf("regs:\n");
+                    printf("-------------regs:\n");
                     show_regs_fun_list();
-                    printf("dis:\n");
+                    printf("--------------dis:\n");
                     show_dis_fun_list();
 
                     // for (auto it : fun_start) {
