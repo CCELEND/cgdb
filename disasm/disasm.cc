@@ -115,7 +115,7 @@ void flow_change_op(char* ops)
         printf("<\033[31m%s+%d\033[0m>", flow_change_fun_name.c_str(), offset);
 }
 
-void disasm1(pid_t pid, unsigned long long rip_val)
+void show_disasm(pid_t pid, unsigned long long rip_val)
 {
     csh handle;
     cs_insn *insn;

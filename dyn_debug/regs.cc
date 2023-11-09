@@ -44,6 +44,26 @@ void show_regs(pid_t pid, struct user_regs_struct* regs)
     regs_val[14] != last_regs.rbp ? printf("\033[31m\033[1m*RBP\033[0m     ") : printf(" RBP     "); show_addr_point(pid, regs_val[14],  true); printf("\n");
     regs_val[15] != last_regs.rsp ? printf("\033[31m\033[1m*RSP\033[0m     ") : printf(" RSP     "); show_addr_point(pid, regs_val[15],  true); printf("\n");
     regs_val[16] != last_regs.rip ? printf("\033[31m\033[1m*RIP\033[0m     ") : printf(" RIP     "); show_addr_point(pid, regs_val[16],  true); printf("\n");
+
+}
+
+// 反汇编 rip 指令
+// void regs_disasm_info(pid_t pid, struct user_regs_struct* regs)
+// {
+//     // if (libc_base == 0) 
+//     get_vma_address(pid);
+//     show_regs(pid, regs);
+//     copy_regs_to_last_regs(&last_regs, regs);
+//     show_disasm(pid, regs->rip);
+// }
+
+void copy_regs_to_last_regs(struct user_regs_struct* last_regs, 
+    struct user_regs_struct* regs)
+{
+    memcpy(last_regs, regs, sizeof(struct user_regs_struct));
+}
+
+
     // printf("RAX      "); show_addr_point(pid, regs_val[0],  true); printf("\n");
     // printf("RBX      "); show_addr_point(pid, regs_val[1],  true); printf("\n");
     // printf("RCX      "); show_addr_point(pid, regs_val[2],  true); printf("\n");
@@ -61,22 +81,4 @@ void show_regs(pid_t pid, struct user_regs_struct* regs)
     // printf("RBP      "); show_addr_point(pid, regs_val[14], true); printf("\n");
     // printf("RSP      "); show_addr_point(pid, regs_val[15], true); printf("\n");
     // printf("RIP      "); show_addr_point(pid, regs_val[16], true); printf("\n");
-
-}
-
-// 反汇编 rip 指令
-void regs_disasm_info(pid_t pid, struct user_regs_struct* regs)
-{
-    // if (libc_base == 0) 
-    get_vma_address(pid);
-    show_regs(pid, regs);
-    copy_regs_to_last_regs(&last_regs, regs);
-    disasm1(pid, regs->rip);
-}
-
-void copy_regs_to_last_regs(struct user_regs_struct* last_regs, 
-    struct user_regs_struct* regs)
-{
-    memcpy(last_regs, regs, sizeof(struct user_regs_struct));
-}
 

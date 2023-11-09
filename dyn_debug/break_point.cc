@@ -82,7 +82,7 @@ void break_point_delete(pid_t pid, int num)
 // 断点处理
 int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag) 
 {
-    struct user_regs_struct regs{};
+    struct user_regs_struct bp_regs{};
     // 判断信号类型
     // exit 信号
     if (WIFEXITED(status)) {
@@ -95,13 +95,13 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
         // 如果触发了 SIGTRAP,说明碰到了断点
         if (WSTOPSIG(status) == SIGTRAP) 
         {                  
-            ptrace(PTRACE_GETREGS, pid, nullptr, &regs);    // 读取寄存器的值，为回退做准备
+            ptrace(PTRACE_GETREGS, pid, nullptr, &bp_regs);    // 读取寄存器的值，为回退做准备
 
             // 如果满足关系，说明断点命中
-            if (bp.addr != (regs.rip - 1)) 
+            if (bp.addr != (bp_regs.rip - 1)) 
             {
                 // 未命中
-                printf("\033[31m\033[1m[-] Break point: 0x%llx failure!\033[0m\n", regs.rip);
+                printf("\033[31m\033[1m[-] Break point: 0x%llx failure!\033[0m\n", bp_regs.rip);
                 return -1;
             } 
             else 
@@ -111,12 +111,17 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
                 // 把 INT 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 // 执行流回退，重新执行正确的指令
-                regs.rip = bp.addr;
-                ptrace(PTRACE_SETREGS, pid, nullptr, &regs);
+                bp_regs.rip = bp.addr;
+                ptrace(PTRACE_SETREGS, pid, nullptr, &bp_regs);
 
-                get_regs(pid, &regs);
-                regs_disasm_info(pid, &regs);
-                show_stack(pid, &regs);
+                // get_regs(pid, &regs);
+                // regs_disasm_info(pid, &regs);
+                // show_stack(pid, &regs);
+                // get_regs(pid, &bp_regs);
+                memcpy(&regs, &bp_regs, sizeof(struct user_regs_struct));
+                get_vma_address(pid);
+                show_regs_dis_stack_info(pid, &regs);
+                copy_regs_to_last_regs(&last_regs, &regs);
 
                 bp.addr = 0;
                 bp.break_point_state = false; // 命中断点之后取消断点

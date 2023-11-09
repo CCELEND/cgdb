@@ -32,7 +32,6 @@ unsigned long long disasm_addr = 0;
 unsigned long long next_disasm_addr = 0;
 bool disasm_addr_synchronous = true;
 
-// unsigned long long last_regs_val[17] = {0};
 struct user_regs_struct regs{};
 struct user_regs_struct last_regs{};
 
@@ -87,10 +86,11 @@ void run_dyn_debug(Binary* bin)
             map_fun_end(pid, bin);
             map_plt_fun_end(pid);
 
-            // struct user_regs_struct regs{};
             get_regs(pid, &regs);
-            regs_disasm_info(pid, &regs);
-            show_stack(pid, &regs);
+            show_regs_dis_stack_info(pid, &regs);
+            copy_regs_to_last_regs(&last_regs, &regs);
+            // regs_disasm_info(pid, &regs);
+            // show_stack(pid, &regs);
 
             // 开始轮询输入的命令
             while (true) {
@@ -121,9 +121,14 @@ void run_dyn_debug(Binary* bin)
                     // 等待主进程收到 sigtrap 信号
                     wait(&status);
 
+                    // get_regs(pid, &regs);
+                    // regs_disasm_info(pid, &regs);
+                    // show_stack(pid, &regs);
+                    get_vma_address(pid);
+                    
                     get_regs(pid, &regs);
-                    regs_disasm_info(pid, &regs);
-                    show_stack(pid, &regs);
+                    show_regs_dis_stack_info(pid, &regs);
+                    copy_regs_to_last_regs(&last_regs, &regs);
 
                     // 执行到最后一条指令, 子进程正常结束, 退出循环
                     if (WIFEXITED(status)) {
@@ -150,11 +155,12 @@ void run_dyn_debug(Binary* bin)
                     wait(&status);
                     int index = -1;
 
-                    for (int i = 0; i < 8; i++) {
-                        if (break_point_list[i].break_point_state) {
-                            if (libc_base == 0){
-                                get_vma_address(pid);
-                            }
+                    for (int i = 0; i < 8; i++) 
+                    {
+                        if (break_point_list[i].break_point_state) 
+                        {
+                            if (libc_base == 0) get_vma_address(pid);
+
                             index = i;
                             break;
                         }
@@ -228,7 +234,8 @@ void run_dyn_debug(Binary* bin)
                         }
                     }
                 } else if (strcmp(arguments[0], "stack") == 0){
-                    if (argc == 2) { // 打断点
+                    if (argc == 2) 
+                    {
                         get_regs(pid, &regs);
                         int num = stoi(arguments[1]);
                         show_num_stack(pid, &regs, num);
@@ -244,24 +251,24 @@ void run_dyn_debug(Binary* bin)
                     show_vmmap(pid);
                 } else if (strcmp(arguments[0], "libc") == 0) {
                     printf("[+] libc base: 0x%llx\n", libc_base);
-                    printf("[+] ld base: 0x%llx\n", ld_base);
+                    printf("[+] ld base:   0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "stack_addr") == 0) {
                     printf("[+] stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
                 } else if (strcmp(arguments[0], "heap_addr") == 0) {
                     printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n", heap_base, heap_end);
                 } else if (strcmp(arguments[0], "code") == 0) {
-                    printf("[+] elf code: \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start, elf_code_end);
+                    printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start,  elf_code_end);
                     printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
-                    printf("[+] ld code: \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start, ld_code_end);
+                    printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start,   ld_code_end);
                     printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
                 } else if (strcmp(arguments[0], "base") == 0) {
                     printf("[+] elf ini base: 0x%llx\n", elf_ini_start);
-                    printf("[+] elf base: 0x%llx\n", elf_base);
-                    printf("[+] libc base: 0x%llx\n", libc_base);
-                    printf("[+] ld base: 0x%llx\n", ld_base);
+                    printf("[+] elf base:     0x%llx\n", elf_base);
+                    printf("[+] libc base:    0x%llx\n", libc_base);
+                    printf("[+] ld base:      0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "data") == 0) {
                     printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", libc_data_start, libc_data_end);
-                    printf("[+] ld data: \033[35m0x%llx-0x%llx\033[0m\n", ld_data_start, ld_data_end);
+                    printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", ld_data_start,   ld_data_end);
 
                 }
                 else if (strcmp(arguments[0], "lplt") == 0) {

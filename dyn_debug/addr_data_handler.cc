@@ -107,8 +107,10 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
         } else if (addr > stack_base && addr < stack_end) {
             if (addr > regs.rsp)
                 printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-regs.rsp);
-            else
+            else if(addr < regs.rsp) 
                 printf("\033[33m0x%llx (stack-0x%llx)\033[0m", addr, regs.rsp-addr);
+            else
+                printf("\033[33m0x%llx (stack)\033[0m", addr);
 
         } else if (addr > heap_base && addr < heap_end) {
             printf("\033[34m0x%llx (heap+0x%llx)\033[0m", addr, addr-heap_base);

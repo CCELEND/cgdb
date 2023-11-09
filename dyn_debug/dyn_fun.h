@@ -76,7 +76,6 @@ extern map<string, unsigned long long> elf_fun_start;
 extern map<string, unsigned long long> elf_fun_end;
 extern map<string, unsigned long long> elf_plt_fun_end;
 
-// extern unsigned long long last_regs_val[17];
 extern struct user_regs_struct regs;
 extern struct user_regs_struct last_regs;
 
@@ -126,6 +125,9 @@ void copy_regs_to_last_regs(struct user_regs_struct* last_regs,
 // stack
 void show_stack(pid_t pid, struct user_regs_struct* regs);
 void show_num_stack(pid_t pid, struct user_regs_struct* regs, int num);
+
+// void show_regs_dis_stack_info(pid_t pid);
+void show_regs_dis_stack_info(pid_t pid, struct user_regs_struct* regs);
 
 // addr handle
 unsigned long long get_addr_val(pid_t pid, unsigned long long addr);

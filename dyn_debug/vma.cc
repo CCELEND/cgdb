@@ -4,7 +4,7 @@
 // 得到虚拟内存地址
 void get_vma_address(pid_t pid)
 {
-    if (libc_base) return;
+    // if (libc_base) return;
 
     string maps_path = "/proc/" + to_string(pid) + "/maps";
     ifstream inf(maps_path.data());//建立输入流
@@ -19,65 +19,156 @@ void get_vma_address(pid_t pid)
     elf_base = strtoul(line.data(), nullptr, 16);
     while(getline(inf, line))
     {
-        if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos && !elf_code_start) {
-            elf_code_start = strtoul(line.data(), nullptr, 16);
-            elf_code_end = strtoul(line.data()+13, nullptr, 16);
-        } 
-        else if (line.find("libc") != string::npos && !libc_base) 
+        // elf
+        if ( line.find("-55") != string::npos || line.find("-56") != string::npos )
         {
-            libc_base = strtoul(line.data(), nullptr, 16);
-        } 
-        else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos && !libc_code_start) 
-        {
-            libc_code_start = strtoul(line.data(), nullptr, 16);
-            libc_code_end = strtoul(line.data()+13, nullptr, 16);
-        } 
-        else if (line.find("libc") != string::npos && line.find("rw-p") != string::npos && !libc_data_start)
-        {
-            libc_data_start = strtoul(line.data(), nullptr, 16);
-        } 
-        else if (line.find("-55") == string::npos && 
-              line.find("ld-linux") == string::npos && line.find("[stack]") == string::npos &&
-              line.find("rw-p") != string::npos ) {
-            libc_data_end = strtoul(line.data()+13, nullptr, 16);
-        }
-
-        else if (line.find("ld-linux") != string::npos && !ld_base) 
-        {
-            ld_base = strtoul(line.data(), nullptr, 16);
-        }
-        else if (line.find("ld-linux") != string::npos && 
-                 line.find("r-xp"    ) != string::npos && 
-                 !ld_code_start) 
-        {
-            ld_code_start = strtoul(line.data(), nullptr, 16);
-            ld_code_end = strtoul(line.data()+13, nullptr, 16);
-        }
-
-        else if (line.find("ld-linux") != string::npos && line.find("rw-p") != string::npos) 
-        {
-            ld_data_start = strtoul(line.data(), nullptr, 16);
-            ld_data_end = strtoul(line.data()+13, nullptr, 16);
+            if ( line.find("r-xp") != string::npos && 
+                 !elf_code_start )
+            {
+                elf_code_start = strtoul(line.data(), nullptr, 16);
+                elf_code_end   = strtoul(line.data()+13, nullptr, 16);
+            }
+            else if ( line.find("rw-p") != string::npos && 
+                      line.find("[heap]") != string::npos &&
+                      !heap_base)
+            {
+                heap_base = strtoul(line.data(), nullptr, 16);
+                heap_end  = strtoul(line.data()+13, nullptr, 16);
+            }
 
         }
-        else if (line.find("[stack]") != string::npos && !stack_base) 
-        {
-            stack_base = strtoul(line.data(), nullptr, 16);
-            stack_end = strtoul(line.data()+13, nullptr, 16);
+        // glibc stack
+        else {
 
-        }
-        
-        else if (line.find("[heap]") != string::npos && !heap_base) 
-        {
-            heap_base = strtoul(line.data(), nullptr, 16);
-            heap_end = strtoul(line.data()+13, nullptr, 16);
+            if ( line.find("libc") != string::npos && 
+                 !libc_base) 
+            {
+                libc_base = strtoul(line.data(), nullptr, 16);
+            }
+
+            else if ( line.find("libc") != string::npos && 
+                      line.find("r-xp") != string::npos && 
+                      !libc_code_start ) 
+            {
+                libc_code_start = strtoul(line.data(), nullptr, 16);
+                libc_code_end   = strtoul(line.data()+13, nullptr, 16);
+            }
+
+            else if ( line.find("libc") != string::npos && 
+                      line.find("rw-p") != string::npos && 
+                      !libc_data_start)
+            {
+                libc_data_start = strtoul(line.data(), nullptr, 16);
+            }
+
+            else if ( line.find("ld-linux") == string::npos && 
+                      line.find("[stack]") == string::npos &&
+                      line.find("rw-p") != string::npos ) 
+            {
+                libc_data_end = strtoul(line.data()+13, nullptr, 16);
+            }
+
+            else if ( line.find("ld-linux") != string::npos && 
+                      !ld_base ) 
+            {
+                ld_base = strtoul(line.data(), nullptr, 16);
+            }
+
+            else if ( line.find("ld-linux") != string::npos && 
+                      line.find("r-xp"    ) != string::npos && 
+                      !ld_code_start ) 
+            {
+                ld_code_start = strtoul(line.data(), nullptr, 16);
+                ld_code_end   = strtoul(line.data()+13, nullptr, 16);
+            }
+
+            else if ( line.find("ld-linux") != string::npos && 
+                      line.find("rw-p") != string::npos ) 
+            {
+                ld_data_start = strtoul(line.data(), nullptr, 16);
+                ld_data_end   = strtoul(line.data()+13, nullptr, 16);
+
+            }
+
+            else if ( line.find("[stack]") != string::npos && 
+                      !stack_base) 
+            {
+                stack_base = strtoul(line.data(), nullptr, 16);
+                stack_end  = strtoul(line.data()+13, nullptr, 16);
+
+            }
             
+            else if ( line.find("[vdso]") != string::npos && 
+                      line.find("r-xp") != string::npos && 
+                      !vdso_code_start) 
+            {
+                vdso_code_start = strtoul(line.data(), nullptr, 16);
+                vdso_code_end   = strtoul(line.data()+13, nullptr, 16);
+            }
         }
-        else if (line.find("[vdso]") != string::npos && line.find("r-xp") != string::npos && !vdso_code_start) 
-        {
-            vdso_code_start = strtoul(line.data(), nullptr, 16);
-            vdso_code_end = strtoul(line.data()+13, nullptr, 16);
-        }
+
+
+        // if (line.find("-7f") == string::npos && line.find("r-xp") != string::npos && !elf_code_start) {
+
+        // } 
+
+        // else if (line.find("rw-p") != string::npos && line.find("[heap]") != string::npos && !heap_base) 
+        // {
+        //     printf("heapheap\n");
+        //     heap_base = strtoul(line.data(), nullptr, 16);
+        //     heap_end  = strtoul(line.data()+13, nullptr, 16);
+            
+        // }
+
+        // else if (line.find("libc") != string::npos && !libc_base) 
+        // {
+        //     libc_base = strtoul(line.data(), nullptr, 16);
+        // } 
+        // else if (line.find("libc") != string::npos && line.find("r-xp") != string::npos && !libc_code_start) 
+        // {
+        //     libc_code_start = strtoul(line.data(), nullptr, 16);
+        //     libc_code_end   = strtoul(line.data()+13, nullptr, 16);
+        // } 
+        // else if (line.find("libc") != string::npos && line.find("rw-p") != string::npos && !libc_data_start)
+        // {
+        //     libc_data_start = strtoul(line.data(), nullptr, 16);
+        // } 
+        // else if ( line.find("-55") == string::npos && 
+        //           line.find("ld-linux") == string::npos && line.find("[stack]") == string::npos &&
+        //           line.find("rw-p") != string::npos ) {
+        //     libc_data_end = strtoul(line.data()+13, nullptr, 16);
+        // }
+
+        // else if (line.find("ld-linux") != string::npos && !ld_base) 
+        // {
+        //     ld_base = strtoul(line.data(), nullptr, 16);
+        // }
+        // else if ( line.find("ld-linux") != string::npos && 
+        //           line.find("r-xp"    ) != string::npos && 
+        //           !ld_code_start ) 
+        // {
+        //     ld_code_start = strtoul(line.data(), nullptr, 16);
+        //     ld_code_end   = strtoul(line.data()+13, nullptr, 16);
+        // }
+
+        // else if (line.find("ld-linux") != string::npos && line.find("rw-p") != string::npos) 
+        // {
+        //     ld_data_start = strtoul(line.data(), nullptr, 16);
+        //     ld_data_end   = strtoul(line.data()+13, nullptr, 16);
+
+        // }
+        // else if (line.find("[stack]") != string::npos && !stack_base) 
+        // {
+        //     stack_base = strtoul(line.data(), nullptr, 16);
+        //     stack_end  = strtoul(line.data()+13, nullptr, 16);
+
+        // }
+        
+        // else if (line.find("[vdso]") != string::npos && line.find("r-xp") != string::npos && !vdso_code_start) 
+        // {
+        //     vdso_code_start = strtoul(line.data(), nullptr, 16);
+        //     vdso_code_end   = strtoul(line.data()+13, nullptr, 16);
+        // }
 
     }
 
