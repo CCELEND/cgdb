@@ -1,12 +1,13 @@
 
 #include "dyn_fun.h"
 
-
 // 输出 fun arg
-void show_fun_args(char* ops, 
+void show_fun_args(pid_t pid, char* mnemonic, char* ops, 
     struct user_regs_struct* regs, struct user_regs_struct* last_regs)
 {
-    if (regs->rdi != last_regs->rdi || string(ops).find("rdi") != string::npos) {
+    if (regs->rdi != last_regs->rdi || string(ops).find("rdi") != string::npos && 
+        string(mnemonic).find("mov") != string::npos) 
+    {
         printf("        rdi: "); show_addr_point(pid, regs->rdi,   true); printf("\n");
     }
     else if (regs->rsi != last_regs->rsi) {

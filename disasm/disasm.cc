@@ -198,8 +198,8 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
                     strcmp(insn[j].mnemonic, "ja" )  == 0 )
                 {
                     flow_change_op(insn[j].op_str);
-                    show_fun_args(insn[j-1].op_str, &regs, &last_regs);
                     printf("\n");
+                    show_fun_args(pid, insn[j-1].mnemonic, insn[j-1].op_str, &regs, &last_regs);
                 }
 
                 printf("\n");
