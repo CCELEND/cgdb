@@ -121,11 +121,7 @@ void run_dyn_debug(Binary* bin)
                     // 等待主进程收到 sigtrap 信号
                     wait(&status);
 
-                    // get_regs(pid, &regs);
-                    // regs_disasm_info(pid, &regs);
-                    // show_stack(pid, &regs);
                     get_vma_address(pid);
-                    
                     get_regs(pid, &regs);
                     show_regs_dis_stack_info(pid, &regs);
                     copy_regs_to_last_regs(&last_regs, &regs);
@@ -159,7 +155,7 @@ void run_dyn_debug(Binary* bin)
                     {
                         if (break_point_list[i].break_point_state) 
                         {
-                            if (libc_base == 0) get_vma_address(pid);
+                            // if (libc_base == 0) get_vma_address(pid);
 
                             index = i;
                             break;
@@ -283,13 +279,7 @@ void run_dyn_debug(Binary* bin)
                     } else {
                         err_info("Please enter the function address!");
                     }
-                } 
-
-                // else if (strcmp(arguments[0], " ") == 0) {
-                //     myargv.clear();
-                //     cmd = "si";
-                //     goto debug_start;
-                // }
+                }
 
                 else if (strcmp(arguments[0], "test") == 0) {
                     // unsigned long long address = strtoul(arguments[1], nullptr, 16);

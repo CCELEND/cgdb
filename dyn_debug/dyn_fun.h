@@ -199,6 +199,9 @@ void show_vmmap(pid_t pid);
 // elf rodata
 void set_elf_rdata(Binary* bin);
 
+void show_fun_args(char* ops, 
+    struct user_regs_struct* regs, struct user_regs_struct* last_regs);
+
 // info
 void arg_error(const char* cgdb);
 void err_exit (const char* msg);

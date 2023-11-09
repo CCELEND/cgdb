@@ -47,16 +47,6 @@ void show_regs(pid_t pid, struct user_regs_struct* regs)
 
 }
 
-// 反汇编 rip 指令
-// void regs_disasm_info(pid_t pid, struct user_regs_struct* regs)
-// {
-//     // if (libc_base == 0) 
-//     get_vma_address(pid);
-//     show_regs(pid, regs);
-//     copy_regs_to_last_regs(&last_regs, regs);
-//     show_disasm(pid, regs->rip);
-// }
-
 void copy_regs_to_last_regs(struct user_regs_struct* last_regs, 
     struct user_regs_struct* regs)
 {
