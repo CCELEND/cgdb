@@ -185,14 +185,15 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please enter the address and read quantity!");
                     }
                 } else if (strcmp(arguments[0], "ic") == 0) { // 计算执行完毕所需指令数
+                    printf("[*] Calculating the number of instructions after this...\n");
                     long count = 0;
                     while (true) {
 
                         // 当前子进程还是暂停状态，父进程被阻塞
                         wait(&status);
                         if (WIFEXITED(status)) {
-                            printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
-                            printf("[+] Total instruction count: \033[32m\033[1m%ld\033[0m\n", 
+                            printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
+                            printf("[+] Total instruction count: \033[32m%ld\033[0m\n", 
                                 count);
                             goto debug_stop;
                         }
