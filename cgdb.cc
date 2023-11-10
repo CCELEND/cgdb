@@ -5,6 +5,7 @@
 
 // 定义全局变量
 vector<string> myargv;
+string old_cmd;
 string cmd;
 string fname;
 
@@ -25,7 +26,6 @@ int main(int argc, char *argv[])
     if(load_binary(fname, &bin, Binary::BIN_TYPE_AUTO) < 0) {
         err_exit("Program loading failed!");
     }
-
     map_fun_plt();
 
     while (true) {
@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 
         if (cmd == "q") {
             goto cgdb_exit;
+
         } else if (cmd == "sym") {
             show_elf_symbol(&bin);
 
