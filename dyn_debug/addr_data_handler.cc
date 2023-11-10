@@ -129,14 +129,14 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             if (data_name != "")
                 printf("\033[35m0x%llx (ld.%s)\033[0m", addr, data_name.c_str());
             else
-                printf("\033[35m0x%llx (ld)\033[0m", addr);
+                printf("\033[35m0x%llx (ld[data])\033[0m", addr);
 
         } else if (addr > libc_data_start && addr < libc_data_end) {
             data_name = addr_get_glibc_data(addr);
             if (data_name != "")
                 printf("\033[35m0x%llx (libc.%s)\033[0m", addr, data_name.c_str());
             else
-                printf("\033[35m0x%llx (libc)\033[0m", addr);
+                printf("\033[35m0x%llx (libc[data])\033[0m", addr);
 
         } else if (addr > elf_ini_start && addr < elf_ini_end){
             ini_name = addr_get_elf_fini(addr);

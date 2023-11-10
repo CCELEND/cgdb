@@ -34,38 +34,39 @@ using namespace std;
 extern vector<string> myargv;
 // 当前命令字符串
 extern string cmd;
-
 extern string fname;
-
-// extern string dis_fun_name;
 
 // 一些 vma 地址
 extern unsigned long long elf_base;
 extern unsigned long long elf_code_start;
 extern unsigned long long elf_code_end;
+extern unsigned long long elf_data_start;
+extern unsigned long long elf_data_end;
 extern unsigned long long elf_ini_start;
 extern unsigned long long elf_ini_end;
 extern unsigned long long elf_rodata_start;
 extern unsigned long long elf_rodata_end;
 
-extern unsigned long long libc_base;
-extern unsigned long long libc_code_start;
-extern unsigned long long libc_code_end;
-extern unsigned long long ld_base;
-extern unsigned long long ld_code_start;
-extern unsigned long long ld_code_end;
-extern unsigned long long vdso_code_start;
-extern unsigned long long vdso_code_end;
-
-extern unsigned long long ld_data_start;
-extern unsigned long long ld_data_end;
-extern unsigned long long libc_data_start;
-extern unsigned long long libc_data_end;
-
 extern unsigned long long heap_base;
 extern unsigned long long heap_end;
 extern unsigned long long stack_base;
 extern unsigned long long stack_end;
+
+extern unsigned long long libc_base;
+extern unsigned long long libc_code_start;
+extern unsigned long long libc_code_end;
+extern unsigned long long libc_data_start;
+extern unsigned long long libc_data_end;
+
+extern unsigned long long ld_base;
+extern unsigned long long ld_code_start;
+extern unsigned long long ld_code_end;
+extern unsigned long long ld_data_start;
+extern unsigned long long ld_data_end;
+
+extern unsigned long long vdso_code_start;
+extern unsigned long long vdso_code_end;
+
 
 // 每次反汇编的开始地址
 extern unsigned long long disasm_addr;
@@ -151,8 +152,8 @@ unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 string addr_get_elf_fun(unsigned long long elf_fun_addr);
 void map_fun_start(pid_t pid, Binary* bin);
 void map_fun_end  (pid_t pid, Binary* bin);
-unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin);
 int addr_get_elf_fun_offset(unsigned long long addr);
+unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin);
 
 
 // elf_plt_fun
@@ -201,6 +202,8 @@ void set_elf_rdata(Binary* bin);
 
 void show_fun_args(pid_t pid, char* mnemonic, char* ops, 
     struct user_regs_struct* regs, struct user_regs_struct* last_regs);
+
+void show_elf_fun_call(pid_t pid, char* elf_fun_name, Binary* bin);
 
 // info
 void arg_error(const char* cgdb);

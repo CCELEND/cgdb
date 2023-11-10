@@ -11,12 +11,15 @@ string addr_get_glibc_data(unsigned long long glibc_data_addr)
     if (glibc_data_addr > ld_data_start && glibc_data_addr < ld_data_end) 
     {
         glibc_data_addr_offset = glibc_data_addr - ld_base;
-        command = std::string("objdump -d -j .data ld-linux-x86-64.so.2 | grep ");
+        // command = std::string("objdump -d -j .data ld-linux-x86-64.so.2 | grep ");
+        command = std::string("objdump -d -j .data 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
     else 
     {
         glibc_data_addr_offset = glibc_data_addr - libc_base;
-        command = std::string("objdump -d -j .data libc.so.6 | grep ");
+        // command = std::string("objdump -d -j .data libc.so.6 | grep ");
+        command = std::string("objdump -d -j .data 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+        
     }
 
     // stringstream 将十六进制数转换为字符串
@@ -48,7 +51,8 @@ string addr_get_glibc_data(unsigned long long glibc_data_addr)
         if (std::string(result).find("<") != std::string::npos) 
         {
             lib_data_str_start = std::string(result).find("<");
-            lib_data_str_end = std::string(result).find("@");
+            // lib_data_str_end = std::string(result).find("@");
+            lib_data_str_end = std::string(result).find(">");
             lib_data_name = std::string(result).substr(lib_data_str_start+1, 
                 lib_data_str_end - lib_data_str_start-1);
         }     

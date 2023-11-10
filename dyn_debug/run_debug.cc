@@ -4,29 +4,33 @@
 unsigned long long elf_base = 0;
 unsigned long long elf_code_start = 0;
 unsigned long long elf_code_end = 0;
+unsigned long long elf_data_start = 0;
+unsigned long long elf_data_end = 0;
 unsigned long long elf_ini_start = 0;
 unsigned long long elf_ini_end = 0;
 unsigned long long elf_rodata_start = 0;
 unsigned long long elf_rodata_end = 0;
 
-unsigned long long libc_base = 0;
-unsigned long long libc_code_start = 0;
-unsigned long long libc_code_end = 0;
-unsigned long long ld_base = 0;
-unsigned long long ld_code_start = 0;
-unsigned long long ld_code_end = 0;
-unsigned long long vdso_code_start = 0;
-unsigned long long vdso_code_end = 0;
-
-unsigned long long ld_data_start = 0;
-unsigned long long ld_data_end = 0;
-unsigned long long libc_data_start = 0;
-unsigned long long libc_data_end = 0;
-
 unsigned long long heap_base = 0;
 unsigned long long heap_end = 0;
 unsigned long long stack_base = 0;
 unsigned long long stack_end = 0;
+
+unsigned long long libc_base = 0;
+unsigned long long libc_code_start = 0;
+unsigned long long libc_code_end = 0;
+unsigned long long libc_data_start = 0;
+unsigned long long libc_data_end = 0;
+
+unsigned long long ld_base = 0;
+unsigned long long ld_code_start = 0;
+unsigned long long ld_code_end = 0;
+unsigned long long ld_data_start = 0;
+unsigned long long ld_data_end = 0;
+
+unsigned long long vdso_code_start = 0;
+unsigned long long vdso_code_end = 0;
+
 
 unsigned long long disasm_addr = 0;
 unsigned long long next_disasm_addr = 0;
@@ -89,8 +93,6 @@ void run_dyn_debug(Binary* bin)
             get_regs(pid, &regs);
             show_regs_dis_stack_info(pid, &regs);
             copy_regs_to_last_regs(&last_regs, &regs);
-            // regs_disasm_info(pid, &regs);
-            // show_stack(pid, &regs);
 
             // 开始轮询输入的命令
             while (true) {
@@ -229,7 +231,15 @@ void run_dyn_debug(Binary* bin)
                             );
                         }
                     }
-                } else if (strcmp(arguments[0], "stack") == 0){
+                } else if (strcmp(arguments[0], "fun") == 0){
+                    if (argc == 2) { // 打断点
+                        show_elf_fun_call(pid, arguments[1], bin);
+                    } else {
+                        err_info("Please enter the function name!");
+                    }
+                }
+
+                else if (strcmp(arguments[0], "stack") == 0){
                     if (argc == 2) 
                     {
                         get_regs(pid, &regs);
@@ -248,10 +258,10 @@ void run_dyn_debug(Binary* bin)
                 } else if (strcmp(arguments[0], "libc") == 0) {
                     printf("[+] libc base: 0x%llx\n", libc_base);
                     printf("[+] ld base:   0x%llx\n", ld_base);
-                } else if (strcmp(arguments[0], "stack_addr") == 0) {
+                } else if (strcmp(arguments[0], "stackbase") == 0) {
                     printf("[+] stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
-                } else if (strcmp(arguments[0], "heap_addr") == 0) {
-                    printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n", heap_base, heap_end);
+                } else if (strcmp(arguments[0], "heapbase") == 0) {
+                    printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n",  heap_base,  heap_end);
                 } else if (strcmp(arguments[0], "code") == 0) {
                     printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start,  elf_code_end);
                     printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
@@ -263,6 +273,7 @@ void run_dyn_debug(Binary* bin)
                     printf("[+] libc base:    0x%llx\n", libc_base);
                     printf("[+] ld base:      0x%llx\n", ld_base);
                 } else if (strcmp(arguments[0], "data") == 0) {
+                    printf("[+] elf data:  \033[35m0x%llx-0x%llx\033[0m\n", elf_data_start,  elf_data_end);
                     printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", libc_data_start, libc_data_end);
                     printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", ld_data_start,   ld_data_end);
 
