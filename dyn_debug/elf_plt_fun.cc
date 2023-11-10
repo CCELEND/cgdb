@@ -38,3 +38,5 @@ void map_plt_fun_end(pid_t pid)
     for (auto it : elf_plt_fun)
          elf_plt_fun_end[it.first] = it.second + elf_base + 0xb;
 }
+
+
