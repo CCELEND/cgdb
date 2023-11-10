@@ -141,7 +141,6 @@ void run_dyn_debug(Binary* bin)
                     wait(&status);
 
                     break_point_handler(pid, status, ni_break_point, false);
-
                 }
 
                 else if (strcmp(arguments[0], "c") == 0) {
