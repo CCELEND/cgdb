@@ -48,4 +48,7 @@ void show_help()
     printf(" \033[34mfun [fun name]\033[0m: Display the calling function of the this function\n");
     printf(" \033[34mlplt\033[0m: Display the PLT address of the libc function.\n");
     printf(" \033[34mplt [addr]\033[0m: Find the corresponding PLT function based on the address.\n");
+
+    printf(" \033[34mKEYCODE_U\033[0m: Enter the up key on the keyboard to execute the previous command.\n");
+
 }

@@ -100,12 +100,14 @@ void run_dyn_debug(Binary* bin)
                 printf("\033[32m\033[1mcgdb> \033[0m");
 
                 getline(cin, cmd);
+                // 上、下、左、右这四个光标键对应的 ASCII 码值不是一个值而是三个，
+                // 准确的说光标键的 ASCII 码值是一个组合
                 all_sum = cmd[0] + cmd[1] + cmd[2];
                 if (all_sum == KEYCODE_U)
                     cmd = old_cmd;
 
                 debug_start:
-                
+
                 //输入参数解析
                 argparse();
                 int argc = myargv.size();

@@ -31,9 +31,9 @@ using namespace std;
 #define CODE_SIZE 8
 
 #define KEYCODE_U 183
-#define KEYCODE_D 184
-#define KEYCODE_R 185
-#define KEYCODE_L 186
+// #define KEYCODE_D 184
+// #define KEYCODE_R 185
+// #define KEYCODE_L 186
 
 // 当前命令所有参数
 extern vector<string> myargv;
