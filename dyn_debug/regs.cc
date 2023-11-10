@@ -16,7 +16,12 @@ void show_regs(pid_t pid, struct user_regs_struct* regs)
     ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
     int count = (size.ws_col-13)/2;      // 要重复输出的次数
 
-    printf("LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA\n");
+    printf("LEGEND: "
+    "\033[33mSTACK\033[0m | "
+    "\033[34mHEAP\033[0m | "
+    "\033[31mCODE\033[0m | "
+    "\033[35mDATA\033[0m | RODATA\n");
+    
     show_str(count);
     printf("[ REGISTERS ]");
     show_str(count);
