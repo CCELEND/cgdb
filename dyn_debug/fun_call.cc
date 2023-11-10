@@ -32,7 +32,9 @@ void show_elf_fun_call(pid_t pid, char* elf_fun_name, Binary* bin)
     fun_size = fun_size + LONG_SIZE - fun_size % LONG_SIZE;
 
     get_addr_data(pid, fun_start_addr, fun_code, fun_size);
-    printf("  \033[31m%s\033[0m(0x%llx-0x%llx):\n", fun_name.c_str(), fun_start_addr, fun_end_addr);
+    printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
+    // printf("  \033[31m%s\033[0m(0x%llx-0x%llx):\n", fun_name.c_str(), fun_start_addr, fun_end_addr);
+    printf("\033[31m%s\033[0m():\n", fun_name.c_str());
     call_disasm(fun_code, fun_start_addr, fun_size, fun_name);
 
 }
