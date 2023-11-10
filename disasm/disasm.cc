@@ -96,6 +96,7 @@ void disasm(char* byte_codes,
     cs_close(&handle);
 }
 
+// 显示调用函数符号和信息
 void call_disasm(char* byte_codes, 
     unsigned long long addr, int num, string call_fun_name)
 {

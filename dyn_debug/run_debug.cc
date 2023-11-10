@@ -2,14 +2,14 @@
 #include "dyn_fun.h"
 
 unsigned long long elf_base = 0;
-unsigned long long elf_code_start = 0;
-unsigned long long elf_code_end = 0;
-unsigned long long elf_data_start = 0;
-unsigned long long elf_data_end = 0;
 unsigned long long elf_ini_start = 0;
 unsigned long long elf_ini_end = 0;
 unsigned long long elf_rodata_start = 0;
 unsigned long long elf_rodata_end = 0;
+unsigned long long elf_code_start = 0;
+unsigned long long elf_code_end = 0;
+unsigned long long elf_data_start = 0;
+unsigned long long elf_data_end = 0;
 
 unsigned long long heap_base = 0;
 unsigned long long heap_end = 0;
@@ -30,7 +30,6 @@ unsigned long long ld_data_end = 0;
 
 unsigned long long vdso_code_start = 0;
 unsigned long long vdso_code_end = 0;
-
 
 unsigned long long disasm_addr = 0;
 unsigned long long next_disasm_addr = 0;
@@ -56,7 +55,7 @@ struct fun_info_type flow_change_fun_info;
 void run_dyn_debug(Binary* bin)
 {
     pid_t pid;
-    Symbol *sym;
+    Symbol* sym;
     int status, num;
 
     // fork 子进程
@@ -81,7 +80,7 @@ void run_dyn_debug(Binary* bin)
             sleep(1);
             // 获取子进程的虚拟地址
             get_vma_address(pid);
-            printf("[+] Base addr: 0x%llx\n", elf_base);
+            printf("[+] elf base: 0x%llx\n", elf_base);
 
             set_elf_rdata(bin);
 
@@ -94,14 +93,19 @@ void run_dyn_debug(Binary* bin)
             show_regs_dis_stack_info(pid, &regs);
             copy_regs_to_last_regs(&last_regs, &regs);
 
+            int all_sum;
             // 开始轮询输入的命令
             while (true) {
 
                 printf("\033[32m\033[1mcgdb> \033[0m");
+
                 getline(cin, cmd);
+                all_sum = cmd[0] + cmd[1] + cmd[2];
+                if (all_sum == KEYCODE_U)
+                    cmd = old_cmd;
 
                 debug_start:
-
+                
                 //输入参数解析
                 argparse();
                 int argc = myargv.size();
@@ -115,9 +119,11 @@ void run_dyn_debug(Binary* bin)
                 if (strcmp(arguments[0], "q") == 0) {
                     // 杀死子进程，避免出现僵尸进程
                     ptrace(PTRACE_KILL, pid, nullptr, nullptr);
+                    // free(c);
                     goto debug_stop;
-                } else if (strcmp(arguments[0], "si") == 0) {//单步调试
-                    
+                } 
+                else if (strcmp(arguments[0], "si") == 0) {//单步调试
+                    old_cmd = cmd;
                     // 发送 single step 给子进程
                     ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
                     // 等待主进程收到 sigtrap 信号
@@ -133,7 +139,9 @@ void run_dyn_debug(Binary* bin)
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         break;
                     }
-                } else if (strcmp(arguments[0], "ni") == 0) {
+                } 
+                else if (strcmp(arguments[0], "ni") == 0) {
+                    old_cmd = cmd;
                     get_regs(pid, &regs);
                     set_ni_break_point(pid, regs.rip);
 
@@ -142,7 +150,6 @@ void run_dyn_debug(Binary* bin)
 
                     break_point_handler(pid, status, ni_break_point, false);
                 }
-
                 else if (strcmp(arguments[0], "c") == 0) {
                     printf("[*] Continuing...\n");
 
@@ -170,21 +177,8 @@ void run_dyn_debug(Binary* bin)
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         goto debug_stop;
                     }
-                } else if (strcmp(arguments[0], "x") == 0){
-                    if (argc == 3) 
-                    {
-                        int num = stoi(arguments[1]);
-                        if (num < 0) {
-                            err_info("Wrong number of reads!");
-                        }
-                        else {
-                            unsigned long long address = strtoul(arguments[2], nullptr, 16);
-                            show_addr_data(pid, num, address);
-                        }
-                    } else {
-                        err_info("Please enter the address and read quantity!");
-                    }
-                } else if (strcmp(arguments[0], "ic") == 0) { // 计算执行完毕所需指令数
+                } 
+                else if (strcmp(arguments[0], "ic") == 0) { // 计算执行完毕所需指令数
                     printf("[*] Calculating the number of instructions after this...\n");
                     long count = 0;
                     while (true) {
@@ -203,13 +197,16 @@ void run_dyn_debug(Binary* bin)
 
                         count++;
                     }
-                } else if (strcmp(arguments[0], "b") == 0) {
+                } 
+
+                else if (strcmp(arguments[0], "b") == 0) {
                     if (argc == 2) { // 打断点
                         set_break_point(pid, arguments[1], bin);
                     } else {
                         err_info("Please enter the break point address or function name!");
                     }
-                } else if(strcmp(arguments[0], "d") == 0 && strcmp(arguments[1], "b") == 0){
+                } 
+                else if (strcmp(arguments[0], "d") == 0 && strcmp(arguments[1], "b") == 0) {
                     if (argc == 3) {
                         int num = stoi(arguments[2]);
                         if (num >= 8 || num < 0) {
@@ -222,7 +219,8 @@ void run_dyn_debug(Binary* bin)
                     else {
                         err_info("Please enter the break point number to delete!");
                     }
-                } else if (strcmp(arguments[0], "ib") == 0) {
+                } 
+                else if (strcmp(arguments[0], "ib") == 0) {
                     printf("Num        Type            Address\n");
                     for (int i = 0; i < 8; i++) {
                         if (break_point_list[i].break_point_state) {
@@ -231,15 +229,24 @@ void run_dyn_debug(Binary* bin)
                             );
                         }
                     }
-                } else if (strcmp(arguments[0], "fun") == 0){
-                    if (argc == 2) { // 打断点
-                        show_elf_fun_call(pid, arguments[1], bin);
-                    } else {
-                        err_info("Please enter the function name!");
-                    }
-                }
+                } 
 
-                else if (strcmp(arguments[0], "stack") == 0){
+                else if (strcmp(arguments[0], "x") == 0) {
+                    if (argc == 3) 
+                    {
+                        int num = stoi(arguments[1]);
+                        if (num < 0) {
+                            err_info("Wrong number of reads!");
+                        }
+                        else {
+                            unsigned long long address = strtoul(arguments[2], nullptr, 16);
+                            show_addr_data(pid, num, address);
+                        }
+                    } else {
+                        err_info("Please enter the address and read quantity!");
+                    }
+                } 
+                else if (strcmp(arguments[0], "stack") == 0) {
                     if (argc == 2) 
                     {
                         get_regs(pid, &regs);
@@ -250,37 +257,41 @@ void run_dyn_debug(Binary* bin)
                     }
                 }
 
-                else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {
-                    // 显示帮助信息
-                    show_help();
-                } else if (strcmp(arguments[0], "vmmap") == 0) {
+                else if (strcmp(arguments[0], "vmmap") == 0) {
                     show_vmmap(pid);
-                } else if (strcmp(arguments[0], "libc") == 0) {
-                    printf("[+] libc base: 0x%llx\n", libc_base);
-                    printf("[+] ld base:   0x%llx\n", ld_base);
-                } else if (strcmp(arguments[0], "stackbase") == 0) {
-                    printf("[+] stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
-                } else if (strcmp(arguments[0], "heapbase") == 0) {
-                    printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n",  heap_base,  heap_end);
-                } else if (strcmp(arguments[0], "code") == 0) {
-                    printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start,  elf_code_end);
-                    printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
-                    printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start,   ld_code_end);
-                    printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
-                } else if (strcmp(arguments[0], "base") == 0) {
+                } 
+                else if (strcmp(arguments[0], "base") == 0) {
                     printf("[+] elf ini base: 0x%llx\n", elf_ini_start);
                     printf("[+] elf base:     0x%llx\n", elf_base);
                     printf("[+] libc base:    0x%llx\n", libc_base);
                     printf("[+] ld base:      0x%llx\n", ld_base);
-                } else if (strcmp(arguments[0], "data") == 0) {
+                } 
+                else if (strcmp(arguments[0], "libc") == 0) {
+                    printf("[+] libc base: 0x%llx\n", libc_base);
+                    printf("[+] ld base:   0x%llx\n", ld_base);
+                } 
+                else if (strcmp(arguments[0], "code") == 0) {
+                    printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start,  elf_code_end);
+                    printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
+                    printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start,   ld_code_end);
+                    printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
+                } 
+                else if (strcmp(arguments[0], "data") == 0) {
                     printf("[+] elf data:  \033[35m0x%llx-0x%llx\033[0m\n", elf_data_start,  elf_data_end);
                     printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", libc_data_start, libc_data_end);
                     printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", ld_data_start,   ld_data_end);
-
                 }
+                else if (strcmp(arguments[0], "stackbase") == 0) {
+                    printf("[+] stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
+                } 
+                else if (strcmp(arguments[0], "heapbase") == 0) {
+                    printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n",  heap_base,  heap_end);
+                } 
+
                 else if (strcmp(arguments[0], "lplt") == 0) {
                     show_elf_plt_fun();
-                } else if (strcmp(arguments[0], "plt") == 0) {
+                } 
+                else if (strcmp(arguments[0], "plt") == 0) {
                     if (argc == 2) {
                         unsigned long long address = strtoul(arguments[1], nullptr, 16);
                         if ( addr_get_elf_plt_fun(address)== "" )
@@ -289,6 +300,13 @@ void run_dyn_debug(Binary* bin)
                             cout << "<" << addr_get_elf_plt_fun(address) << "@plt>" << endl;
                     } else {
                         err_info("Please enter the function address!");
+                    }
+                }
+                else if (strcmp(arguments[0], "fun") == 0) {
+                    if (argc == 2) { // 打断点
+                        show_elf_fun_call(pid, arguments[1], bin);
+                    } else {
+                        err_info("Please enter the function name!");
                     }
                 }
 
@@ -311,6 +329,11 @@ void run_dyn_debug(Binary* bin)
                     // }
                 }
 
+                else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {
+                    // 显示帮助信息
+                    old_cmd = cmd;
+                    show_help();
+                } 
                 else {
                     err_info("Command not found!");
                     printf("Enter 'h' to view supported commands.\n");

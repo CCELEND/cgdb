@@ -30,10 +30,16 @@ using namespace std;
 // 注入断点中断指令的长度，8个字节
 #define CODE_SIZE 8
 
+#define KEYCODE_U 183
+#define KEYCODE_D 184
+#define KEYCODE_R 185
+#define KEYCODE_L 186
+
 // 当前命令所有参数
 extern vector<string> myargv;
 // 当前命令字符串
 extern string cmd;
+extern string old_cmd;
 extern string fname;
 
 // 一些 vma 地址
@@ -127,7 +133,8 @@ void copy_regs_to_last_regs(struct user_regs_struct* last_regs,
 void show_stack(pid_t pid, struct user_regs_struct* regs);
 void show_num_stack(pid_t pid, struct user_regs_struct* regs, int num);
 
-// void show_regs_dis_stack_info(pid_t pid);
+// show_info
+// 显示寄存器，反汇编，栈信息
 void show_regs_dis_stack_info(pid_t pid, struct user_regs_struct* regs);
 
 // addr handle
@@ -200,9 +207,12 @@ void show_vmmap(pid_t pid);
 // elf rodata
 void set_elf_rdata(Binary* bin);
 
+// fun args
+// 显示调用函数参数
 void show_fun_args(pid_t pid, char* mnemonic, char* ops, 
     struct user_regs_struct* regs, struct user_regs_struct* last_regs);
 
+// 显示调用函数信息
 void show_elf_fun_call(pid_t pid, char* elf_fun_name, Binary* bin);
 
 // info

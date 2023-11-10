@@ -2,12 +2,18 @@
 #include "dyn_fun.h"
 
 // 解析输入参数
-void argparse() {
+void argparse() 
+{
     string param;
-    for (char i:cmd + " ") {// 用到空格进行分割，为了防止最后一个参数分割不到加一个空格
-        if (i != ' ') {
+    // 用到空格进行分割，为了防止最后一个参数分割不到加一个空格
+    for (char i:cmd + " ") 
+    {
+        if (i != ' ') 
+        {
             param += i;
-        } else {
+        } 
+        else 
+        {
             myargv.push_back(param);
             param = "";
             continue;
@@ -15,7 +21,8 @@ void argparse() {
     }
 }
 
-void show_help() {
+void show_help() 
+{
     printf(" \033[34mq\033[0m: Stop process.\n");
     printf(" \033[34msi\033[0m: Single step.\n");
     printf(" \033[34mni\033[0m: Single step over.\n");
