@@ -1,8 +1,7 @@
 #include "disasm.h"
 
 // 输出指令行数 line, num 指令长度
-void disasm(char* byte_codes, 
-    unsigned long long addr, int num, int line)
+void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 {
     csh handle;
     cs_insn *insn;
@@ -249,6 +248,10 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
                     "\033[36m\033[1m%s\033[0m ", 
                         code, insn[j].mnemonic, insn[j].op_str);
 
+                if (strcmp(insn[j].mnemonic, "endbr64") == 0){
+                    set_fun_args_regs(&regs, &fun_args_regs);
+                }
+
                 if (strcmp(insn[j].mnemonic, "call") == 0 ||
                     strcmp(insn[j].mnemonic, "jmp" ) == 0 ||
                     strcmp(insn[j].mnemonic, "ret" ) == 0 ||
@@ -257,8 +260,11 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
                 {
                     flow_change_op(insn[j].op_str);
                     printf("\n");
-                    show_fun_args(pid, insn[j-1].mnemonic, insn[j-1].op_str, &regs, &last_regs);
+                    // show_fun_args(pid, insn[j-1].mnemonic, insn[j-1].op_str, &regs, &last_regs);
+                    show_fun_args(pid, &regs, &fun_args_regs);
                 }
+                if (strcmp(insn[j-1].mnemonic, "call") == 0)
+                    set_fun_args_regs(&regs, &fun_args_regs);
 
                 printf("\n");
 

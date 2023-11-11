@@ -37,6 +37,7 @@ bool disasm_addr_synchronous = true;
 
 struct user_regs_struct regs{};
 struct user_regs_struct last_regs{};
+struct user_regs_struct fun_args_regs{};
 
 struct break_point break_point_list[8];
 struct break_point ni_break_point;
@@ -318,12 +319,12 @@ void run_dyn_debug(Binary* bin)
                 else if (strcmp(arguments[0], "test") == 0) {
                     // unsigned long long address = strtoul(arguments[1], nullptr, 16);
 
-                    printf("-------------regs:\n");
-                    show_fun_list(&regs_fun_info);
-                    printf("--------------dis:\n");
-                    show_fun_list(&dis_fun_info);
-                    printf("--------------flow_change_fun:\n");
-                    show_fun_list(&flow_change_fun_info);
+                    // printf("-------------regs:\n");
+                    // show_fun_list(&regs_fun_info);
+                    // printf("--------------dis:\n");
+                    // show_fun_list(&dis_fun_info);
+                    // printf("--------------flow_change_fun:\n");
+                    // show_fun_list(&flow_change_fun_info);
 
                     // for (auto it : fun_start) {
                     //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
@@ -332,6 +333,20 @@ void run_dyn_debug(Binary* bin)
                     // for (auto i : fun_end) {
                     //     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
                     // }
+
+                    printf("fun_args_regs.rdi: 0x%llx\n", fun_args_regs.rdi);
+                    printf("fun_args_regs.rsi: 0x%llx\n", fun_args_regs.rsi);
+                    printf("fun_args_regs.rdx: 0x%llx\n", fun_args_regs.rdx);
+                    printf("fun_args_regs.rcx: 0x%llx\n", fun_args_regs.rcx);
+                    printf("fun_args_regs.r8: 0x%llx\n", fun_args_regs.r8);
+                    printf("fun_args_regs.r9: 0x%llx\n", fun_args_regs.r9);
+
+                    printf("regs.rdi: 0x%llx\n", regs.rdi);
+                    printf("regs.rsi: 0x%llx\n", regs.rsi);
+                    printf("regs.rdx: 0x%llx\n", regs.rdx);
+                    printf("regs.rcx: 0x%llx\n", regs.rcx);
+                    printf("regs.r8: 0x%llx\n", regs.r8);
+                    printf("regs.r9: 0x%llx\n", regs.r9);
                 }
 
                 else if (strcmp(arguments[0], "help") == 0 || strcmp(arguments[0], "h") == 0) {

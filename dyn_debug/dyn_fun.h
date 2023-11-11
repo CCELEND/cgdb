@@ -85,6 +85,7 @@ extern map<string, unsigned long long> elf_plt_fun_end;
 
 extern struct user_regs_struct regs;
 extern struct user_regs_struct last_regs;
+extern struct user_regs_struct fun_args_regs;
 
 struct fun_frame {
     unsigned long long fun_start_addr;
@@ -209,8 +210,13 @@ void set_elf_rdata(Binary* bin);
 
 // fun args
 // 显示调用函数参数
-void show_fun_args(pid_t pid, char* mnemonic, char* ops, 
-    struct user_regs_struct* regs, struct user_regs_struct* last_regs);
+// void show_fun_args(pid_t pid, char* mnemonic, char* ops, 
+//     struct user_regs_struct* regs, struct user_regs_struct* last_regs);
+
+void show_fun_args(pid_t pid,
+    struct user_regs_struct* regs, struct user_regs_struct* fun_args_regs);
+void set_fun_args_regs(struct user_regs_struct* regs, 
+    struct user_regs_struct* fun_args_regs);
 
 // 显示调用函数信息
 void show_elf_fun_call(pid_t pid, char* elf_fun_name, Binary* bin);
