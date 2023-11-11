@@ -28,35 +28,50 @@ int main(int argc, char *argv[])
     }
     map_fun_plt();
 
-    while (true) {
+    int all_sum;
+
+    while (true) 
+    {
         printf("\033[34m\033[1mcgdb> \033[0m");
         getline(cin, cmd);
+
+        all_sum = cmd[0] + cmd[1] + cmd[2];
+        if (all_sum == KEYCODE_U)
+            cmd = old_cmd;
 
         if (cmd == "q") {
             goto cgdb_exit;
 
         } else if (cmd == "sym") {
+            old_cmd = cmd;
             show_elf_symbol(&bin);
 
         } else if (cmd == "dyn") {
+            old_cmd = cmd;
             show_elf_dynsym(&bin);
 
         } else if (cmd == "sections") {
+            old_cmd = cmd;
             show_elf_sections_code_data(&bin);
 
         } else if (cmd == "got") {
+            old_cmd = cmd;
             show_elf_got();
 
         } else if (cmd == "plt") {
+            old_cmd = cmd;
             show_elf_plt();
 
         } else if (cmd == "lplt") {
+            old_cmd = cmd;
             show_elf_lib_plt();
 
         } else if (cmd == "r") {
+            old_cmd = cmd;
             run_dyn_debug(&bin);
 
         } else if (cmd == "help" || cmd == "h") {
+            old_cmd = cmd;
             show_elf_help();
 
         }
