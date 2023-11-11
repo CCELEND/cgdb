@@ -59,23 +59,27 @@ void run_dyn_debug(Binary* bin)
     int status, num;
 
     // fork 子进程
-    switch (pid = fork()) {
+    switch (pid = fork()) 
+    {
         // fork 子进程失败
         case -1:
             err_exit("Failed to create subprocess!");
         // 处理子进程
         case 0:
-            if (ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0) {
+            if (ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0) 
+            {
                 err_exit("Ptrace error in subprocess!");
             }
             // .data 返回一个指向数组中第一个元素的指针，该指针在内部使用
-            if (execl(fname.data(), fname.data(), nullptr)) {
+            if (execl(fname.data(), fname.data(), nullptr)) 
+            {
                 err_exit("Execl error in subprocess!");
             }
             // 子进程，没有成功执行
             printf("\033[31m\033[1m[-] Invalid input command: %s\033[0m\n", fname.c_str());
             exit(3);
-        default:{
+        default:
+        {
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
             sleep(1);
             // 获取子进程的虚拟地址
@@ -121,7 +125,6 @@ void run_dyn_debug(Binary* bin)
                 if (strcmp(arguments[0], "q") == 0) {
                     // 杀死子进程，避免出现僵尸进程
                     ptrace(PTRACE_KILL, pid, nullptr, nullptr);
-                    // free(c);
                     goto debug_stop;
                 } 
                 else if (strcmp(arguments[0], "si") == 0) {//单步调试
