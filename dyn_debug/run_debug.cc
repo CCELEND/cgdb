@@ -127,6 +127,7 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "si")) {//单步调试
                     old_cmd = cmd;
+                    
                     // 发送 single step 给子进程
                     ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
                     // 等待主进程收到 sigtrap 信号
@@ -142,11 +143,6 @@ void run_dyn_debug(Binary* bin)
                     show_regs_dis_stack_info(pid, &regs);
                     copy_regs_to_last_regs(&last_regs, &regs);
 
-                    // 执行到最后一条指令, 子进程正常结束, 退出循环
-                    // if (WIFEXITED(status)) {
-                    //     printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
-                    //     break;
-                    // }
                 } 
                 else if (!strcmp(arguments[0], "ni")) {
                     old_cmd = cmd;

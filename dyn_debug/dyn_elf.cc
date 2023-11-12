@@ -1,24 +1,12 @@
 
 #include "dyn_fun.h"
 
-// 根据值找键
-// string get_map_key_value(map<string, unsigned long long>& Map, unsigned long long plt_fun_addr) 
-// {
-//     for (const auto& pair : Map) 
-//     {
-//         if (pair.second == plt_fun_addr) {
-//             return pair.first;
-//         }
-//     }
-//     return "";
-// }
-
 string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr)
 {
     for (int i = 0; i < 0x10; i++)
     {
         if(addr >= fun_info->fun_list[i].fun_start_addr && 
-            addr <= fun_info->fun_list[i].fun_end_addr )
+           addr <= fun_info->fun_list[i].fun_end_addr)
             return fun_info->fun_list[i].fun_name;
     }
 
