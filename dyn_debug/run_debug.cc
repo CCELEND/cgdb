@@ -173,8 +173,8 @@ void run_dyn_debug(Binary* bin)
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
                     // 等待子进程停止或者结束，并获取子进程状态值
                     wait(&status);
-                    int index = -1;
 
+                    int index = -1;
                     for (int i = 0; i < 8; i++) 
                     {
                         if (break_point_list[i].break_point_state) 
@@ -208,7 +208,6 @@ void run_dyn_debug(Binary* bin)
 
                         // 单步执行下一条指令
                         ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
-
                         count++;
                     }
                 } 
@@ -275,7 +274,7 @@ void run_dyn_debug(Binary* bin)
                     show_vmmap(pid);
                 } 
                 else if (!strcmp(arguments[0], "base")) {
-                    printf("[+] elf ini base: 0x%llx\n", elf_ini_start);
+                    // printf("[+] elf ini base: 0x%llx\n", elf_ini_start);
                     printf("[+] elf base:     0x%llx\n", elf_base);
                     printf("[+] libc base:    0x%llx\n", libc_base);
                     printf("[+] ld base:      0x%llx\n", ld_base);
@@ -346,15 +345,15 @@ void run_dyn_debug(Binary* bin)
                     printf("fun_args_regs.rsi: 0x%llx\n", fun_args_regs.rsi);
                     printf("fun_args_regs.rdx: 0x%llx\n", fun_args_regs.rdx);
                     printf("fun_args_regs.rcx: 0x%llx\n", fun_args_regs.rcx);
-                    printf("fun_args_regs.r8: 0x%llx\n", fun_args_regs.r8);
-                    printf("fun_args_regs.r9: 0x%llx\n", fun_args_regs.r9);
+                    printf("fun_args_regs.r8:  0x%llx\n", fun_args_regs.r8);
+                    printf("fun_args_regs.r9:  0x%llx\n", fun_args_regs.r9);
 
                     printf("regs.rdi: 0x%llx\n", regs.rdi);
                     printf("regs.rsi: 0x%llx\n", regs.rsi);
                     printf("regs.rdx: 0x%llx\n", regs.rdx);
                     printf("regs.rcx: 0x%llx\n", regs.rcx);
-                    printf("regs.r8: 0x%llx\n", regs.r8);
-                    printf("regs.r9: 0x%llx\n", regs.r9);
+                    printf("regs.r8:  0x%llx\n", regs.r8);
+                    printf("regs.r9:  0x%llx\n", regs.r9);
                 }
 
                 else if (!strcmp(arguments[0], "help") || !strcmp(arguments[0], "h")) {
