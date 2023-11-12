@@ -7,9 +7,8 @@ void dyn_show_elf_fun()
     printf("[+] Intrinsic function\n");
     printf("%-30saddress\n", "name");
     printf("============================================\n");
-    for (auto it : elf_fun_start) {
+    for (auto it : elf_fun_start) 
         printf("%-30s0x%llx\n", it.first.c_str(), it.second + elf_base);
-    }
 }
 
 // 通过 elf 函数名获得 elf 函数地址

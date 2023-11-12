@@ -35,17 +35,4 @@ void map_plt_fun_start()
     free(result); // 释放动态分配的内存
 }
 
-// 根据函数名获得 plt 地址
-unsigned long long get_plt_fun_addr(char* funame)
-{
-    if (elf_plt_fun_start.find(funame) != elf_plt_fun_start.end()) {
-        return elf_plt_fun_start[funame];
-    } 
-    else {
-        printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
-        return 0;
-    }
-
-}
-
 

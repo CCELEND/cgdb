@@ -75,7 +75,8 @@ void run_dyn_debug(Binary* bin)
                 err_exit("Execl error in subprocess!");
             }
             // 子进程，没有成功执行
-            printf("\033[31m\033[1m[-] Invalid input command: %s\033[0m\n", fname.c_str());
+            printf("\033[31m\033[1m[-] Invalid input command: %s\033[0m\n", 
+                fname.c_str());
             exit(3);
         default:
         {
@@ -127,7 +128,7 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "si")) {//单步调试
                     old_cmd = cmd;
-                    
+
                     // 发送 single step 给子进程
                     ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
                     // 等待主进程收到 sigtrap 信号

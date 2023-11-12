@@ -7,9 +7,8 @@ void dyn_show_elf_plt_fun()
     printf("[+] PLT function \033[32mplt<@plt>\033[0m\n");
     printf("%-30saddress\n", "name");
     printf("============================================\n");
-    for (auto it : elf_plt_fun_start) {
+    for (auto it : elf_plt_fun_start) 
         printf("%-30s0x%llx\n", it.first.c_str(), it.second + elf_base);
-    }
 }
 
 // 根据实际 elf plt 函数地址找函数名
