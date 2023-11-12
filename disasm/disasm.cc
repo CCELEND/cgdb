@@ -43,7 +43,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
                         code, insn[j].mnemonic,
                         insn[j].op_str);
 
-                if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main"){
+                if (!strcmp(insn[j].mnemonic, "ret") && fun_name == "main"){
                     break;
                 }
             }
@@ -57,16 +57,16 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 
                 printf("\033[34m%-20s\033[0m", code);
 
-                if ( strcmp(insn[j].mnemonic, "call") == 0 || 
-                     strcmp(insn[j].mnemonic, "ret")  == 0 || 
-                     strcmp(insn[j].mnemonic, "jmp")  == 0 )
+                if ( !strcmp(insn[j].mnemonic, "call") || 
+                     !strcmp(insn[j].mnemonic, "ret")  || 
+                     !strcmp(insn[j].mnemonic, "jmp") )
                 {
                     printf( "\033[33m%-16s\033[0m"
                             "\033[36m%s\033[0m ",
                         insn[j].mnemonic, insn[j].op_str);
 
-                    if (strcmp(insn[j].mnemonic, "call") == 0 || 
-                        strcmp(insn[j].mnemonic, "jmp")  == 0 )
+                    if (!strcmp(insn[j].mnemonic, "call") || 
+                        !strcmp(insn[j].mnemonic, "jmp") )
                     {
                         plt_addr = strtoul(insn[j].op_str, nullptr, 16);
                         if (plt_addr < 0x7f0000000000)
@@ -126,8 +126,8 @@ void call_disasm(char* byte_codes,
             //         "\033[36m\033[1m%s\033[0m\n", 
             //             code, insn[j].mnemonic, insn[j].op_str);
 
-            if ( strcmp(insn[j].mnemonic, "call") == 0 || 
-                 strcmp(insn[j].mnemonic, "jmp")  == 0 )
+            if ( !strcmp(insn[j].mnemonic, "call") || 
+                 !strcmp(insn[j].mnemonic, "jmp") )
             {
                 fun_addr = strtoul(insn[j].op_str, nullptr, 16);
 
@@ -248,22 +248,22 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
                     "\033[36m\033[1m%s\033[0m ", 
                         code, insn[j].mnemonic, insn[j].op_str);
 
-                if (strcmp(insn[j].mnemonic, "endbr64") == 0){
+                if (!strcmp(insn[j].mnemonic, "endbr64")){
                     set_fun_args_regs(&regs, &fun_args_regs);
                 }
 
-                if (strcmp(insn[j].mnemonic, "call") == 0 ||
-                    strcmp(insn[j].mnemonic, "jmp" ) == 0 ||
-                    strcmp(insn[j].mnemonic, "ret" ) == 0 ||
-                    strcmp(insn[j].mnemonic, "je"  ) == 0 ||
-                    strcmp(insn[j].mnemonic, "ja" )  == 0 )
+                if (!strcmp(insn[j].mnemonic, "call") ||
+                    !strcmp(insn[j].mnemonic, "jmp" ) ||
+                    !strcmp(insn[j].mnemonic, "ret" ) ||
+                    !strcmp(insn[j].mnemonic, "je"  ) ||
+                    !strcmp(insn[j].mnemonic, "ja" ) )
                 {
                     flow_change_op(insn[j].op_str);
                     printf("\n");
-                    // show_fun_args(pid, insn[j-1].mnemonic, insn[j-1].op_str, &regs, &last_regs);
                     show_fun_args(pid, &regs, &fun_args_regs);
                 }
-                if (strcmp(insn[j-1].mnemonic, "call") == 0)
+
+                if (!strcmp(insn[j-1].mnemonic, "call"))
                     set_fun_args_regs(&regs, &fun_args_regs);
 
                 printf("\n");
@@ -278,20 +278,20 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
 
                 printf("\033[34m%-20s\033[0m", code);
 
-                if ( strcmp(insn[j].mnemonic, "call") == 0 || 
-                     strcmp(insn[j].mnemonic, "ret" ) == 0 || 
-                     strcmp(insn[j].mnemonic, "jmp" ) == 0 || 
-                     strcmp(insn[j].mnemonic, "je"  ) == 0 || 
-                     strcmp(insn[j].mnemonic, "ja" ) == 0 )
+                if ( !strcmp(insn[j].mnemonic, "call") || 
+                     !strcmp(insn[j].mnemonic, "ret" ) || 
+                     !strcmp(insn[j].mnemonic, "jmp" ) || 
+                     !strcmp(insn[j].mnemonic, "je"  ) || 
+                     !strcmp(insn[j].mnemonic, "ja" ) )
                 {
                     printf( "\033[33m%-16s\033[0m"
                             "\033[36m%s\033[0m ",
                         insn[j].mnemonic, insn[j].op_str);
 
-                    if (strcmp(insn[j].mnemonic, "call") == 0 || 
-                        strcmp(insn[j].mnemonic, "jmp" ) == 0 || 
-                        strcmp(insn[j].mnemonic, "je"  ) == 0 || 
-                        strcmp(insn[j].mnemonic, "ja" ) == 0 )
+                    if (!strcmp(insn[j].mnemonic, "call") || 
+                        !strcmp(insn[j].mnemonic, "jmp" ) || 
+                        !strcmp(insn[j].mnemonic, "je"  ) || 
+                        !strcmp(insn[j].mnemonic, "ja" ) )
                     {
 
                         flow_change_op(insn[j].op_str);
@@ -340,8 +340,8 @@ void disasm_mne_op(char* byte_codes,
                 "\033[36m\033[1m%s\033[0m ", 
                 insn[j].mnemonic, insn[j].op_str
             );
-            if ( strcmp(insn[j].mnemonic, "call") == 0 ||  
-                 strcmp(insn[j].mnemonic, "jmp" ) == 0 )
+            if ( !strcmp(insn[j].mnemonic, "call") ||  
+                 !strcmp(insn[j].mnemonic, "jmp" ) )
             {
                 flow_change_op(insn[j].op_str);
             }
