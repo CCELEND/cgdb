@@ -10,7 +10,8 @@ string cmd;
 string fname;
 
 // 键是函数名，值是地址
-map<string, unsigned long long> elf_plt_fun;
+map<string, unsigned long long> elf_fun_start;
+map<string, unsigned long long> elf_plt_fun_start;
 
 int main(int argc, char *argv[]) 
 {
@@ -27,7 +28,9 @@ int main(int argc, char *argv[])
         err_exit("Program loading failed!");
     }
     
-    map_fun_plt();
+    map_fun_start(&bin);
+    map_plt_fun_start();
+
     int all_sum;
     while (true) 
     {
@@ -52,10 +55,13 @@ int main(int argc, char *argv[])
         } else if (cmd == "sections") {
             old_cmd = cmd;
             show_elf_sections_code_data(&bin);
-
         } else if (cmd == "got") {
             old_cmd = cmd;
             show_elf_got();
+
+        } else if (cmd == "lfun") {
+            old_cmd = cmd;
+            show_elf_fun();
 
         } else if (cmd == "plt") {
             old_cmd = cmd;
@@ -63,7 +69,7 @@ int main(int argc, char *argv[])
 
         } else if (cmd == "lplt") {
             old_cmd = cmd;
-            show_elf_lib_plt();
+            show_elf_plt_fun();
 
         } else if (cmd == "r") {
             old_cmd = cmd;
