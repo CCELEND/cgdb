@@ -53,16 +53,28 @@ void show_elf_plt()
     free(result); // 释放动态分配的内存
 }
 
-// 显示 libc plt
-void show_elf_lib_plt()
+void show_elf_fun()
 {
-    printf("[+] Libc function \033[32m<@plt>\033[0m\n");
+    printf("[+] Intrinsic function\n");
     printf("%-30saddress\n", "name");
     printf("=====================================\n");
-    for (auto it : elf_plt_fun) {
+    for (auto it : elf_fun_start) {
         printf("%-30s0x%llx\n", it.first.c_str(), it.second);
     }
 }
+
+// 显示  plt
+void show_elf_plt_fun()
+{
+    printf("[+] PLT function \033[32m<@plt>\033[0m\n");
+    printf("%-30saddress\n", "name");
+    printf("=====================================\n");
+    for (auto it : elf_plt_fun_start) {
+        printf("%-30s0x%llx\n", it.first.c_str(), it.second);
+    }
+}
+
+
 
 // 显示符号表
 void show_elf_symbol(Binary* bin)

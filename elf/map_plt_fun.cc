@@ -2,7 +2,7 @@
 #include "loader_elf.h"
 
 // 建立函数名和 plt 地址的映射
-void map_fun_plt()
+void map_plt_fun_start()
 {
     std::string command = std::string("objdump -d -j .plt.sec -M intel ") + fname;
     FILE* fp = popen(command.c_str(), "r");
@@ -27,7 +27,7 @@ void map_fun_plt()
             fun_str_end = std::string(result).find("@");
             fun_name = std::string(result).substr(fun_str_start+1, fun_str_end-fun_str_start-1);
             fun_plt_addr = strtoul(result, nullptr, 16);
-            elf_plt_fun[fun_name] = fun_plt_addr;
+            elf_plt_fun_start[fun_name] = fun_plt_addr;
         }     
     }
 
@@ -38,8 +38,8 @@ void map_fun_plt()
 // 根据函数名获得 plt 地址
 unsigned long long get_plt_fun_addr(char* funame)
 {
-    if (elf_plt_fun.find(funame) != elf_plt_fun.end()) {
-        return elf_plt_fun[funame];
+    if (elf_plt_fun_start.find(funame) != elf_plt_fun_start.end()) {
+        return elf_plt_fun_start[funame];
     } 
     else {
         printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");

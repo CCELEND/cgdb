@@ -42,8 +42,6 @@ struct user_regs_struct fun_args_regs{};
 struct break_point break_point_list[8];
 struct break_point ni_break_point;
 
-// 键是 elf 函数名，值是开始地址
-map<string, unsigned long long> elf_fun_start;
 // 键是 elf 函数名，值是结束地址
 map<string, unsigned long long> elf_fun_end;
 // 键是 elf plt 函数名，值是结束地址
@@ -89,9 +87,8 @@ void run_dyn_debug(Binary* bin)
 
             set_elf_rdata(bin);
 
-            // 建立函数名和开始地址，结束地址的映射
-            map_fun_start(pid, bin);
-            map_fun_end(pid, bin);
+            // 建立函数名和结束地址的映射
+            map_fun_end(pid);
             map_plt_fun_end(pid);
 
             get_regs(pid, &regs);
@@ -214,7 +211,7 @@ void run_dyn_debug(Binary* bin)
 
                 else if (!strcmp(arguments[0], "b")) {
                     if (argc == 2) { // 打断点
-                        set_break_point(pid, arguments[1], bin);
+                        set_break_point(pid, arguments[1]);
                     } else {
                         err_info("Please enter the break point address or function name!");
                     }
@@ -299,10 +296,13 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "heapbase")) {
                     printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n",  heap_base,  heap_end);
+                }
+                else if (!strcmp(arguments[0], "lfun")) {
+                    dyn_show_elf_fun();
                 } 
 
                 else if (!strcmp(arguments[0], "lplt")) {
-                    show_elf_plt_fun();
+                    dyn_show_elf_plt_fun();
                 } 
                 else if (!strcmp(arguments[0], "plt")) {
                     if (argc == 2) {
@@ -317,7 +317,7 @@ void run_dyn_debug(Binary* bin)
                 }
                 else if (!strcmp(arguments[0], "fun")) {
                     if (argc == 2) { // 打断点
-                        show_elf_fun_call(pid, arguments[1], bin);
+                        show_elf_fun_call(pid, arguments[1]);
                     } else {
                         err_info("Please enter the function name!");
                     }

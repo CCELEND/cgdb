@@ -5,7 +5,7 @@ void clear_fun_list(struct fun_info_type* fun_info)
 {
     for (int i = 0; i < fun_info->fun_num; i++)
     {
-        if (fun_info->fun_list[i].fun_start_addr == 0)
+        if (!fun_info->fun_list[i].fun_start_addr)
             break;
         fun_info->fun_list[i].fun_start_addr = 0;
         fun_info->fun_list[i].fun_end_addr = 0;
@@ -56,7 +56,7 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
                 fun_name = addr_get_elf_fun(fun_addr);
                 if (fun_name != "") 
                 {
-                    fun_info->fun_list[i].fun_start_addr = elf_fun_start[fun_name];
+                    fun_info->fun_list[i].fun_start_addr = elf_fun_start[fun_name] + elf_base;
                     fun_info->fun_list[i].fun_end_addr = elf_fun_end[fun_name];
                     fun_info->fun_list[i].fun_name = fun_name;
                     fun_info->fun_num++;
@@ -65,7 +65,7 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
                 else 
                 {
                     fun_name = addr_get_elf_plt_fun(fun_addr);
-                    fun_info->fun_list[i].fun_start_addr = elf_plt_fun[fun_name] + elf_base;
+                    fun_info->fun_list[i].fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
                     fun_info->fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
                     fun_name += "@plt";
                     fun_info->fun_list[i].fun_name = fun_name;

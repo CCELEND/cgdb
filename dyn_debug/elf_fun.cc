@@ -1,18 +1,24 @@
 
 #include "dyn_fun.h"
 
-// 通过 elf 函数名获得 elf 函数地址
-unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin)
+// 输出 elf 函数的函数名和地址
+void dyn_show_elf_fun()
 {
-    Symbol *sym;
+    printf("[+] Intrinsic function\n");
+    printf("%-30saddress\n", "name");
+    printf("============================================\n");
+    for (auto it : elf_fun_start) {
+        printf("%-30s0x%llx\n", it.first.c_str(), it.second + elf_base);
+    }
+}
 
-    for(int i = 0; i < bin->symbols.size(); i++) {
-        sym = &bin->symbols[i];
-        if(sym->fun_sym_type == "symtab") {
-            if (fun_name == sym->name) {
-                return sym->addr + elf_base;
-            }
-        }
+// 通过 elf 函数名获得 elf 函数地址
+unsigned long long get_elf_fun_addr(char* fun_name)
+{
+    for (auto it : elf_fun_start) 
+    {
+        if (string(fun_name) == it.first)
+            return it.second + elf_base;
     }
 
     return 0;
@@ -23,7 +29,7 @@ string addr_get_elf_fun(unsigned long long addr)
 {
     for (auto it : elf_fun_start) 
     {
-        if (addr >= it.second && addr <= elf_fun_end[it.first])
+        if (addr >= it.second + elf_base && addr <= elf_fun_end[it.first])
             return it.first;
     }
 
@@ -36,37 +42,17 @@ int addr_get_elf_fun_offset(unsigned long long addr)
 {
     for (auto it : elf_fun_start) 
     {
-        if (addr >= it.second && addr <= elf_fun_end[it.first])
-            return addr - it.second;
+        if (addr >= it.second + elf_base && addr <= elf_fun_end[it.first])
+            return addr - it.second - elf_base;
     }
 
     return -1;
 
 }
 
-
-// 建立 elf 函数名和开始地址的映射
-void map_fun_start(pid_t pid, Binary* bin)
-{
-    Symbol *sym;
-    for(int i = 0; i < bin->symbols.size(); i++) 
-    {
-        sym = &bin->symbols[i];
-        if(sym->addr)
-            elf_fun_start[sym->name] = sym->addr + elf_base;
-    }
-
-}
-
 // 建立 elf 函数名和结束地址的映射
-void map_fun_end(pid_t pid, Binary* bin)
+void map_fun_end(pid_t pid)
 {
-    Symbol *sym;
-    for(int i = 0; i < bin->symbols.size(); i++) 
-    {
-        sym = &bin->symbols[i];
-        if(sym->addr)
-            elf_fun_end[sym->name] = get_fun_end(pid, sym->addr + elf_base);
-    }
-
+    for (auto it : elf_fun_start) 
+        elf_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
 }

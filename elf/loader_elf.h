@@ -16,8 +16,9 @@
 // 新版本的宏有问题, 需要修改
 #define bfd_get_section_flags(bfd, ptr) ((void) bfd, (ptr)->flags)
 
-// 键为 plt 函数名，值为地址
-extern std::map<std::string, unsigned long long> elf_plt_fun;
+// 键为函数名，值为地址
+extern std::map<std::string, unsigned long long> elf_fun_start;
+extern std::map<std::string, unsigned long long> elf_plt_fun_start;
 
 extern std::string fname;
 
@@ -98,9 +99,12 @@ void show_elf_dynsym(Binary* bin);
 void show_elf_sections_code_data(Binary* bin);
 void show_elf_got   ();
 void show_elf_plt   ();
-void show_elf_lib_plt();
+void show_elf_plt_fun();
+void show_elf_fun();
 
-void map_fun_plt();
+void map_fun_start(Binary* bin);
+void map_plt_fun_start();
+
 unsigned long long get_plt_fun_addr(char* funame);
 
 void show_elf_help();

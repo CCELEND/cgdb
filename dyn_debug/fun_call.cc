@@ -1,13 +1,13 @@
 
 #include "dyn_fun.h"
 
-void show_elf_fun_call(pid_t pid, char* elf_fun_name, Binary* bin)
+void show_elf_fun_call(pid_t pid, char* elf_fun_name)
 {
     char fun_code[0x1000];
     unsigned long long fun_start_addr, fun_end_addr, fun_size;
     string fun_name;
 
-    fun_start_addr = get_elf_fun_addr(elf_fun_name, bin);
+    fun_start_addr = get_elf_fun_addr(elf_fun_name);
     if (!fun_start_addr){
         err_info("There is no such function!");
         return;

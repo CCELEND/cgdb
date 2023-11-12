@@ -158,15 +158,15 @@ unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 
 // elf_fun
 string addr_get_elf_fun(unsigned long long elf_fun_addr);
-void map_fun_start(pid_t pid, Binary* bin);
-void map_fun_end  (pid_t pid, Binary* bin);
+void dyn_show_elf_fun();
+void map_fun_end  (pid_t pid);
 int addr_get_elf_fun_offset(unsigned long long addr);
-unsigned long long get_elf_fun_addr(char* fun_name, Binary* bin);
+unsigned long long get_elf_fun_addr(char* fun_name);
 
 
 // elf_plt_fun
 string addr_get_elf_plt_fun(unsigned long long elf_plt_fun_addr);
-void show_elf_plt_fun();
+void dyn_show_elf_plt_fun();
 void map_plt_fun_end(pid_t pid);
 int addr_get_elf_plt_fun_offset(unsigned long long addr);
 
@@ -180,7 +180,7 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr,
 // glibc_plt_fun
 string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
 
-//
+// init
 string addr_get_elf_init(unsigned long long elf_init_addr);
 string addr_get_elf_fini(unsigned long long elf_fini_addr);
 
@@ -197,7 +197,7 @@ int  addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr
 int  break_point_handler(pid_t pid, int status, break_point& bp, 
     bool showbp_flag);
 void break_point_inject(pid_t pid, break_point& bp);
-void set_break_point   (pid_t pid, char* bp_fun, Binary* bin);
+void set_break_point   (pid_t pid, char* bp_fun);
 void set_ni_break_point(pid_t pid, unsigned long long addr);
 void break_point_delete(pid_t pid, int idx);
 
@@ -208,10 +208,6 @@ void show_vmmap(pid_t pid);
 // elf rodata
 void set_elf_rdata(Binary* bin);
 
-// fun args
-// 显示调用函数参数
-// void show_fun_args(pid_t pid, char* mnemonic, char* ops, 
-//     struct user_regs_struct* regs, struct user_regs_struct* last_regs);
 
 void show_fun_args(pid_t pid,
     struct user_regs_struct* regs, struct user_regs_struct* fun_args_regs);
@@ -219,7 +215,7 @@ void set_fun_args_regs(struct user_regs_struct* regs,
     struct user_regs_struct* fun_args_regs);
 
 // 显示调用函数信息
-void show_elf_fun_call(pid_t pid, char* elf_fun_name, Binary* bin);
+void show_elf_fun_call(pid_t pid, char* elf_fun_name);
 
 // info
 void arg_error(const char* cgdb);

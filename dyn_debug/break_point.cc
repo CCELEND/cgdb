@@ -35,11 +35,11 @@ void set_ni_break_point(pid_t pid, unsigned long long addr)
 }
 
 // 设置普通断点
-void set_break_point(pid_t pid, char* bp_fun, Binary* bin) 
+void set_break_point(pid_t pid, char* bp_fun) 
 {
     unsigned long long break_point_addr;
 
-    break_point_addr = get_elf_fun_addr(bp_fun, bin);
+    break_point_addr = get_elf_fun_addr(bp_fun);
     if (!break_point_addr){
         err_info("There is no such function!");
         return;
