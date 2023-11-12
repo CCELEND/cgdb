@@ -26,10 +26,9 @@ int main(int argc, char *argv[])
     if(load_binary(fname, &bin, Binary::BIN_TYPE_AUTO) < 0) {
         err_exit("Program loading failed!");
     }
+    
     map_fun_plt();
-
     int all_sum;
-
     while (true) 
     {
         printf("\033[34m\033[1mcgdb> \033[0m");
