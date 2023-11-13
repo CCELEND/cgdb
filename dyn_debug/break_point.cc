@@ -60,6 +60,7 @@ void set_break_point(pid_t pid, unsigned long long break_point_addr)
             link_file = get_addr_file_base(break_point_addr, &base_addr);
             printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
                     i, link_file.c_str(), break_point_addr-base_addr, break_point_addr);
+
             if (fun_offset)
                 printf("<%s+%d>\n", fun_name.c_str(), fun_offset);
             else
@@ -114,9 +115,9 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
             } 
             else 
             {
-                if (showbp_flag){
+                if (showbp_flag)
                     printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
-                }
+
                 // 把 INT 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 // 执行流回退，重新执行正确的指令

@@ -116,9 +116,8 @@ void run_dyn_debug(Binary* bin)
                 int argc = myargv.size();
                 char** arguments = new char* [argc]; // 转换参数类型
 
-                for (int i = 0; i < argc; i++) {
+                for (int i = 0; i < argc; i++)
                     arguments[i] = (char*) myargv[i].data();
-                }
 
                 // 退出操作
                 if (!strcmp(arguments[0], "q")) {
@@ -183,21 +182,23 @@ void run_dyn_debug(Binary* bin)
                     // 没有断点, 子进程结束
                     if (WIFEXITED(status)) {
                         printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
-                        goto debug_stop;
+                        break;
                     }
                 } 
                 else if (!strcmp(arguments[0], "ic")) { // 计算执行完毕所需指令数
                     printf("[*] Calculating the number of instructions after this...\n");
                     long count = 0;
-                    while (true) {
+                    while (true) 
+                    {
 
                         // 当前子进程还是暂停状态，父进程被阻塞
                         wait(&status);
-                        if (WIFEXITED(status)) {
+                        if (WIFEXITED(status)) 
+                        {
                             printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
                             printf("[+] Total instruction count: \033[32m%ld\033[0m\n", 
                                 count);
-                            goto debug_stop;
+                            break;
                         }
 
                         // 单步执行下一条指令
@@ -216,9 +217,9 @@ void run_dyn_debug(Binary* bin)
                             err_info("There is no such function!");
                         else  // 打断点
                             set_break_point(pid, break_point_fun_addr);
-                    } else {
+                    } 
+                    else 
                         err_info("Please enter the break point function name!");
-                    }
                 } 
                 else if (!strcmp(arguments[0], "ba")) {
                     if (argc == 2) { 
@@ -227,23 +228,24 @@ void run_dyn_debug(Binary* bin)
                             err_info("Illegal address!");
                         else // 打断点
                             set_break_point(pid, break_point_addr);
-                    } else {
+                    } 
+                    else 
                         err_info("Please enter the break point address!");
-                    }
+
                 }             
                 else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) {
-                    if (argc == 3) {
+                    if (argc == 3) 
+                    {
                         int num = stoi(arguments[2]);
-                        if (num >= 8 || num < 0) {
+
+                        if (num >= 8 || num < 0)
                             err_info("Error break point number!");
-                        }
-                        else {
+                        else
                             break_point_delete(pid, num);
-                        }
                     }
-                    else {
+                    else
                         err_info("Please enter the break point number to delete!");
-                    }
+
                 } 
                 else if (!strcmp(arguments[0], "ib")) {
 
@@ -262,6 +264,7 @@ void run_dyn_debug(Binary* bin)
                             printf("%-11dbreak point     \033[31m0x%llx\033[0m ",
                                 i, break_point_list[i].addr
                             );
+
                             if (fun_offset)
                                 printf("<%s+%d>\n", fun_name.c_str(), fun_offset);
                             else
@@ -275,16 +278,15 @@ void run_dyn_debug(Binary* bin)
                     if (argc == 3) 
                     {
                         int num = stoi(arguments[1]);
-                        if (num < 0) {
+                        if (num < 0) 
                             err_info("Wrong number of reads!");
-                        }
                         else {
                             unsigned long long address = strtoul(arguments[2], nullptr, 16);
                             show_addr_data(pid, num, address);
                         }
-                    } else {
+                    } 
+                    else 
                         err_info("Please enter the address and read quantity!");
-                    }
                 } 
                 else if (!strcmp(arguments[0], "stack")) {
                     if (argc == 2) 
@@ -292,9 +294,10 @@ void run_dyn_debug(Binary* bin)
                         get_regs(pid, &regs);
                         int num = stoi(arguments[1]);
                         show_num_stack(pid, &regs, num);
-                    } else {
-                        err_info("Please Enter the correct quantity!");
                     }
+                    else 
+                        err_info("Please Enter the correct quantity!");
+
                 }
 
 
@@ -340,22 +343,22 @@ void run_dyn_debug(Binary* bin)
                 else if (!strcmp(arguments[0], "plt")) {
                     if (argc == 2) {
                         unsigned long long address = strtoul(arguments[1], nullptr, 16);
+
                         if ( addr_get_elf_plt_fun(address)== "" )
                             printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
                         else
                             cout << "<" << addr_get_elf_plt_fun(address) << "@plt>" << endl;
-                    } else {
+                    } 
+                    else 
                         err_info("Please enter the function address!");
-                    }
                 }
                 else if (!strcmp(arguments[0], "fun")) {
-                    if (argc == 2) { // 打断点
+                    if (argc == 2)
                         show_elf_fun_call(pid, arguments[1]);
-                    } else {
+                    else 
                         err_info("Please enter the function name!");
-                    }
                 }
-                
+
 
                 else if (!strcmp(arguments[0], "test")) {
                     // unsigned long long address = strtoul(arguments[1], nullptr, 16);

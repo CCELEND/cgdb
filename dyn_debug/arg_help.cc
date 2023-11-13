@@ -34,18 +34,19 @@ void show_help()
     printf(" \033[34mstack [num]\033[0m: Display a certain number of stack(rsp) values and pointers.\n");
     
     printf(" \033[34mib\033[0m: Display break point information.\n");
-    printf(" \033[34mb [fun name]\033[0m: Insert function break point.\n");
+    printf(" \033[34mbf [fun name] or b [fun name]\033[0m: Insert function break point.\n");
+    printf(" \033[34mba [addr]\033[0m: Insert address break point.\n");
     printf(" \033[34md b [idx]\033[0m: Based on break point index, remove break point.\n");
 
     printf(" \033[34mvmmap\033[0m: Display the virtual address space of the program.\n");
-    printf(" \033[34mbase\033[0m: Display the base addresses of elf, libc and ld.\n");
-    printf(" \033[34mlibc\033[0m: Display the base addresses of libc and ld.\n");
+    printf(" \033[34mbase\033[0m: Display the base address of elf, libc and ld.\n");
+    printf(" \033[34mlibc\033[0m: Display the base address of libc and ld.\n");
     printf(" \033[34mcode\033[0m: Display the range of executable segments.\n");
     printf(" \033[34mdata\033[0m: Display the range of data segments.\n");
     printf(" \033[34mstackbase\033[0m: Display the start and end addresses of the stack.\n");
     printf(" \033[34mheapbase\033[0m: Display the start and end addresses of the heap.\n");
 
-    printf(" \033[34mfun [fun name]\033[0m: Display the calling function of the this function\n");
+    printf(" \033[34mfun [fun name]\033[0m: Display the calling function of the this function.\n");
     printf(" \033[34mlfun\033[0m: Display internal function name and address.\n");
     printf(" \033[34mlplt\033[0m: Display PLT function name and address.\n");
     printf(" \033[34mplt [addr]\033[0m: Find the corresponding PLT function based on the address.\n");
