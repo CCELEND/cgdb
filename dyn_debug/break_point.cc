@@ -54,7 +54,6 @@ void set_break_point(pid_t pid, unsigned long long break_point_addr)
     {
         if (!break_point_list[i].addr)
         {
-
             fun_name = get_fun(break_point_addr, &fun_start_addr);
             fun_offset = break_point_addr - fun_start_addr;
             link_file = get_addr_file_base(break_point_addr, &base_addr);

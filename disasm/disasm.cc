@@ -1,6 +1,6 @@
 #include "disasm.h"
 
-// 判断是否是跳转指令
+// 判断操作码是否是跳转指令
 bool judg_jump(char* mnemonic)
 {
     if (!strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||
@@ -18,6 +18,7 @@ bool judg_jump(char* mnemonic)
 
 // addr:汇编代码的地址, fun_name:函数名, offset:偏移, 
 // 指令码:codes, 操作码:mnemonic, 操作数:ops 
+// 高亮显示
 void dis_highlight_show(unsigned long long addr, string fun_name, int offset, 
     char* codes, char* mnemonic, char* ops)
 {
@@ -69,7 +70,7 @@ void dis_show(unsigned long long addr, string fun_name, int offset,
     }
 }
 
-
+// 只输出两行
 void bp_disasm(pid_t pid, unsigned long long addr)
 {
     csh handle;

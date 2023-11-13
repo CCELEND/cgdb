@@ -269,6 +269,7 @@ bool judg_addr_code(unsigned long long addr)
         return false;
 }
 
+// 通过地址获取文件名和加载基址
 string get_addr_file_base(unsigned long long addr, unsigned long long* base_addr)
 {
     if (addr > elf_code_start && addr < elf_code_end) {

@@ -98,7 +98,8 @@ void run_dyn_debug(Binary* bin)
 
             int all_sum;
             // 开始轮询输入的命令
-            while (true) {
+            while (true) 
+            {
 
                 printf("\033[32m\033[1mcgdb> \033[0m");
 
@@ -110,7 +111,6 @@ void run_dyn_debug(Binary* bin)
                     cmd = old_cmd;
 
                 debug_start:
-
                 //输入参数解析
                 argparse();
                 int argc = myargv.size();
@@ -204,7 +204,8 @@ void run_dyn_debug(Binary* bin)
                         ptrace(PTRACE_SINGLESTEP, pid, nullptr, nullptr);
                         count++;
                     }
-                } 
+                }
+
 
                 else if (!strcmp(arguments[0], "bf") || !strcmp(arguments[0], "b")) {
                     if (argc == 2) 
@@ -219,7 +220,6 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please enter the break point function name!");
                     }
                 } 
-
                 else if (!strcmp(arguments[0], "ba")) {
                     if (argc == 2) { 
                         unsigned long long break_point_addr = strtoul(arguments[1], nullptr, 16);
@@ -268,7 +268,8 @@ void run_dyn_debug(Binary* bin)
                                 printf("<%s>\n", fun_name.c_str());
                         }
                     }
-                } 
+                }
+
 
                 else if (!strcmp(arguments[0], "x")) {
                     if (argc == 3) 
@@ -295,6 +296,7 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please Enter the correct quantity!");
                     }
                 }
+
 
                 else if (!strcmp(arguments[0], "vmmap")) {
                     show_vmmap(pid);
@@ -326,6 +328,8 @@ void run_dyn_debug(Binary* bin)
                 else if (!strcmp(arguments[0], "heapbase")) {
                     printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n",  heap_base,  heap_end);
                 }
+
+
                 else if (!strcmp(arguments[0], "lfun")) {
                     dyn_show_elf_fun();
                 } 
@@ -351,6 +355,7 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please enter the function name!");
                     }
                 }
+                
 
                 else if (!strcmp(arguments[0], "test")) {
                     // unsigned long long address = strtoul(arguments[1], nullptr, 16);
@@ -370,19 +375,19 @@ void run_dyn_debug(Binary* bin)
                     //     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
                     // }
 
-                    printf("fun_args_regs.rdi: 0x%llx\n", fun_args_regs.rdi);
-                    printf("fun_args_regs.rsi: 0x%llx\n", fun_args_regs.rsi);
-                    printf("fun_args_regs.rdx: 0x%llx\n", fun_args_regs.rdx);
-                    printf("fun_args_regs.rcx: 0x%llx\n", fun_args_regs.rcx);
-                    printf("fun_args_regs.r8:  0x%llx\n", fun_args_regs.r8);
-                    printf("fun_args_regs.r9:  0x%llx\n", fun_args_regs.r9);
+                    // printf("fun_args_regs.rdi: 0x%llx\n", fun_args_regs.rdi);
+                    // printf("fun_args_regs.rsi: 0x%llx\n", fun_args_regs.rsi);
+                    // printf("fun_args_regs.rdx: 0x%llx\n", fun_args_regs.rdx);
+                    // printf("fun_args_regs.rcx: 0x%llx\n", fun_args_regs.rcx);
+                    // printf("fun_args_regs.r8:  0x%llx\n", fun_args_regs.r8);
+                    // printf("fun_args_regs.r9:  0x%llx\n", fun_args_regs.r9);
 
-                    printf("regs.rdi: 0x%llx\n", regs.rdi);
-                    printf("regs.rsi: 0x%llx\n", regs.rsi);
-                    printf("regs.rdx: 0x%llx\n", regs.rdx);
-                    printf("regs.rcx: 0x%llx\n", regs.rcx);
-                    printf("regs.r8:  0x%llx\n", regs.r8);
-                    printf("regs.r9:  0x%llx\n", regs.r9);
+                    // printf("regs.rdi: 0x%llx\n", regs.rdi);
+                    // printf("regs.rsi: 0x%llx\n", regs.rsi);
+                    // printf("regs.rdx: 0x%llx\n", regs.rdx);
+                    // printf("regs.rcx: 0x%llx\n", regs.rcx);
+                    // printf("regs.r8:  0x%llx\n", regs.r8);
+                    // printf("regs.r9:  0x%llx\n", regs.r9);
                 }
 
                 else if (!strcmp(arguments[0], "help") || !strcmp(arguments[0], "h")) {
