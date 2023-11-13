@@ -1,6 +1,7 @@
 
 #include "dyn_fun.h"
 
+// 清理函数列表
 void clear_fun_list(struct fun_info_type* fun_info)
 {
     for (int i = 0; i < fun_info->fun_num; i++)
@@ -14,6 +15,7 @@ void clear_fun_list(struct fun_info_type* fun_info)
     fun_info->fun_num = 0;
 }
 
+// 设置函数列表
 void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
 {
     for (int i = 0; i < 0x10; i++) 
@@ -80,7 +82,7 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
     }
 }
 
-// show
+// 显示函数列表
 void show_fun_list(struct fun_info_type* fun_info)
 {
     for (int i = 0; i < 0x10; i++)
@@ -96,6 +98,7 @@ void show_fun_list(struct fun_info_type* fun_info)
     printf("num: %d\n", fun_info->fun_num);
 }
 
+// 通过地址获得对应函数地址偏移
 int addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr)
 {
 

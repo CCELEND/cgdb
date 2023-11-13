@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void disasm(char* byte_codes, unsigned long long addr, int num, int line);
+void bp_disasm(pid_t pid, unsigned long long addr);
 void call_disasm(char* byte_codes, unsigned long long addr, int num, string call_fun_name);
 void show_disasm(pid_t pid, unsigned long long rip_val);
 void disasm_mne_op(char* byte_codes, unsigned long long addr, int num, int line);

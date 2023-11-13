@@ -118,106 +118,124 @@ extern struct break_point break_point_list[8];
 // ni 断点结构体
 extern struct break_point ni_break_point;
 
-// run api, help args
+// 帮助和参数信息
+// arg_help.cc
 void argparse();
 void show_help();
+// 运行动态调试
+// run_debug.cc
 void run_dyn_debug(Binary* bin);
 
-// regs
+// 寄存器信息处理
+// regs.cc
 void get_regs (pid_t pid, struct user_regs_struct* regs);
 void show_regs(pid_t pid, struct user_regs_struct* regs);
 void regs_disasm_info(pid_t pid, struct user_regs_struct* regs);
 void copy_regs_to_last_regs(struct user_regs_struct* last_regs, 
     struct user_regs_struct* regs);
 
-// stack
+// 栈信息
+// stack.cc
 void show_stack(pid_t pid, struct user_regs_struct* regs);
 void show_num_stack(pid_t pid, struct user_regs_struct* regs, int num);
 
-// show_info
 // 显示寄存器，反汇编，栈信息
+// show_info.cc
 void show_regs_dis_stack_info(pid_t pid, struct user_regs_struct* regs);
 
-// addr handle
+// 地址数据处理
+// addr_data_handler.cc
+string get_addr_file_base(unsigned long long addr, unsigned long long* base_addr);
 unsigned long long get_addr_val(pid_t pid, unsigned long long addr);
 bool judg_addr_code(unsigned long long addr);
-
 void val_to_string(unsigned long long val);
 void flag_addr_printf(unsigned long long addr, bool addr_flag);
 void show_addr_data (pid_t pid, int num , unsigned long long addr);
 void show_addr_point(pid_t pid, unsigned long long addr, bool addr_flag);
 void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
 void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len);
-void print_bytes(const char* tip, char* codes, int len);
+void print_bytes(char* codes, int len);
 
-// dyn_elf
-string get_map_key_value(map<string, unsigned long long>& Map, 
-    unsigned long long fun_plt_addr);
+// dyn_elf.cc
 string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr);
+string get_fun(unsigned long long addr, unsigned long long* fun_start_addr);
 unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr);
 
-// elf_fun
+// elf 函数
+// elf_fun.cc
 string addr_get_elf_fun(unsigned long long elf_fun_addr);
 void dyn_show_elf_fun();
 void map_fun_end  (pid_t pid);
 int addr_get_elf_fun_offset(unsigned long long addr);
 unsigned long long get_elf_fun_addr(char* fun_name);
 
-
-// elf_plt_fun
+// elf plt 函数
+// elf_plt_fun.cc
 string addr_get_elf_plt_fun(unsigned long long elf_plt_fun_addr);
 void dyn_show_elf_plt_fun();
 void map_plt_fun_end(pid_t pid);
-int addr_get_elf_plt_fun_offset(unsigned long long addr);
+int  addr_get_elf_plt_fun_offset(unsigned long long addr);
 
+// elf 文件函数指针初始化，析构函数处理
+// elf_init_fini_array.cc
+string addr_get_elf_init(unsigned long long elf_init_addr);
+string addr_get_elf_fini(unsigned long long elf_fini_addr);
 
-// glibc_fun
+// elf 文件只读数据段处理
+// elf_rdata.cc
+void set_elf_rdata(Binary* bin);
+
+// glibc 函数
+// glibc_fun.cc
 string addr_get_glibc_fun(unsigned long long glibc_fun_addr, 
     unsigned long long* glibc_fun_start);
 unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, 
     string fun_name);
 
-// glibc_plt_fun
+// glibc plt 函数
+// glibc_plt_fun.cc
 string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr);
 
-// init
-string addr_get_elf_init(unsigned long long elf_init_addr);
-string addr_get_elf_fini(unsigned long long elf_fini_addr);
-
-// glibc data
+// glibc 数据段处理
+// glibc_data.cc
 string addr_get_glibc_data(unsigned long long glibc_data_addr);
 
-// fun list
+// 函数列表信息
+// fun_list.cc
 void show_fun_list (struct fun_info_type* fun_info);
 void clear_fun_list(struct fun_info_type* fun_info);
 void set_fun_list  (struct fun_info_type* fun_info, unsigned long long fun_addr);
 int  addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr);
 
-// break point
+// 断点处理
+// break_point.cc
 int  break_point_handler(pid_t pid, int status, break_point& bp, 
     bool showbp_flag);
 void break_point_inject(pid_t pid, break_point& bp);
-void set_break_point   (pid_t pid, char* bp_fun);
+// void set_break_point   (pid_t pid, char* bp_fun);
+void set_break_point   (pid_t pid, unsigned long long break_point_addr);
 void set_ni_break_point(pid_t pid, unsigned long long addr);
 void break_point_delete(pid_t pid, int idx);
 
-// vmmap
+
+// 虚拟内存地址空间
+// vma.cc
 void get_vma_address(pid_t pid);
 void show_vmmap(pid_t pid);
 
-// elf rodata
-void set_elf_rdata(Binary* bin);
-
-
+// 调用函数参数
+// fun_args.cc
 void show_fun_args(pid_t pid,
     struct user_regs_struct* regs, struct user_regs_struct* fun_args_regs);
 void set_fun_args_regs(struct user_regs_struct* regs, 
     struct user_regs_struct* fun_args_regs);
 
 // 显示调用函数信息
+// fun_call.cc
 void show_elf_fun_call(pid_t pid, char* elf_fun_name);
 
-// info
+// 提示信息
+// info.cc
 void arg_error(const char* cgdb);
 void err_exit (const char* msg);
 void err_info (const char* msg);

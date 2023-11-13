@@ -15,7 +15,7 @@ void map_plt_fun_start()
     char* result = nullptr;
     size_t len = 0;
     ssize_t read;
-    unsigned long long fun_plt_addr;
+    unsigned long long plt_fun_addr;
     int fun_str_start, fun_str_end;
     std::string fun_name;
 
@@ -26,8 +26,8 @@ void map_plt_fun_start()
             fun_str_start = std::string(result).find("<");
             fun_str_end = std::string(result).find("@");
             fun_name = std::string(result).substr(fun_str_start+1, fun_str_end-fun_str_start-1);
-            fun_plt_addr = strtoul(result, nullptr, 16);
-            elf_plt_fun_start[fun_name] = fun_plt_addr;
+            plt_fun_addr = strtoul(result, nullptr, 16);
+            elf_plt_fun_start[fun_name] = plt_fun_addr;
         }     
     }
 

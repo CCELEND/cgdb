@@ -29,39 +29,47 @@ void set_ni_break_point(pid_t pid, unsigned long long addr)
 
     ni_break_point.addr = next_addr;
     // 需要打断点的地址上指令取出备份
-    get_addr_data(pid, ni_break_point.addr, ni_break_point.backup, CODE_SIZE);
+    get_addr_data(pid, next_addr, ni_break_point.backup, CODE_SIZE);
     break_point_inject(pid, ni_break_point);
 
 }
 
 // 设置普通断点
-void set_break_point(pid_t pid, char* bp_fun) 
+// void set_break_point(pid_t pid, char* bp_fun)
+void set_break_point(pid_t pid, unsigned long long break_point_addr)
 {
-    unsigned long long break_point_addr;
-
-    break_point_addr = get_elf_fun_addr(bp_fun);
-    if (!break_point_addr){
-        err_info("There is no such function!");
-        return;
-    }
-
-    for (int i = 0; i < 8; i++) {
-        if (break_point_list[i].addr == break_point_addr){
+    for (int i = 0; i < 8; i++) 
+    {
+        if (break_point_list[i].addr == break_point_addr)
+        {
             err_info("Break point already exists!");
             return;
         }
     }
-    for (int i = 0; i < 8; i++) {
-        if (break_point_list[i].addr == 0)
-        {
-            break_point_list[i].addr = break_point_addr;
-            printf("[+] Break point %d at \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m\n", 
-                    i, break_point_addr-elf_base, break_point_list[i].addr);
 
+    int fun_offset;
+    string fun_name = "", link_file = "";
+    unsigned long long fun_start_addr, base_addr;
+    for (int i = 0; i < 8; i++) 
+    {
+        if (!break_point_list[i].addr)
+        {
+
+            fun_name = get_fun(break_point_addr, &fun_start_addr);
+            fun_offset = break_point_addr - fun_start_addr;
+            link_file = get_addr_file_base(break_point_addr, &base_addr);
+            printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
+                    i, link_file.c_str(), break_point_addr-base_addr, break_point_addr);
+            if (fun_offset)
+                printf("<%s+%d>\n", fun_name.c_str(), fun_offset);
+            else
+                printf("<%s>\n", fun_name.c_str());
+
+            break_point_list[i].addr = break_point_addr;
             // 需要打断点的地址上指令取出备份
-            get_addr_data(pid, break_point_list[i].addr, break_point_list[i].backup, CODE_SIZE);
+            get_addr_data(pid, break_point_addr, break_point_list[i].backup, CODE_SIZE);
             // 输出2行断点地址的反汇编
-            disasm(break_point_list[i].backup, break_point_list[i].addr, CODE_SIZE, 2);
+            bp_disasm(pid, break_point_addr);
             // 注入断点
             break_point_inject(pid, break_point_list[i]);
             break;
@@ -106,8 +114,9 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
             } 
             else 
             {
-                if (showbp_flag)
+                if (showbp_flag){
                     printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
+                }
                 // 把 INT 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 // 执行流回退，重新执行正确的指令
@@ -119,8 +128,9 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
                 show_regs_dis_stack_info(pid, &regs);
                 copy_regs_to_last_regs(&last_regs, &regs);
 
+                // 命中断点之后取消断点
                 bp.addr = 0;
-                bp.break_point_state = false; // 命中断点之后取消断点
+                bp.break_point_state = false;
                 return 0;
             }
         }

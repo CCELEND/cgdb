@@ -1,7 +1,7 @@
 
 #include "dyn_fun.h"
 
-// 获取地址的值
+// 获取该地址8字节的值
 unsigned long long get_addr_val(pid_t pid, unsigned long long addr)
 {
     unsigned long long  val;
@@ -13,7 +13,8 @@ unsigned long long get_addr_val(pid_t pid, unsigned long long addr)
 void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len) 
 {
     char* laddr = str;
-    int i = 0, j = len / LONG_SIZE; // 计算一共需要读取多少个字
+    // 计算一共需要读取多少个字
+    int i = 0, j = len >> 3; //j = len / LONG_SIZE;
     union u {
         long val;
         char chars[LONG_SIZE];
@@ -38,7 +39,7 @@ void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len)
 void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len) 
 {
     char* laddr = str;
-    int i = 0, j = len / LONG_SIZE;
+    int i = 0, j = len >> 3;
     union u {
         long val;
         char chars[LONG_SIZE];
@@ -60,13 +61,10 @@ void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len)
     }
 }
 
-// 按照字节打印数据，可附带提示信息
-void print_bytes(const char* tip, char* codes, int len) 
+// 按照字节打印数据
+void print_bytes(char* codes, int len) 
 {
-    int i;
-
-    printf("%s", tip);
-    for (i = 0; i < len; ++i) 
+    for (int i = 0; i < len; ++i) 
     {
         printf("%02x", (unsigned char) codes[i]);
         if ((i + 1) % 8 == 0) printf("\n");
@@ -85,7 +83,6 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
 
     if (addr_flag)  // true
     {
-        
         if (addr > elf_code_start && addr < elf_code_end) {
             set_fun_list(&regs_fun_info, addr);
             fun_name = addr_get_fun(&regs_fun_info, addr);
@@ -124,7 +121,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             else
                 printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
-        } else if (addr > ld_data_start && addr < ld_data_end){
+        } else if (addr > ld_data_start && addr < ld_data_end) {
             data_name = addr_get_glibc_data(addr); 
             if (data_name != "")
                 printf("\033[35m0x%llx (ld.%s)\033[0m", addr, data_name.c_str());
@@ -138,7 +135,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
             else
                 printf("\033[35m0x%llx (libc[data])\033[0m", addr);
 
-        } else if (addr > elf_ini_start && addr < elf_ini_end){
+        } else if (addr > elf_ini_start && addr < elf_ini_end) {
             ini_name = addr_get_elf_fini(addr);
             if (ini_name != "")
                 printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
@@ -154,7 +151,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
     }
     else
     {
-        if (judg_addr_code(addr)){
+        if (judg_addr_code(addr)) {
             printf("\033[31m0x%llx\033[0m", addr);
         } else if (addr > stack_base && addr < stack_end) {
             printf("\033[33m0x%llx\033[0m", addr);
@@ -166,7 +163,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
 }
 
 // 输出指定地址的数据，输出 num 组，每组8字节
-void show_addr_data(pid_t pid, int num , unsigned long long addr)
+void show_addr_data(pid_t pid, int num, unsigned long long addr)
 {
     union u {
         long val;
@@ -270,5 +267,20 @@ bool judg_addr_code(unsigned long long addr)
         return true;
     } else
         return false;
+}
 
+string get_addr_file_base(unsigned long long addr, unsigned long long* base_addr)
+{
+    if (addr > elf_code_start && addr < elf_code_end) {
+        *base_addr = elf_base;
+        return "elf";
+    } else if (addr > libc_code_start && addr < libc_code_end) {
+        *base_addr = libc_base;
+        return "libc";
+    } else if (addr > ld_code_start && addr < ld_code_end) {
+        *base_addr = ld_base;
+        return "ld";
+    }
+    else
+        return "";
 }

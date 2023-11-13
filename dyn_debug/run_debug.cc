@@ -206,13 +206,31 @@ void run_dyn_debug(Binary* bin)
                     }
                 } 
 
-                else if (!strcmp(arguments[0], "b")) {
-                    if (argc == 2) { // 打断点
-                        set_break_point(pid, arguments[1]);
+                else if (!strcmp(arguments[0], "bf") || !strcmp(arguments[0], "b")) {
+                    if (argc == 2) 
+                    {
+                        unsigned long long break_point_fun_addr;
+                        break_point_fun_addr = get_elf_fun_addr(arguments[1]);
+                        if (!break_point_fun_addr)
+                            err_info("There is no such function!");
+                        else  // 打断点
+                            set_break_point(pid, break_point_fun_addr);
                     } else {
-                        err_info("Please enter the break point address or function name!");
+                        err_info("Please enter the break point function name!");
                     }
                 } 
+
+                else if (!strcmp(arguments[0], "ba")) {
+                    if (argc == 2) { 
+                        unsigned long long break_point_addr = strtoul(arguments[1], nullptr, 16);
+                        if (!judg_addr_code(break_point_addr))
+                            err_info("Illegal address!");
+                        else // 打断点
+                            set_break_point(pid, break_point_addr);
+                    } else {
+                        err_info("Please enter the break point address!");
+                    }
+                }             
                 else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) {
                     if (argc == 3) {
                         int num = stoi(arguments[2]);
@@ -228,12 +246,26 @@ void run_dyn_debug(Binary* bin)
                     }
                 } 
                 else if (!strcmp(arguments[0], "ib")) {
+
+                    int fun_offset;
+                    string fun_name = "";
+                    unsigned long long fun_start_addr;
+
                     printf("Num        Type            Address\n");
-                    for (int i = 0; i < 8; i++) {
-                        if (break_point_list[i].break_point_state) {
-                            printf("%-11dbreak point     \033[31m0x%llx\033[0m\n",
+                    for (int i = 0; i < 8; i++) 
+                    {
+                        if (break_point_list[i].break_point_state) 
+                        {
+                            fun_name = get_fun(break_point_list[i].addr, &fun_start_addr);
+                            fun_offset = break_point_list[i].addr - fun_start_addr;
+
+                            printf("%-11dbreak point     \033[31m0x%llx\033[0m ",
                                 i, break_point_list[i].addr
                             );
+                            if (fun_offset)
+                                printf("<%s+%d>\n", fun_name.c_str(), fun_offset);
+                            else
+                                printf("<%s>\n", fun_name.c_str());
                         }
                     }
                 } 

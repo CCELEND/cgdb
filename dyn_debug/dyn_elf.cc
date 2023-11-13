@@ -13,6 +13,47 @@ string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr)
     return "";
 }
 
+// 通过地址找函数名
+string get_fun(unsigned long long addr, unsigned long long* fun_start_addr)
+{
+    string fun_name;
+    if (addr > 0x7f0000000000)
+    {
+        fun_name = addr_get_glibc_plt_fun(addr);
+        if (fun_name != "") 
+        {
+            *fun_start_addr = addr;
+            return fun_name;
+        }
+        else
+        {
+            fun_name = addr_get_glibc_fun(addr, fun_start_addr);
+            return fun_name;
+        }
+    }
+
+    // elf
+    else
+    {
+        fun_name = addr_get_elf_fun(addr);
+        if (fun_name != "") 
+        {
+            *fun_start_addr = elf_fun_start[fun_name] + elf_base;
+            return fun_name;
+        }
+        else 
+        {
+            fun_name = addr_get_elf_plt_fun(addr);
+            *fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
+            fun_name += "@plt";
+            return fun_name;
+        }
+
+    }
+
+}
+
+
 // 通过函数地址获得函数结束地址
 unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr)
 {

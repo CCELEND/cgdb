@@ -1,92 +1,118 @@
 #include "disasm.h"
 
-// 输出指令行数 line, num 指令长度
-void disasm(char* byte_codes, unsigned long long addr, int num, int line)
+// 判断是否是跳转指令
+bool judg_jump(char* mnemonic)
+{
+    if (!strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||
+        !strcmp(mnemonic, "ret" ) || !strcmp(mnemonic, "je" ) ||
+        !strcmp(mnemonic, "jne" ) || !strcmp(mnemonic, "jz" ) ||
+        !strcmp(mnemonic, "ja"  ) || !strcmp(mnemonic, "jae") ||
+        !strcmp(mnemonic, "jb"  ) || !strcmp(mnemonic, "jbe") ||
+        !strcmp(mnemonic, "jg"  ) || !strcmp(mnemonic, "jge") ||
+        !strcmp(mnemonic, "jl"  ) || !strcmp(mnemonic, "jle")
+        )
+        return true;
+    else
+        return false;
+}
+
+// addr:汇编代码的地址, fun_name:函数名, offset:偏移, 
+// 指令码:codes, 操作码:mnemonic, 操作数:ops 
+void dis_highlight_show(unsigned long long addr, string fun_name, int offset, 
+    char* codes, char* mnemonic, char* ops)
+{
+    string jump_fun_name = "";
+    unsigned long long jump_addr, jump_fun_start_addr;
+    int jump_fun_offset;
+
+    printf("\033[32m\033[1m ► 0x%llx\033[0m ", addr);
+    if(fun_name != ""){
+        printf("\033[32m\033[1m<%s+%04d>   ", fun_name.c_str(), offset);
+    }
+    printf("\033[34m\033[1m%-20s\033[0m", codes);
+    printf("\033[33m\033[1m%-16s\033[0m", mnemonic);
+    printf("\033[36m\033[1m%s\033[0m ", ops);
+    if (judg_jump(mnemonic))
+    {
+        jump_addr = strtoul(ops, nullptr, 16);
+        jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
+        jump_fun_offset = jump_addr - jump_fun_start_addr;
+        if (jump_fun_offset)
+            printf("\033[32m\033[1m<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
+        else
+            printf("\033[32m\033[1m<%s>", jump_fun_name.c_str());
+    }
+}
+void dis_show(unsigned long long addr, string fun_name, int offset, 
+    char* codes, char* mnemonic, char* ops)
+{
+    string jump_fun_name = "";
+    unsigned long long jump_addr, jump_fun_start_addr;
+    int jump_fun_offset;
+
+    printf("   0x%llx ", addr);
+    if(fun_name != ""){
+        printf("<%s+%04d>   ", fun_name.c_str(), offset);
+    }
+    printf("\033[34m%-20s\033[0m", codes);
+    printf("\033[33m%-16s\033[0m", mnemonic);
+    printf("\033[36m%s\033[0m ", ops);
+    if (judg_jump(mnemonic))
+    {
+        jump_addr = strtoul(ops, nullptr, 16);
+        jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
+        jump_fun_offset = jump_addr - jump_fun_start_addr;
+        if (jump_fun_offset)
+            printf("<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
+        else
+            printf("<%s>", jump_fun_name.c_str());
+    }
+}
+
+
+void bp_disasm(pid_t pid, unsigned long long addr)
 {
     csh handle;
     cs_insn *insn;
     size_t count;
-    unsigned long long plt_addr;
-    string fun_name;
-    int offset;
+    
+
+    char addr_instruct[32];
+    get_addr_data(pid, addr, addr_instruct, 32);
 
     if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
         printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
         return;
-    }    
-
-    count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
-    if (count > 0) {
+    }
+    count = cs_disasm(handle, (uint8_t*)addr_instruct, 32, addr, 0, &insn);
+    if (count > 0) 
+    {
         size_t j;
-        for (j = 0; j < line; j++) 
+        int fun_offset;
+        string dis_fun_name = "";
+        unsigned long long fun_start_addr;
+
+        for (j = 0; j < 2 && j < count-1; j++)
         {
             char code[32];
-            for(int i = 0; i < insn[j].size; ++i){
+
+            dis_fun_name = get_fun(insn[j].address, &fun_start_addr);
+            fun_offset = insn[j].address - fun_start_addr;
+            
+            for(int i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
-            }
 
-            fun_name = addr_get_elf_fun(insn[j].address);
-            offset = addr_get_elf_fun_offset(insn[j].address);
-
-            // address 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
-            if (!j){
-
-                printf("\033[32m\033[1m ► 0x%lx\033[0m ", insn[j].address);
-
-                if(fun_name != "") {
-                    printf("\033[32m\033[1m<%s+%d>\t", fun_name.c_str(), offset);
-                }
-
-                printf( "\033[34m\033[1m%-20s\033[0m"
-                        "\033[33m\033[1m%-16s\033[0m"
-                        "\033[36m\033[1m%s\033[0m\n", 
-                        code, insn[j].mnemonic,
-                        insn[j].op_str);
-
-                if (!strcmp(insn[j].mnemonic, "ret") && fun_name == "main"){
-                    break;
-                }
+            // addr 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
+            if (insn[j].address == addr)
+            {
+                dis_highlight_show(insn[j].address, dis_fun_name, fun_offset, 
+                    code, insn[j].mnemonic, insn[j].op_str);
             }
             else{
-
-                printf("   0x%lx ", insn[j].address);
-
-                if(fun_name != "") {
-                    printf("<%s+%d>\t", fun_name.c_str(), offset);
-                }
-
-                printf("\033[34m%-20s\033[0m", code);
-
-                if ( !strcmp(insn[j].mnemonic, "call") || 
-                     !strcmp(insn[j].mnemonic, "ret")  || 
-                     !strcmp(insn[j].mnemonic, "jmp") )
-                {
-                    printf( "\033[33m%-16s\033[0m"
-                            "\033[36m%s\033[0m ",
-                        insn[j].mnemonic, insn[j].op_str);
-
-                    if (!strcmp(insn[j].mnemonic, "call") || 
-                        !strcmp(insn[j].mnemonic, "jmp") )
-                    {
-                        plt_addr = strtoul(insn[j].op_str, nullptr, 16);
-                        if (plt_addr < 0x7f0000000000)
-                            cout << "<\033[31m" << addr_get_elf_plt_fun(plt_addr) << "@plt\033[0m>"; 
-                    }
-
-                    if (strcmp(insn[j].mnemonic, "ret") == 0 && fun_name == "main") {
-                        printf("\n");
-                        break;
-                    }
- 
-                    printf("\n\n");
-
-                }
-                else {
-                    printf( "\033[33m\033[2m%-16s\033[0m"
-                            "\033[36m\033[2m%s\033[0m\n",
-                        insn[j].mnemonic, insn[j].op_str);
-                }
-            }   
+                dis_show(insn[j].address, dis_fun_name, fun_offset, 
+                    code, insn[j].mnemonic, insn[j].op_str);
+            }
+            printf("\n");
         }
         cs_free(insn, count);
     }
@@ -94,6 +120,7 @@ void disasm(char* byte_codes, unsigned long long addr, int num, int line)
 
     cs_close(&handle);
 }
+
 
 // 显示调用函数符号和信息
 void call_disasm(char* byte_codes, 
@@ -252,11 +279,7 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
                     set_fun_args_regs(&regs, &fun_args_regs);
                 }
 
-                if (!strcmp(insn[j].mnemonic, "call") ||
-                    !strcmp(insn[j].mnemonic, "jmp" ) ||
-                    !strcmp(insn[j].mnemonic, "ret" ) ||
-                    !strcmp(insn[j].mnemonic, "je"  ) ||
-                    !strcmp(insn[j].mnemonic, "ja" ) )
+                if (judg_jump(insn[j].mnemonic))
                 {
                     flow_change_op(insn[j].op_str);
                     printf("\n");
@@ -278,24 +301,14 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
 
                 printf("\033[34m%-20s\033[0m", code);
 
-                if ( !strcmp(insn[j].mnemonic, "call") || 
-                     !strcmp(insn[j].mnemonic, "ret" ) || 
-                     !strcmp(insn[j].mnemonic, "jmp" ) || 
-                     !strcmp(insn[j].mnemonic, "je"  ) || 
-                     !strcmp(insn[j].mnemonic, "ja" ) )
+                if (judg_jump(insn[j].mnemonic))
                 {
                     printf( "\033[33m%-16s\033[0m"
                             "\033[36m%s\033[0m ",
                         insn[j].mnemonic, insn[j].op_str);
 
-                    if (!strcmp(insn[j].mnemonic, "call") || 
-                        !strcmp(insn[j].mnemonic, "jmp" ) || 
-                        !strcmp(insn[j].mnemonic, "je"  ) || 
-                        !strcmp(insn[j].mnemonic, "ja" ) )
-                    {
-
-                        flow_change_op(insn[j].op_str);
-                    }
+                    // 输出跳转指令流操作数的函数符号和偏移
+                    flow_change_op(insn[j].op_str);
 
                     printf("\n\n");
                 }
