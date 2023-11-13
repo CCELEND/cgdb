@@ -22,7 +22,8 @@ void set_ni_break_point(pid_t pid, unsigned long long addr)
     next_addr = get_next_instruct_addr(rip_instruct, addr, 32);
 
     // 检查普通断点列表是否有这个地址的断点，有则取消
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) 
+    {
         if (break_point_list[i].addr == next_addr)
             break_point_delete(pid, i);
     }
