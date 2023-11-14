@@ -4,7 +4,7 @@
 // 获取该地址8字节的值
 u64 get_addr_val(pid_t pid, u64 addr)
 {
-    u64  val;
+    u64 val;
     val = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
     return val;
 }
