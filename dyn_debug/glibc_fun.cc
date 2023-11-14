@@ -11,8 +11,8 @@ string addr_get_glibc_fun(u64 glibc_fun_addr,
         glibc_fun_addr = glibc_fun_addr &~ 0xf;
 
     u64 glibc_fun_addr_offset;
-    std::string command;
-    std::string glibc_fun_name = "";
+    string command;
+    string glibc_fun_name = "";
     bool is_libc, break_flag = false;
 
     if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
@@ -26,18 +26,18 @@ string addr_get_glibc_fun(u64 glibc_fun_addr,
         command = std::string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
     }
 
-    std::stringstream ss;
+    stringstream ss;
     FILE* fp;
     while (!break_flag)
     {
         ss.clear();
         ss.str("");
 
-        std::string exe_command = command;
+        string exe_command = command;
         // 使stringstream 将十六进制数转换为字符串
         
-        ss << std::hex << glibc_fun_addr_offset; // 使用十六进制输出
-        std::string addr_hex_str = ss.str();
+        ss << hex << glibc_fun_addr_offset; // 使用十六进制输出
+        string addr_hex_str = ss.str();
         // 去掉前缀"0x"
         if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
             addr_hex_str = addr_hex_str.substr(2);
@@ -59,11 +59,11 @@ string addr_get_glibc_fun(u64 glibc_fun_addr,
         
         while ((read = getline(&result, &len, fp)) != -1) 
         {
-            if (std::string(result).find("<") != std::string::npos) 
+            if (string(result).find("<") != string::npos) 
             {
-                lib_fun_str_start = std::string(result).find("<");
-                lib_fun_str_end = std::string(result).find(">");
-                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, 
+                lib_fun_str_start = string(result).find("<");
+                lib_fun_str_end = string(result).find(">");
+                glibc_fun_name = string(result).substr(lib_fun_str_start+1, 
                     lib_fun_str_end-lib_fun_str_start-1);
                 // printf("%s\n", glibc_fun_name.c_str());
                 break_flag = true;
@@ -96,33 +96,33 @@ u64 get_glibc_fun_end(u64 glibc_fun_addr,
 
     u64 glibc_fun_addr_offset;
     u64 glibc_fun_end_addr = 0;
-    std::string command;
-    std::string glibc_fun_name = "";
+    string command;
+    string glibc_fun_name = "";
     bool is_libc, break_flag = false;
 
     if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
         is_libc = false;
         glibc_fun_addr_offset = glibc_fun_addr - ld_base;
-        command = std::string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+        command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
     else {
         is_libc = true;
         glibc_fun_addr_offset = glibc_fun_addr - libc_base;
-        command = std::string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+        command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
     }
 
-    std::stringstream ss;
+    stringstream ss;
     FILE* fp;
     while (!break_flag)
     {
         ss.clear();
         ss.str("");
         glibc_fun_addr_offset += 0x8;
-        std::string exe_command = command;
+        string exe_command = command;
         // 使stringstream 将十六进制数转换为字符串
         
-        ss << std::hex << glibc_fun_addr_offset; // 使用十六进制输出
-        std::string addr_hex_str = ss.str();
+        ss << hex << glibc_fun_addr_offset; // 使用十六进制输出
+        string addr_hex_str = ss.str();
         // 去掉前缀"0x"
         if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
             addr_hex_str = addr_hex_str.substr(2);
@@ -143,12 +143,12 @@ u64 get_glibc_fun_end(u64 glibc_fun_addr,
         s32 lib_fun_str_start, lib_fun_str_end;
         while ((read = getline(&result, &len, fp)) != -1) 
         {
-            if (std::string(result).find("<") != std::string::npos) 
+            if (string(result).find("<") != string::npos) 
             {
 
-                lib_fun_str_start = std::string(result).find("<");
-                lib_fun_str_end = std::string(result).find(">");
-                glibc_fun_name = std::string(result).substr(lib_fun_str_start+1, 
+                lib_fun_str_start = string(result).find("<");
+                lib_fun_str_end = string(result).find(">");
+                glibc_fun_name = string(result).substr(lib_fun_str_start+1, 
                     lib_fun_str_end-lib_fun_str_start-1);
 
                 if (glibc_fun_name != fun_name)

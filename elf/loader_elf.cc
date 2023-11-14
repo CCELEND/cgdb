@@ -3,7 +3,7 @@
 
 // 打开二进制文件
 static bfd*
-open_bfd(std::string &fname)
+open_bfd(string &fname)
 {
   static s32 bfd_inited = 0;
 
@@ -83,8 +83,8 @@ load_symbols_bfd(bfd* bfd_h, Binary* bin)
         bin->symbols.push_back(Symbol());
         sym = &bin->symbols.back();
         sym->type = Symbol::SYM_TYPE_FUNC;
-        sym->name = std::string(bfd_symtab[i]->name);
-        sym->fun_sym_type = std::string("symtab");
+        sym->name = string(bfd_symtab[i]->name);
+        sym->fun_sym_type = string("symtab");
         // 得到函数符号的起始地址
         sym->addr = bfd_asymbol_value(bfd_symtab[i]);
       }
@@ -140,8 +140,8 @@ load_dynsym_bfd(bfd* bfd_h, Binary* bin)
         bin->symbols.push_back(Symbol());
         sym = &bin->symbols.back();
         sym->type = Symbol::SYM_TYPE_FUNC;
-        sym->name = std::string(bfd_dynsym[i]->name);
-        sym->fun_sym_type = std::string("dynsym");  //
+        sym->name = string(bfd_dynsym[i]->name);
+        sym->fun_sym_type = string("dynsym");  //
         sym->addr = bfd_asymbol_value(bfd_dynsym[i]);
       }
     }
@@ -201,7 +201,7 @@ load_sections_bfd(bfd* bfd_h, Binary* bin)
     sec = &bin->sections.back();
 
     sec->binary = bin;
-    sec->name   = std::string(secname);
+    sec->name   = string(secname);
     sec->type   = sectype;
     sec->vma    = vma;
     sec->size   = size;
@@ -223,7 +223,7 @@ load_sections_bfd(bfd* bfd_h, Binary* bin)
 
 
 static int
-load_binary_bfd(std::string &fname, Binary* bin, Binary::BinaryType type)
+load_binary_bfd(string &fname, Binary* bin, Binary::BinaryType type)
 {
   s32 ret;
   bfd *bfd_h;
@@ -236,13 +236,13 @@ load_binary_bfd(std::string &fname, Binary* bin, Binary::BinaryType type)
     goto fail;
   }
 
-  bin->filename = std::string(fname);
+  bin->filename = string(fname);
   // 获取二进制文件的入口点地址
   // 返回 bfd 对象的 start_address 字段的值，起始地址是 bfd_vma
   bin->entry    = bfd_get_start_address(bfd_h);
 
   // 设置相应的 Binary 类型, ELF 或者 PE
-  bin->type_str = std::string(bfd_h->xvec->name);
+  bin->type_str = string(bfd_h->xvec->name);
   switch(bfd_h->xvec->flavour) {
     case bfd_target_elf_flavour:
       bin->type = Binary::BIN_TYPE_ELF;
@@ -259,7 +259,7 @@ load_binary_bfd(std::string &fname, Binary* bin, Binary::BinaryType type)
   // 返回指向 bfd_arch_info_type 数据结构的指针
   bfd_info = bfd_get_arch_info(bfd_h);
   // 提供了有关二进制体系结构的信息，以及方便的、可打印的字符串描述该体系结构
-  bin->arch_str = std::string(bfd_info->printable_name);
+  bin->arch_str = string(bfd_info->printable_name);
   switch(bfd_info->mach) {
     case bfd_mach_i386_i386:
       bin->arch = Binary::ARCH_X86; 
@@ -299,7 +299,7 @@ cleanup:
 
 // 是解析由文件名指定的二进制文件，并将其加载到指定的 Binary 对象中
 int
-load_binary(std::string &fname, Binary* bin, Binary::BinaryType type)
+load_binary(string &fname, Binary* bin, Binary::BinaryType type)
 {
   return load_binary_bfd(fname, bin, type);
 }

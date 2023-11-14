@@ -3,7 +3,7 @@
 // 显示 got
 void show_elf_got()
 {
-    std::string command = std::string("objdump -R ") + fname;
+    string command = string("objdump -R ") + fname;
     // 执行命令并将标准输出连接到文件流中
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)
@@ -17,8 +17,8 @@ void show_elf_got()
     ssize_t read;
 
     while ((read = getline(&result, &len, fp)) != -1) {
-        if (strcmp(result, "\n") != 0 && std::string(result).find("elf64-x86-64") == std::string::npos)
-            std::cout << result;
+        if (strcmp(result, "\n") != 0 && string(result).find("elf64-x86-64") == string::npos)
+            cout << result;
     }
 
     pclose(fp);   // 关闭管道
@@ -28,7 +28,7 @@ void show_elf_got()
 // 显示 libc plt
 void show_elf_plt()
 {
-    std::string command = std::string("objdump -d -j .plt.sec -M intel ") + fname;
+    string command = string("objdump -d -j .plt.sec -M intel ") + fname;
     // 执行命令并将标准输出连接到文件流中
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)
@@ -43,9 +43,9 @@ void show_elf_plt()
 
     while ((read = getline(&result, &len, fp)) != -1) {
         // 处理每一行输出
-        if (strcmp(result, "\n") != 0 && std::string(result).find("elf64-x86-64") == std::string::npos
-            && std::string(result).find("Disassembly") == std::string::npos){
-            std::cout << result;
+        if (strcmp(result, "\n") != 0 && string(result).find("elf64-x86-64") == string::npos
+            && string(result).find("Disassembly") == string::npos){
+            cout << result;
         }
     }
 
