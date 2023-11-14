@@ -35,21 +35,21 @@ u64 disasm_addr = 0;
 u64 next_disasm_addr = 0;
 bool disasm_addr_synchronous = true;
 
-struct user_regs_struct regs{};
-struct user_regs_struct last_regs{};
-struct user_regs_struct fun_args_regs{};
+regs_struct regs{};
+regs_struct last_regs{};
+regs_struct fun_args_regs{};
 
-struct break_point break_point_list[8];
-struct break_point ni_break_point;
+break_point_type break_point_list[8];
+break_point_type ni_break_point;
 
 // 键是 elf 函数名，值是结束地址
 map<string, u64> elf_fun_end;
 // 键是 elf plt 函数名，值是结束地址
 map<string, u64> elf_plt_fun_end;
 
-struct fun_info_type regs_fun_info;
-struct fun_info_type dis_fun_info;
-struct fun_info_type flow_change_fun_info;
+fun_list_info_type regs_fun_info;
+fun_list_info_type dis_fun_info;
+fun_list_info_type flow_change_fun_info;
 
 void run_dyn_debug(Binary* bin)
 {
@@ -305,7 +305,7 @@ void run_dyn_debug(Binary* bin)
                     show_vmmap(pid);
                 } 
                 else if (!strcmp(arguments[0], "base")) {
-                    // printf("[+] elf ini base: 0x%llx\n", elf_ini_start);
+
                     printf("[+] elf base:     0x%llx\n", elf_base);
                     printf("[+] libc base:    0x%llx\n", libc_base);
                     printf("[+] ld base:      0x%llx\n", ld_base);

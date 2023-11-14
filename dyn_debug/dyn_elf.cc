@@ -2,7 +2,7 @@
 #include "dyn_fun.h"
 
 // 从函数信息结构体获取对应地址的信息
-string addr_get_fun(struct fun_info_type* fun_info, u64 addr)
+string addr_get_fun(fun_list_info_type* fun_info, u64 addr)
 {
     for (s32 i = 0; i < 0x10; i++)
     {
