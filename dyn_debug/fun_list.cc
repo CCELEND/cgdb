@@ -7,7 +7,7 @@ void clear_fun_list(fun_list_info_type* fun_info)
     for (s32 i = 0; i < fun_info->fun_num; i++)
     {
         if (!fun_info->fun_list[i].fun_start_addr) break;
-        
+
         fun_info->fun_list[i].fun_start_addr = 0;
         fun_info->fun_list[i].fun_end_addr = 0;
         fun_info->fun_list[i].fun_name = "";
@@ -107,7 +107,6 @@ s32 addr_get_fun_offset(fun_list_info_type* fun_info, u64 addr)
         if ( addr >= fun_info->fun_list[i].fun_start_addr && 
              addr <= fun_info->fun_list[i].fun_end_addr )
             return addr - fun_info->fun_list[i].fun_start_addr;
-
     }
 
     return -1;
