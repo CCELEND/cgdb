@@ -54,8 +54,7 @@ void show_regs(pid_t pid, regs_struct* regs)
 
 }
 
-void copy_regs_to_last_regs(regs_struct* last_regs, 
-    regs_struct* regs)
+void copy_regs_to_last_regs(regs_struct* last_regs, regs_struct* regs)
 {
     memcpy(last_regs, regs, sizeof(struct user_regs_struct));
 }
