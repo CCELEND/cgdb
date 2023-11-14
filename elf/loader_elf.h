@@ -1,28 +1,19 @@
 #ifndef LOADER_ELF_H
 #define LOADER_ELF_H
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <iostream>
-#include <unistd.h>
-#include <string>
-#include <vector>
 #include <bfd.h>
-#include <map>
+#include "../need_include.h"
 
-#include "../types.h"
+using namespace std;
 
 // 新版本的宏有问题, 需要修改
 #define bfd_get_section_flags(bfd, ptr) ((void) bfd, (ptr)->flags)
 
 // 键为函数名，值为地址
-extern std::map<std::string, u64> elf_fun_start;
-extern std::map<std::string, u64> elf_plt_fun_start;
+extern map<string, u64> elf_fun_start;
+extern map<string, u64> elf_plt_fun_start;
 
-extern std::string fname;
+extern string fname;
 
 class Binary;
 class Section;
@@ -39,8 +30,8 @@ public:
   Symbol() : type(SYM_TYPE_UKN), name(), addr(0) {}
 
   SymbolType  type;         // 枚举体, 符号类型
-  std::string name;         // 符号名字
-  std::string fun_sym_type; // 函数符号类型
+  string name;         // 符号名字
+  string fun_sym_type; // 函数符号类型
   uint64_t    addr;         // 符号起始地址
 };
 
@@ -58,7 +49,7 @@ public:
   bool contains (uint64_t addr) { return (addr >= vma) && (addr-vma < size); }
 
   Binary       *binary;
-  std::string   name;
+  string   name;
   SectionType   type;
   uint64_t      vma;
   uint64_t      size;
@@ -82,18 +73,18 @@ public:
 
   Section *get_text_section() { for(auto &s : sections) if(s.name == ".text") return &s; return NULL; }
 
-  std::string          filename;
+  string          filename;
   BinaryType           type;
-  std::string          type_str;
+  string          type_str;
   BinaryArch           arch;
-  std::string          arch_str;
+  string          arch_str;
   unsigned             bits;
   uint64_t             entry;
-  std::vector<Section> sections;
-  std::vector<Symbol>  symbols;
+  vector<Section> sections;
+  vector<Symbol>  symbols;
 };
 
-int  load_binary   (std::string &fname, Binary* bin, Binary::BinaryType type);
+int  load_binary   (string &fname, Binary* bin, Binary::BinaryType type);
 void unload_binary (Binary* bin);
 
 void show_elf_symbol(Binary* bin);

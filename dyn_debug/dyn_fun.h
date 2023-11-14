@@ -1,26 +1,7 @@
 #ifndef DYN_FUN_H
 #define DYN_FUN_H
 
-#include <stdio.h>
-#include <string>
-#include <stdint.h>
-#include <vector>
-#include <iostream>
-#include <sstream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-#include <fstream>
-#include <sys/wait.h>
-#include <sys/ptrace.h>
-#include <sys/reg.h>
-#include <sys/user.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <termios.h>
-
-#include "../types.h"
+#include "../need_include.h"
 #include "../elf/loader_elf.h"
 #include "../disasm/disasm.h"
 
