@@ -2,19 +2,19 @@
 #include "dyn_fun.h"
 
 // 获取该地址8字节的值
-unsigned long long get_addr_val(pid_t pid, unsigned long long addr)
+u64 get_addr_val(pid_t pid, u64 addr)
 {
-    unsigned long long  val;
+    u64  val;
     val = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
     return val;
 }
 
 // 从子进程指定地址读取 len 字节长度数据到 str
-void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len) 
+void get_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
     // 计算一共需要读取多少个字
-    int i = 0, j = len >> 3; //j = len / LONG_SIZE;
+    s32 i = 0, j = len >> 3; //j = len / LONG_SIZE;
     union u {
         long val;
         char chars[LONG_SIZE];
@@ -37,10 +37,10 @@ void get_addr_data(pid_t pid, unsigned long long addr, char* str, int len)
 }
 
 // 从 str 插入 len 字节长度数据到子进程指定地址
-void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len) 
+void put_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
-    int i = 0, j = len >> 3;
+    s32 i = 0, j = len >> 3;
     union u {
         long val;
         char chars[LONG_SIZE];
@@ -65,9 +65,9 @@ void put_addr_data(pid_t pid, unsigned long long addr, char* str, int len)
 }
 
 // 按照字节打印数据
-void print_bytes(char* codes, int len) 
+void print_bytes(char* codes, s32 len) 
 {
-    for (int i = 0; i < len; ++i) 
+    for (s32 i = 0; i < len; ++i) 
     {
         printf("%02x", (unsigned char) codes[i]);
         if ((i + 1) % 8 == 0) printf("\n");
@@ -75,14 +75,14 @@ void print_bytes(char* codes, int len)
 }
 
 // 输出带颜色的地址以标记所属地址范围 addr_flag 为真会显示地址所属文件
-void flag_addr_printf(unsigned long long addr, bool addr_flag)
+void flag_addr_printf(u64 addr, bool addr_flag)
 {
     if (addr == 0) {
         printf("0x%llx", addr);
         return;
     }
     string fun_name, data_name, ini_name;
-    int offset;
+    s32 offset;
 
     if (addr_flag)  // true
     {
@@ -182,7 +182,7 @@ void flag_addr_printf(unsigned long long addr, bool addr_flag)
 }
 
 // 输出指定地址的数据，输出 num 组，每组8字节
-void show_addr_data(pid_t pid, int num, unsigned long long addr)
+void show_addr_data(pid_t pid, s32 num, u64 addr)
 {
     union u {
         long val;
@@ -190,7 +190,7 @@ void show_addr_data(pid_t pid, int num, unsigned long long addr)
     } word{};
     char laddr[8];
 
-    for (int i = 0; i < num; i++) 
+    for (s32 i = 0; i < num; i++) 
     {
         if( i % 2 == 0)
         {
@@ -219,10 +219,10 @@ void show_addr_data(pid_t pid, int num, unsigned long long addr)
 }
 
 // 输出地址的多重指针
-void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
+void show_addr_point(pid_t pid, u64 address, bool addr_flag)
 {
-    unsigned long long addr;
-    unsigned long long val;
+    u64 addr;
+    u64 val;
     char addr_instruct[16]; // one line dis
     flag_addr_printf(address, addr_flag);
 
@@ -262,16 +262,16 @@ void show_addr_point(pid_t pid, unsigned long long address, bool addr_flag)
 }
 
 // 字节流转换字符串
-void val_to_string(unsigned long long val)
+void val_to_string(u64 val)
 {
     union u {
-        unsigned long long val;
+        u64 val;
         char chars[LONG_SIZE];
     } word{};
     word.val = val;
 
     printf(" '");
-    for(int i = 0; i < CODE_SIZE; ++i)
+    for(s32 i = 0; i < CODE_SIZE; ++i)
     {
         if ( long((unsigned char)word.chars[i]) == 0x00 ) break;
         if ( long((unsigned char)word.chars[i]) >= 0x21 &&
@@ -281,7 +281,7 @@ void val_to_string(unsigned long long val)
 }
 
 // 判断地址是否可执行
-bool judg_addr_code(unsigned long long addr)
+bool judg_addr_code(u64 addr)
 {
     if (addr > elf_code_start && addr < elf_code_end) 
         return true;
@@ -300,7 +300,7 @@ bool judg_addr_code(unsigned long long addr)
 }
 
 // 通过地址获取文件名和加载基址
-string get_addr_file_base(unsigned long long addr, unsigned long long* base_addr)
+string get_addr_file_base(u64 addr, u64* base_addr)
 {
     if (addr > elf_code_start && addr < elf_code_end) 
     {

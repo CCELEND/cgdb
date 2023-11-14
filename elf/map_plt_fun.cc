@@ -15,8 +15,8 @@ void map_plt_fun_start()
     char* result = nullptr;
     size_t len = 0;
     ssize_t read;
-    unsigned long long plt_fun_addr;
-    int fun_str_start, fun_str_end;
+    u64 plt_fun_addr;
+    s32 fun_str_start, fun_str_end;
     std::string fun_name;
 
     while ((read = getline(&result, &len, fp)) != -1) 

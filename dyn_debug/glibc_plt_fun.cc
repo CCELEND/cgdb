@@ -3,9 +3,9 @@
 
 
 // 根据地址找所在 glibc plt 函数名
-string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr) 
+string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr) 
 {
-    unsigned long long glibc_plt_fun_addr_offset;
+    u64 glibc_plt_fun_addr_offset;
     std::string command;
 
     if (glibc_plt_fun_addr < ld_code_end && glibc_plt_fun_addr > ld_code_start) 
@@ -40,7 +40,7 @@ string addr_get_glibc_plt_fun(unsigned long long glibc_plt_fun_addr)
     char* result = nullptr;
     size_t len = 0;
     ssize_t read;
-    int lib_plt_fun_str_start, lib_plt_fun_str_end;
+    s32 lib_plt_fun_str_start, lib_plt_fun_str_end;
     std::string lib_plt_fun_name = "";
 
     while ((read = getline(&result, &len, fp)) != -1) 

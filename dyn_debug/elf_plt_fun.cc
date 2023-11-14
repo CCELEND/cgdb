@@ -12,7 +12,7 @@ void dyn_show_elf_plt_fun()
 }
 
 // 根据实际 elf plt 函数地址找函数名
-string addr_get_elf_plt_fun(unsigned long long addr)
+string addr_get_elf_plt_fun(u64 addr)
 {
     for (auto it : elf_plt_fun_start) 
     {
@@ -25,7 +25,7 @@ string addr_get_elf_plt_fun(unsigned long long addr)
 
 
 // 根据地址找所在 elf plt 函数偏移
-int addr_get_elf_plt_fun_offset(unsigned long long addr)
+int addr_get_elf_plt_fun_offset(u64 addr)
 {
     for (auto it : elf_plt_fun_start) 
     {

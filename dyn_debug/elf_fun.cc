@@ -12,7 +12,7 @@ void dyn_show_elf_fun()
 }
 
 // 通过 elf 函数名获得 elf 函数地址
-unsigned long long get_elf_fun_addr(char* fun_name)
+u64 get_elf_fun_addr(char* fun_name)
 {
     for (auto it : elf_fun_start) 
     {
@@ -24,7 +24,7 @@ unsigned long long get_elf_fun_addr(char* fun_name)
 }
 
 // 根据地址找所在 elf 函数名
-string addr_get_elf_fun(unsigned long long addr)
+string addr_get_elf_fun(u64 addr)
 {
     for (auto it : elf_fun_start) 
     {
@@ -37,7 +37,7 @@ string addr_get_elf_fun(unsigned long long addr)
 }
 
 // 根据地址找所在 elf 函数偏移
-int addr_get_elf_fun_offset(unsigned long long addr)
+int addr_get_elf_fun_offset(u64 addr)
 {
     for (auto it : elf_fun_start) 
     {

@@ -4,7 +4,7 @@
 // 清理函数列表
 void clear_fun_list(struct fun_info_type* fun_info)
 {
-    for (int i = 0; i < fun_info->fun_num; i++)
+    for (s32 i = 0; i < fun_info->fun_num; i++)
     {
         if (!fun_info->fun_list[i].fun_start_addr)
             break;
@@ -16,9 +16,9 @@ void clear_fun_list(struct fun_info_type* fun_info)
 }
 
 // 设置函数列表
-void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
+void set_fun_list(struct fun_info_type* fun_info, u64 fun_addr)
 {
-    for (int i = 0; i < 0x10; i++) 
+    for (s32 i = 0; i < 0x10; i++) 
     {
         // 地址在列表某个函数范围内就直接退出
         if (fun_addr >= fun_info->fun_list[i].fun_start_addr && 
@@ -42,7 +42,7 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
                 }
                 else
                 {
-                    unsigned long long glibc_fun_start;
+                    u64 glibc_fun_start;
                     fun_name = addr_get_glibc_fun(fun_addr, &glibc_fun_start);
                     fun_info->fun_list[i].fun_start_addr = glibc_fun_start;
                     fun_info->fun_list[i].fun_name = fun_name;
@@ -85,7 +85,7 @@ void set_fun_list(struct fun_info_type* fun_info, unsigned long long fun_addr)
 // 显示函数列表
 void show_fun_list(struct fun_info_type* fun_info)
 {
-    for (int i = 0; i < 0x10; i++)
+    for (s32 i = 0; i < 0x10; i++)
     {
         if (fun_info->fun_list[i].fun_start_addr == 0) break;
 
@@ -99,10 +99,10 @@ void show_fun_list(struct fun_info_type* fun_info)
 }
 
 // 通过地址获得对应函数地址偏移
-int addr_get_fun_offset(struct fun_info_type* fun_info, unsigned long long addr)
+s32 addr_get_fun_offset(struct fun_info_type* fun_info, u64 addr)
 {
 
-    for (int i = 0; i < 0x10; i++)
+    for (s32 i = 0; i < 0x10; i++)
     {
         if ( addr >= fun_info->fun_list[i].fun_start_addr && 
              addr <= fun_info->fun_list[i].fun_end_addr )

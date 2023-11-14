@@ -13,12 +13,14 @@
 #include <bfd.h>
 #include <map>
 
+#include "../types.h"
+
 // 新版本的宏有问题, 需要修改
 #define bfd_get_section_flags(bfd, ptr) ((void) bfd, (ptr)->flags)
 
 // 键为函数名，值为地址
-extern std::map<std::string, unsigned long long> elf_fun_start;
-extern std::map<std::string, unsigned long long> elf_plt_fun_start;
+extern std::map<std::string, u64> elf_fun_start;
+extern std::map<std::string, u64> elf_plt_fun_start;
 
 extern std::string fname;
 
@@ -105,7 +107,7 @@ void show_elf_fun();
 void map_fun_start(Binary* bin);
 void map_plt_fun_start();
 
-unsigned long long get_plt_fun_addr(char* funame);
+u64 get_plt_fun_addr(char* funame);
 
 void show_elf_help();
 

@@ -5,7 +5,7 @@
 void map_fun_start(Binary* bin)
 {
     Symbol* sym;
-    for(int i = 0; i < bin->symbols.size(); i++) 
+    for(s32 i = 0; i < bin->symbols.size(); i++) 
     {
         sym = &bin->symbols[i];
         if(sym->addr)

@@ -13,16 +13,16 @@ void break_point_inject(pid_t pid, break_point& bp)
 }
 
 // 设置 ni 断点
-void set_ni_break_point(pid_t pid, unsigned long long addr)
+void set_ni_break_point(pid_t pid, u64 addr)
 {
     char rip_instruct[32];
-    unsigned long long next_addr;
+    u64 next_addr;
     
     get_addr_data(pid, addr, rip_instruct, 32);
     next_addr = get_next_instruct_addr(rip_instruct, addr, 32);
 
     // 检查普通断点列表是否有这个地址的断点，有则取消
-    for (int i = 0; i < 8; i++) 
+    for (s32 i = 0; i < 8; i++) 
     {
         if (break_point_list[i].addr == next_addr)
             break_point_delete(pid, i);
@@ -37,28 +37,28 @@ void set_ni_break_point(pid_t pid, unsigned long long addr)
 
 // 设置普通断点
 // void set_break_point(pid_t pid, char* bp_fun)
-void set_break_point(pid_t pid, unsigned long long break_point_addr)
+void set_break_point(pid_t pid, u64 break_point_addr)
 {
-    for (int i = 0; i < 8; i++) 
+    for (s32 i = 0; i < 8; i++) 
     {
         if (break_point_list[i].addr == break_point_addr)
         {
-            err_info("Break point already exists!");
+            err_info("Break pos32 already exists!");
             return;
         }
     }
 
-    int fun_offset;
+    s32 fun_offset;
     string fun_name = "", link_file = "";
-    unsigned long long fun_start_addr, base_addr;
-    for (int i = 0; i < 8; i++) 
+    u64 fun_start_addr, base_addr;
+    for (s32 i = 0; i < 8; i++) 
     {
         if (!break_point_list[i].addr)
         {
             fun_name = get_fun(break_point_addr, &fun_start_addr);
             fun_offset = break_point_addr - fun_start_addr;
             link_file = get_addr_file_base(break_point_addr, &base_addr);
-            printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
+            printf("[+] Break pos32 %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
                     i, link_file.c_str(), break_point_addr-base_addr, break_point_addr);
 
             if (fun_offset)
@@ -79,7 +79,7 @@ void set_break_point(pid_t pid, unsigned long long break_point_addr)
 }
 
 // 删除断点
-void break_point_delete(pid_t pid, int num)
+void break_point_delete(pid_t pid, s32 num)
 {
     // 指令恢复
     put_addr_data(pid, break_point_list[num].addr, break_point_list[num].backup, CODE_SIZE);
@@ -89,7 +89,7 @@ void break_point_delete(pid_t pid, int num)
 }
 
 // 断点处理
-int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag) 
+s32 break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag) 
 {
     struct user_regs_struct bp_regs{};
     // 判断信号类型
@@ -116,9 +116,9 @@ int break_point_handler(pid_t pid, int status, break_point& bp, bool showbp_flag
             else 
             {
                 if (showbp_flag)
-                    printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
+                    printf("[+] Break pos32 at: \033[31m0x%llx\033[0m\n", bp.addr);
 
-                // 把 INT 3 patch 回本来正常的指令
+                // 把 s32 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 // 执行流回退，重新执行正确的指令
                 bp_regs.rip = bp.addr;

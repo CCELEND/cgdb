@@ -6,16 +6,16 @@
 void show_stack(pid_t pid, struct user_regs_struct* regs)
 {
     struct winsize size;
-    unsigned long long stack = regs->rsp;
+    u64 stack = regs->rsp;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
-    int count = (size.ws_col-9)/2;      // 要重复输出的次数
+    s32 count = (size.ws_col-9)/2;      // 要重复输出的次数
 
     show_str(count);
     printf("[ STACK ]");
     show_str(count);
     printf("\033[0m\n");
 
-    for (int i = 0; i < 8; i++)
+    for (s32 i = 0; i < 8; i++)
     {
         if (stack == regs->rsp) {
             printf("%02d:%04x  rsp  ", i, i*8);
@@ -33,15 +33,15 @@ void show_stack(pid_t pid, struct user_regs_struct* regs)
     }
 }
 
-void show_num_stack(pid_t pid, struct user_regs_struct* regs, int num)
+void show_num_stack(pid_t pid, struct user_regs_struct* regs, s32 num)
 {
     if (num < 0 || num > 0x100){
         printf("[-] Number of errors!\n");
         return;
     }
 
-    unsigned long long stack = regs->rsp;
-    for (int i = 0; i < num; i++)
+    u64 stack = regs->rsp;
+    for (s32 i = 0; i < num; i++)
     {
         if (stack == regs->rsp) {
             printf("%02d:%04x  rsp  ", i, i*8);

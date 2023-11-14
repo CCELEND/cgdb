@@ -4,13 +4,13 @@
 // 根据地址找所在 glibc 函数名 2.36
 // 704d25fbbb72fa95d517b883131828c0883fe9.debug libc
 // 2e105c0bb3ee8e8f5b917f8af764373d206659.debug ld
-string addr_get_glibc_fun(unsigned long long glibc_fun_addr, 
-    unsigned long long* glibc_fun_start)
+string addr_get_glibc_fun(u64 glibc_fun_addr, 
+    u64* glibc_fun_start)
 {
     if (glibc_fun_addr % 0x8 != 0)
         glibc_fun_addr = glibc_fun_addr &~ 0xf;
 
-    unsigned long long glibc_fun_addr_offset;
+    u64 glibc_fun_addr_offset;
     std::string command;
     std::string glibc_fun_name = "";
     bool is_libc, break_flag = false;
@@ -55,7 +55,7 @@ string addr_get_glibc_fun(unsigned long long glibc_fun_addr,
         char* result = nullptr;
         size_t len = 0;
         ssize_t read;
-        int lib_fun_str_start, lib_fun_str_end;
+        s32 lib_fun_str_start, lib_fun_str_end;
         
         while ((read = getline(&result, &len, fp)) != -1) 
         {
@@ -88,14 +88,14 @@ string addr_get_glibc_fun(unsigned long long glibc_fun_addr,
 }
 
 // 通过 glibc 函数地址获得函数结束地址
-unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr, 
+u64 get_glibc_fun_end(u64 glibc_fun_addr, 
     string fun_name)
 {
     if (glibc_fun_addr % 0x8 != 0)
         glibc_fun_addr = glibc_fun_addr &~ 0xf;
 
-    unsigned long long glibc_fun_addr_offset;
-    unsigned long long glibc_fun_end_addr = 0;
+    u64 glibc_fun_addr_offset;
+    u64 glibc_fun_end_addr = 0;
     std::string command;
     std::string glibc_fun_name = "";
     bool is_libc, break_flag = false;
@@ -140,7 +140,7 @@ unsigned long long get_glibc_fun_end(unsigned long long glibc_fun_addr,
         char* result = nullptr;
         size_t len = 0;
         ssize_t read;
-        int lib_fun_str_start, lib_fun_str_end;
+        s32 lib_fun_str_start, lib_fun_str_end;
         while ((read = getline(&result, &len, fp)) != -1) 
         {
             if (std::string(result).find("<") != std::string::npos) 

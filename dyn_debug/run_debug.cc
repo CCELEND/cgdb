@@ -1,38 +1,38 @@
 
 #include "dyn_fun.h"
 
-unsigned long long elf_base = 0;
-unsigned long long elf_ini_start = 0;
-unsigned long long elf_ini_end = 0;
-unsigned long long elf_rodata_start = 0;
-unsigned long long elf_rodata_end = 0;
-unsigned long long elf_code_start = 0;
-unsigned long long elf_code_end = 0;
-unsigned long long elf_data_start = 0;
-unsigned long long elf_data_end = 0;
+u64 elf_base = 0;
+u64 elf_ini_start = 0;
+u64 elf_ini_end = 0;
+u64 elf_rodata_start = 0;
+u64 elf_rodata_end = 0;
+u64 elf_code_start = 0;
+u64 elf_code_end = 0;
+u64 elf_data_start = 0;
+u64 elf_data_end = 0;
 
-unsigned long long heap_base = 0;
-unsigned long long heap_end = 0;
-unsigned long long stack_base = 0;
-unsigned long long stack_end = 0;
+u64 heap_base = 0;
+u64 heap_end = 0;
+u64 stack_base = 0;
+u64 stack_end = 0;
 
-unsigned long long libc_base = 0;
-unsigned long long libc_code_start = 0;
-unsigned long long libc_code_end = 0;
-unsigned long long libc_data_start = 0;
-unsigned long long libc_data_end = 0;
+u64 libc_base = 0;
+u64 libc_code_start = 0;
+u64 libc_code_end = 0;
+u64 libc_data_start = 0;
+u64 libc_data_end = 0;
 
-unsigned long long ld_base = 0;
-unsigned long long ld_code_start = 0;
-unsigned long long ld_code_end = 0;
-unsigned long long ld_data_start = 0;
-unsigned long long ld_data_end = 0;
+u64 ld_base = 0;
+u64 ld_code_start = 0;
+u64 ld_code_end = 0;
+u64 ld_data_start = 0;
+u64 ld_data_end = 0;
 
-unsigned long long vdso_code_start = 0;
-unsigned long long vdso_code_end = 0;
+u64 vdso_code_start = 0;
+u64 vdso_code_end = 0;
 
-unsigned long long disasm_addr = 0;
-unsigned long long next_disasm_addr = 0;
+u64 disasm_addr = 0;
+u64 next_disasm_addr = 0;
 bool disasm_addr_synchronous = true;
 
 struct user_regs_struct regs{};
@@ -43,9 +43,9 @@ struct break_point break_point_list[8];
 struct break_point ni_break_point;
 
 // 键是 elf 函数名，值是结束地址
-map<string, unsigned long long> elf_fun_end;
+map<string, u64> elf_fun_end;
 // 键是 elf plt 函数名，值是结束地址
-map<string, unsigned long long> elf_plt_fun_end;
+map<string, u64> elf_plt_fun_end;
 
 struct fun_info_type regs_fun_info;
 struct fun_info_type dis_fun_info;
@@ -55,7 +55,7 @@ void run_dyn_debug(Binary* bin)
 {
     pid_t pid;
     Symbol* sym;
-    int status, num;
+    s32 status, num;
 
     // fork 子进程
     switch (pid = fork()) 
@@ -96,7 +96,7 @@ void run_dyn_debug(Binary* bin)
             show_regs_dis_stack_info(pid, &regs);
             copy_regs_to_last_regs(&last_regs, &regs);
 
-            int all_sum;
+            s32 all_sum;
             // 开始轮询输入的命令
             while (true) 
             {
@@ -113,10 +113,10 @@ void run_dyn_debug(Binary* bin)
                 debug_start:
                 //输入参数解析
                 argparse();
-                int argc = myargv.size();
+                s32 argc = myargv.size();
                 char** arguments = new char* [argc]; // 转换参数类型
 
-                for (int i = 0; i < argc; i++)
+                for (s32 i = 0; i < argc; i++)
                     arguments[i] = (char*) myargv[i].data();
 
                 // 退出操作
@@ -167,7 +167,7 @@ void run_dyn_debug(Binary* bin)
                     // 等待子进程停止或者结束，并获取子进程状态值
                     wait(&status);
 
-                    int index = -1;
+                    s32 index = -1;
                     for (int i = 0; i < 8; i++) 
                     {
                         if (break_point_list[i].break_point_state) 
@@ -187,7 +187,7 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "ic")) { // 计算执行完毕所需指令数
                     printf("[*] Calculating the number of instructions after this...\n");
-                    long count = 0;
+                    s64 count = 0;
                     while (true) 
                     {
 
@@ -196,7 +196,7 @@ void run_dyn_debug(Binary* bin)
                         if (WIFEXITED(status)) 
                         {
                             printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
-                            printf("[+] Total instruction count: \033[32m%ld\033[0m\n", 
+                            printf("[+] Total instruction count: \033[32m%lld\033[0m\n", 
                                 count);
                             break;
                         }
@@ -211,7 +211,7 @@ void run_dyn_debug(Binary* bin)
                 else if (!strcmp(arguments[0], "bf") || !strcmp(arguments[0], "b")) {
                     if (argc == 2) 
                     {
-                        unsigned long long break_point_fun_addr;
+                        u64 break_point_fun_addr;
                         break_point_fun_addr = get_elf_fun_addr(arguments[1]);
                         if (!break_point_fun_addr)
                             err_info("There is no such function!");
@@ -223,7 +223,7 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "ba")) {
                     if (argc == 2) { 
-                        unsigned long long break_point_addr = strtoul(arguments[1], nullptr, 16);
+                        u64 break_point_addr = strtoul(arguments[1], nullptr, 16);
                         if (!judg_addr_code(break_point_addr))
                             err_info("Illegal address!");
                         else // 打断点
@@ -236,7 +236,7 @@ void run_dyn_debug(Binary* bin)
                 else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) {
                     if (argc == 3) 
                     {
-                        int num = stoi(arguments[2]);
+                        s32 num = stoi(arguments[2]);
 
                         if (num >= 8 || num < 0)
                             err_info("Error break point number!");
@@ -249,12 +249,12 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "ib")) {
 
-                    int fun_offset;
+                    s32 fun_offset;
                     string fun_name = "";
-                    unsigned long long fun_start_addr;
+                    u64 fun_start_addr;
 
                     printf("Num        Type            Address\n");
-                    for (int i = 0; i < 8; i++) 
+                    for (s32 i = 0; i < 8; i++) 
                     {
                         if (break_point_list[i].break_point_state) 
                         {
@@ -281,7 +281,7 @@ void run_dyn_debug(Binary* bin)
                         if (num < 0) 
                             err_info("Wrong number of reads!");
                         else {
-                            unsigned long long address = strtoul(arguments[2], nullptr, 16);
+                            u64 address = strtoul(arguments[2], nullptr, 16);
                             show_addr_data(pid, num, address);
                         }
                     } 
@@ -292,7 +292,7 @@ void run_dyn_debug(Binary* bin)
                     if (argc == 2) 
                     {
                         get_regs(pid, &regs);
-                        int num = stoi(arguments[1]);
+                        s32 num = stoi(arguments[1]);
                         show_num_stack(pid, &regs, num);
                     }
                     else 
@@ -342,7 +342,7 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "plt")) {
                     if (argc == 2) {
-                        unsigned long long address = strtoul(arguments[1], nullptr, 16);
+                        u64 address = strtoul(arguments[1], nullptr, 16);
 
                         if ( addr_get_elf_plt_fun(address)== "" )
                             printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
@@ -361,7 +361,7 @@ void run_dyn_debug(Binary* bin)
 
 
                 else if (!strcmp(arguments[0], "test")) {
-                    // unsigned long long address = strtoul(arguments[1], nullptr, 16);
+                    // u64 address = strtoul(arguments[1], nullptr, 16);
 
                     // printf("-------------regs:\n");
                     // show_fun_list(&regs_fun_info);

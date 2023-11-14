@@ -37,7 +37,7 @@ void show_elf_plt()
         return;
     }
 
-    char *result = nullptr;
+    char* result = nullptr;
     size_t len = 0;
     ssize_t read;
 
@@ -79,7 +79,7 @@ void show_elf_plt_fun()
 // 显示符号表
 void show_elf_symbol(Binary* bin)
 {
-    Symbol *sym;
+    Symbol* sym;
 
     printf("[+] Symbol tables (\033[32mFUNC\033[0m)\n");
     printf("    %-31s %18s   %s\n", "name", "address", "type");

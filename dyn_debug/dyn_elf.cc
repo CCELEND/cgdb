@@ -2,9 +2,9 @@
 #include "dyn_fun.h"
 
 // 从函数信息结构体获取对应地址的信息
-string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr)
+string addr_get_fun(struct fun_info_type* fun_info, u64 addr)
 {
-    for (int i = 0; i < 0x10; i++)
+    for (s32 i = 0; i < 0x10; i++)
     {
         if(addr >= fun_info->fun_list[i].fun_start_addr && 
            addr <= fun_info->fun_list[i].fun_end_addr)
@@ -15,7 +15,7 @@ string addr_get_fun(struct fun_info_type* fun_info, unsigned long long addr)
 }
 
 // 通过地址找函数名
-string get_fun(unsigned long long addr, unsigned long long* fun_start_addr)
+string get_fun(u64 addr, u64* fun_start_addr)
 {
     string fun_name;
     if (addr > 0x7f0000000000)
@@ -56,7 +56,7 @@ string get_fun(unsigned long long addr, unsigned long long* fun_start_addr)
 
 
 // 通过函数地址获得函数结束地址
-unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr)
+u64 get_fun_end(pid_t pid, u64 fun_addr)
 {
     char buf[0x1000];
     union u 
@@ -65,13 +65,13 @@ unsigned long long get_fun_end(pid_t pid, unsigned long long fun_addr)
         char chars[LONG_SIZE];
     } word{};
 
-    for (int i = 0; i < 0x1000; i += LONG_SIZE){
+    for (s32 i = 0; i < 0x1000; i += LONG_SIZE){
         word.val = ptrace(PTRACE_PEEKDATA, pid, fun_addr + i, nullptr);
         if (word.val == -1)
             err_info("Trace error!");
         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
 
-        for (int j = i; j < i + 8; j++)
+        for (s32 j = i; j < i + 8; j++)
         {
             // 函数结束的标志的指令码
             if ( long((unsigned char)buf[j]) == 0xf4 ||

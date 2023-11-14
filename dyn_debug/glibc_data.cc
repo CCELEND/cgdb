@@ -3,9 +3,9 @@
 
 
 // 根据地址找所在 glibc data 段符号名
-string addr_get_glibc_data(unsigned long long glibc_data_addr) 
+string addr_get_glibc_data(u64 glibc_data_addr) 
 {
-    unsigned long long glibc_data_addr_offset;
+    u64 glibc_data_addr_offset;
     std::string command;
 
     if (glibc_data_addr > ld_data_start && glibc_data_addr < ld_data_end) 
@@ -43,7 +43,7 @@ string addr_get_glibc_data(unsigned long long glibc_data_addr)
     char* result = nullptr;
     size_t len = 0;
     ssize_t read;
-    int lib_data_str_start, lib_data_str_end;
+    s32 lib_data_str_start, lib_data_str_end;
     std::string lib_data_name = "";
 
     while ((read = getline(&result, &len, fp)) != -1) 

@@ -19,12 +19,12 @@ bool judg_jump(char* mnemonic)
 // addr:汇编代码的地址, fun_name:函数名, offset:偏移, 
 // 指令码:codes, 操作码:mnemonic, 操作数:ops 
 // 高亮显示
-void dis_highlight_show(unsigned long long addr, string fun_name, int offset, 
+void dis_highlight_show(u64 addr, string fun_name, s32 offset, 
     char* codes, char* mnemonic, char* ops)
 {
     string jump_fun_name = "";
-    unsigned long long jump_addr, jump_fun_start_addr;
-    int jump_fun_offset;
+    u64 jump_addr, jump_fun_start_addr;
+    s32 jump_fun_offset;
 
     printf("\033[32m\033[1m ► 0x%llx\033[0m ", addr);
     if(fun_name != ""){
@@ -44,12 +44,12 @@ void dis_highlight_show(unsigned long long addr, string fun_name, int offset,
             printf("\033[32m\033[1m<%s>", jump_fun_name.c_str());
     }
 }
-void dis_show(unsigned long long addr, string fun_name, int offset, 
+void dis_show(u64 addr, string fun_name, s32 offset, 
     char* codes, char* mnemonic, char* ops)
 {
     string jump_fun_name = "";
-    unsigned long long jump_addr, jump_fun_start_addr;
-    int jump_fun_offset;
+    u64 jump_addr, jump_fun_start_addr;
+    s32 jump_fun_offset;
 
     printf("   0x%llx ", addr);
     if(fun_name != ""){
@@ -71,7 +71,7 @@ void dis_show(unsigned long long addr, string fun_name, int offset,
 }
 
 // 只输出两行
-void bp_disasm(pid_t pid, unsigned long long addr)
+void bp_disasm(pid_t pid, u64 addr)
 {
     csh handle;
     cs_insn *insn;
@@ -89,9 +89,9 @@ void bp_disasm(pid_t pid, unsigned long long addr)
     if (count > 0) 
     {
         size_t j;
-        int fun_offset;
+        s32 fun_offset;
         string dis_fun_name = "";
-        unsigned long long fun_start_addr;
+        u64 fun_start_addr;
 
         for (j = 0; j < 2 && j < count-1; j++)
         {
@@ -100,7 +100,7 @@ void bp_disasm(pid_t pid, unsigned long long addr)
             dis_fun_name = get_fun(insn[j].address, &fun_start_addr);
             fun_offset = insn[j].address - fun_start_addr;
             
-            for(int i = 0; i < insn[j].size; ++i)
+            for(s32 i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
             // addr 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
@@ -125,14 +125,14 @@ void bp_disasm(pid_t pid, unsigned long long addr)
 
 // 显示调用函数符号和信息
 void call_disasm(char* byte_codes, 
-    unsigned long long addr, int num, string call_fun_name)
+    u64 addr, s32 num, string call_fun_name)
 {
     csh handle;
     cs_insn *insn;
     size_t count;
-    unsigned long long fun_addr;
+    u64 fun_addr;
     string fun_name;
-    int offset;
+    s32 offset;
 
     if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
         printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
@@ -147,7 +147,7 @@ void call_disasm(char* byte_codes,
             char code[32];
             string dis_fun_name = "";
             
-            // for(int i = 0; i < insn[j].size; ++i)
+            // for(s32 i = 0; i < insn[j].size; ++i)
             //     sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
             // printf("\033[34m\033[1m%-20s\033[0m" "\033[33m\033[1m%-16s\033[0m" 
@@ -184,9 +184,9 @@ void call_disasm(char* byte_codes,
 // 输出跳转指令流操作数的函数符号和偏移
 void flow_change_op(char* ops)
 {
-    unsigned long long flow_change_addr;
+    u64 flow_change_addr;
     string flow_change_fun_name = "";
-    int offset;
+    s32 offset;
     flow_change_addr = strtoul(ops, nullptr, 16);
     if (!flow_change_addr)
         return;
@@ -200,16 +200,16 @@ void flow_change_op(char* ops)
         printf("<\033[31m%s+%d\033[0m>", flow_change_fun_name.c_str(), offset);
 }
 
-void show_disasm(pid_t pid, unsigned long long rip_val)
+void show_disasm(pid_t pid, u64 rip_val)
 {
     csh handle;
     cs_insn *insn;
     size_t count;
-    int fun_offset;
+    s32 fun_offset;
 
     struct winsize size;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
-    int str_count = (size.ws_col-10)/2;      // 要重复输出的次数
+    s32 str_count = (size.ws_col-10)/2;      // 要重复输出的次数
     show_str(str_count);
     printf("[ DISASM ]");
     show_str(str_count);
@@ -229,11 +229,11 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 176, disasm_addr, 0, &insn);
     if (count > 0) {
         size_t j;
-        int num;
-        int line = 0;
+        s32 num;
+        s32 line = 0;
         num = dis_fun_info.fun_num;
 
-        for (int i = 0; i < 11 && i < count-1; i++ )
+        for (s32 i = 0; i < 11 && i < count-1; i++ )
             line++;
         // printf("%d\n", line);
 
@@ -246,7 +246,7 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
         {
             // printf("---0x%lx\n", insn[line-1].address);
             clear_fun_list(&dis_fun_info); // 清空函数列表
-            for(int i = 0; i < 11 && i < count-1; i++)
+            for(s32 i = 0; i < 11 && i < count-1; i++)
                 set_fun_list(&dis_fun_info, insn[i].address);
         }
 
@@ -255,7 +255,7 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
             char code[32];
             string dis_fun_name = "";
             
-            for(int i = 0; i < insn[j].size; ++i)
+            for(s32 i = 0; i < insn[j].size; ++i)
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
 
             dis_fun_name = addr_get_fun(&dis_fun_info, insn[j].address);
@@ -332,12 +332,12 @@ void show_disasm(pid_t pid, unsigned long long rip_val)
 
 //输出 line 行反汇编, 只输出 mnemonic 操作码, op_str 操作数
 void disasm_mne_op(char* byte_codes, 
-    unsigned long long addr, int num, int line)
+    u64 addr, s32 num, s32 line)
 {
     csh handle;
     cs_insn *insn;
     size_t count;
-    unsigned long long plt_addr;
+    u64 plt_addr;
 
     if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
         printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
@@ -368,13 +368,13 @@ void disasm_mne_op(char* byte_codes,
 }
 
 // 获得下一条指令地址
-unsigned long long get_next_instruct_addr(char* byte_codes, 
-    unsigned long long addr, int num)
+u64 get_next_instruct_addr(char* byte_codes, 
+    u64 addr, s32 num)
 {
     csh handle;
     cs_insn *insn;
     size_t count;
-    unsigned long long next_addr;
+    u64 next_addr;
 
     if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
         printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");

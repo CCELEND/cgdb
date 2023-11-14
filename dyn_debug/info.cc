@@ -27,9 +27,9 @@ void good_info(const char* msg)
     printf("\033[32m\033[1m[+] %s\033[0m\n", msg);
 }
 
-void show_str(int count)
+void show_str(s32 count)
 {
-    for (int i = 0; i < count; i++)
+    for (s32 i = 0; i < count; i++)
         printf("\033[34m─");
 }
 

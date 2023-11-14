@@ -3,9 +3,9 @@
 
 
 // 根据地址找所在 elf init, fini 段符号名
-string addr_get_elf_init(unsigned long long elf_init_addr) 
+string addr_get_elf_init(u64 elf_init_addr) 
 {
-    unsigned long long elf_init_addr_offset;
+    u64 elf_init_addr_offset;
     std::string command;
 
     elf_init_addr_offset = elf_init_addr - elf_base;
@@ -59,9 +59,9 @@ string addr_get_elf_init(unsigned long long elf_init_addr)
 }
 
 
-string addr_get_elf_fini(unsigned long long elf_fini_addr) 
+string addr_get_elf_fini(u64 elf_fini_addr) 
 {
-    unsigned long long elf_fini_addr_offset;
+    u64 elf_fini_addr_offset;
     std::string command;
 
     elf_fini_addr_offset = elf_fini_addr - elf_base;
