@@ -14,7 +14,7 @@ void get_addr_data(pid_t pid, u64 addr, char* str, s32 len)
 {
     char* laddr = str;
     // 计算一共需要读取多少个字
-    s32 i = 0, j = len >> 3; //j = len / LONG_SIZE;
+    s32 i = 0, j = len >> 3;
     union u {
         long val;
         char chars[LONG_SIZE];
