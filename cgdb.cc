@@ -10,8 +10,8 @@ string cmd;
 string fname;
 
 // 键是函数名，值是地址
-map<string, unsigned long long> elf_fun_start;
-map<string, unsigned long long> elf_plt_fun_start;
+map<string, u64> elf_fun_start;
+map<string, u64> elf_plt_fun_start;
 
 int main(int argc, char *argv[]) 
 {
