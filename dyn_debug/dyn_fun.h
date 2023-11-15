@@ -102,6 +102,19 @@ extern break_point_type break_point_list[8];
 // ni 断点结构体
 extern break_point_type ni_break_point;
 
+typedef struct fun_tree_info {
+    // u64 fun_addr;
+    struct fun_tree_info* next;
+    struct fun_tree_info* sub_fun;
+    s32 sub_fun_num;
+    string fun_name;
+    // 构造函数初始化结构体
+    // fun_tree_info(): next(NULL), sub_fun(NULL), sub_fun_num(0), fun_name("") {}
+} fun_tree_info_t;
+
+// extern fun_tree_info_t* parent_node;
+// extern fun_tree_info_t* sub_node;
+
 // 帮助和参数信息
 // arg_help.cc
 void argparse();
@@ -212,6 +225,11 @@ void set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs);
 // 显示调用函数信息
 // fun_call.cc
 void show_elf_fun_call(pid_t pid, char* elf_fun_name);
+
+
+s32 set_parent_node(pid_t pid, char* parent_fun_name);
+void show_fun_tree();
+void free_fun_tree();
 
 // 提示信息
 // info.cc

@@ -359,6 +359,20 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please enter the function name!");
                 }
 
+                else if (!strcmp(arguments[0], "tree")) {
+                    if (argc == 2)
+                    {
+                        if(!set_parent_node(pid, arguments[1]))
+                        {
+                            printf("")
+                            show_fun_tree();
+                            free_fun_tree();
+                        }
+                    }
+                        // show_elf_fun_call(pid, arguments[1]);
+                    else 
+                        err_info("Please enter the function name!");
+                }
 
                 else if (!strcmp(arguments[0], "test")) {
                     // u64 address = strtoul(arguments[1], nullptr, 16);
