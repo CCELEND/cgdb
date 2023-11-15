@@ -5,7 +5,6 @@
 
 fun_tree_info_t* parent_node;
 fun_tree_info_t* sub_node;
-// char* fun_code;
 
 void set_sub_node_link(string sub_fun_name)
 {
@@ -62,14 +61,16 @@ void tree_disasm(char* byte_codes, u64 parent_fun_addr, s32 num, string parent_f
             if ( !strcmp(insn[j].mnemonic, "call") || 
                  !strcmp(insn[j].mnemonic, "jmp") )
             {
+                u64 fun_start_addr;
                 sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
+                sub_fun_name = get_fun(sub_fun_addr, &fun_start_addr);
 
-                sub_fun_name = addr_get_elf_fun(sub_fun_addr);
-                if (sub_fun_name == "")
-                {
-                    sub_fun_name = addr_get_elf_plt_fun(sub_fun_addr);
-                    sub_fun_name += "@plt";
-                }
+                // sub_fun_name = addr_get_elf_fun(sub_fun_addr);
+                // if (sub_fun_name == "")
+                // {
+                //     sub_fun_name = addr_get_elf_plt_fun(sub_fun_addr);
+                //     sub_fun_name += "@plt";
+                // }
 
                 set_sub_node_link(sub_fun_name);
             } 
@@ -123,6 +124,7 @@ s32 set_parent_node(pid_t pid, char* parent_fun_name)
 
 void show_fun_tree()
 {
+    printf("Number of subfunctions: %d\n", parent_node->sub_fun_num);
     fun_tree_info_t* temp = NULL;
     for(temp = parent_node->sub_fun; temp; temp = temp->next)
     {

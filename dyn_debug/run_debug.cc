@@ -364,7 +364,6 @@ void run_dyn_debug(Binary* bin)
                     {
                         if(!set_parent_node(pid, arguments[1]))
                         {
-                            printf("")
                             show_fun_tree();
                             free_fun_tree();
                         }
