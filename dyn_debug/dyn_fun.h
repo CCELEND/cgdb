@@ -143,6 +143,7 @@ void show_regs_dis_stack_info(pid_t pid, regs_struct* regs);
 // addr_data_handler.cc
 string get_addr_file_base(u64 addr, u64* base_addr);
 u64 get_addr_val(pid_t pid, u64 addr);
+u64 get_hex_in_string(char* str);
 bool judg_addr_code  (u64 addr);
 void val_to_string   (u64 val);
 void flag_addr_printf(u64 addr, bool addr_flag);
@@ -151,6 +152,7 @@ void show_addr_point (pid_t pid, u64 addr, bool addr_flag);
 void get_addr_data   (pid_t pid, u64 addr, char* str, s32 len);
 void put_addr_data   (pid_t pid, u64 addr, char* str, s32 len);
 void print_bytes(char* codes, s32 len);
+
 
 // dyn_elf.cc
 string addr_get_fun(fun_list_info_type* fun_info, u64 addr);
@@ -170,7 +172,8 @@ u64 get_elf_fun_addr(char* fun_name);
 string addr_get_elf_plt_fun(u64 elf_plt_fun_addr);
 void dyn_show_elf_plt_fun();
 void map_plt_fun_end(pid_t pid);
-int  addr_get_elf_plt_fun_offset(u64 addr);
+s32 addr_get_elf_plt_fun_offset(u64 addr);
+u64 get_elf_plt_fun_addr(char* plt_fun_name);
 
 // elf 文件函数指针初始化，析构函数处理
 // elf_init_fini_array.cc

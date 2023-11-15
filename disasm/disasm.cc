@@ -163,7 +163,7 @@ void call_disasm(char* byte_codes,
                 if (fun_name == ""){
                     fun_name = addr_get_elf_plt_fun(fun_addr);
                     offset = addr_get_elf_plt_fun_offset(fun_addr);
-                    fun_name += "@plt";
+                    // fun_name += "@plt";
                 }
                 else{
                     offset = addr_get_elf_fun_offset(fun_addr);

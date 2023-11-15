@@ -46,7 +46,7 @@ string get_fun(u64 addr, u64* fun_start_addr)
         {
             fun_name = addr_get_elf_plt_fun(addr);
             *fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
-            fun_name += "@plt";
+            // fun_name += "@plt";
             return fun_name;
         }
 

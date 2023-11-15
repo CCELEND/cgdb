@@ -23,6 +23,18 @@ string addr_get_elf_plt_fun(u64 addr)
     return "";
 }
 
+// 通过 elf plt 函数名获得 elf plt 函数地址
+u64 get_elf_plt_fun_addr(char* plt_fun_name)
+{
+    for (auto it : elf_plt_fun_start) 
+    {
+        if (string(plt_fun_name) == it.first)
+            return it.second + elf_base;
+    }
+
+    return 0;
+}
+
 
 // 根据地址找所在 elf plt 函数偏移
 int addr_get_elf_plt_fun_offset(u64 addr)

@@ -24,7 +24,7 @@ void map_plt_fun_start()
         if (string(result).find("@plt") != string::npos) 
         {
             fun_str_start = string(result).find("<");
-            fun_str_end = string(result).find("@");
+            fun_str_end = string(result).find(">");
             fun_name = string(result).substr(fun_str_start+1, fun_str_end-fun_str_start-1);
             plt_fun_addr = strtoul(result, nullptr, 16);
             elf_plt_fun_start[fun_name] = plt_fun_addr;

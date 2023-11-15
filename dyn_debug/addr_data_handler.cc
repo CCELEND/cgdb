@@ -320,3 +320,23 @@ string get_addr_file_base(u64 addr, u64* base_addr)
     else
         return "";
 }
+
+// qword ptr [rip + 0x2f25]
+u64 get_hex_in_string(char* str)
+{
+    u64 hex_val;
+    s32 hex_str_start, hex_str_end;
+    string hex_str;
+
+    if (string(str).find("0x") != string::npos)
+    {
+        hex_str_start = string(str).find("0x");
+        hex_str_end = string(str).find("]");
+        hex_str = string(str).substr(hex_str_start+2, 
+                    hex_str_end-hex_str_start-2);
+        hex_val = strtoul(hex_str.c_str(), nullptr, 16);
+        return hex_val;
+    }
+    
+    return 0;
+}

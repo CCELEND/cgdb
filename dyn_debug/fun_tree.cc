@@ -39,7 +39,7 @@ void set_sub_node_link(string sub_fun_name)
     }
 }
 
-void tree_disasm(char* byte_codes, u64 parent_fun_addr, s32 num, string parent_fun_name)
+void tree_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 num, string parent_fun_name)
 {
     csh handle;
     cs_insn *insn;
@@ -59,19 +59,21 @@ void tree_disasm(char* byte_codes, u64 parent_fun_addr, s32 num, string parent_f
         for (j = 0; j < count; j++) 
         {            
             if ( !strcmp(insn[j].mnemonic, "call") || 
-                 !strcmp(insn[j].mnemonic, "jmp") )
+                 !strcmp(insn[j].mnemonic, "jmp")  || 
+                 !strcmp(insn[j].mnemonic, "bnd jmp"))
             {
                 u64 fun_start_addr;
-                sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
-                sub_fun_name = get_fun(sub_fun_addr, &fun_start_addr);
-
-                // sub_fun_name = addr_get_elf_fun(sub_fun_addr);
-                // if (sub_fun_name == "")
-                // {
-                //     sub_fun_name = addr_get_elf_plt_fun(sub_fun_addr);
-                //     sub_fun_name += "@plt";
-                // }
-
+                if (!strcmp(insn[j].mnemonic, "bnd jmp"))
+                {
+                    u64 got_addr;
+                    got_addr = insn[j].address + get_hex_in_string(insn[j].op_str) + 7;
+                    sub_fun_addr = get_addr_val(pid, got_addr);
+                    sub_fun_name = get_fun(sub_fun_addr, &fun_start_addr);
+                }
+                else{
+                    sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
+                    sub_fun_name = get_fun(sub_fun_addr, &fun_start_addr);
+                }
                 set_sub_node_link(sub_fun_name);
             } 
         }
@@ -93,12 +95,30 @@ s32 set_parent_node(pid_t pid, char* parent_fun_name)
     string fun_name;
 
     fun_start_addr = get_elf_fun_addr(parent_fun_name);
-    if (!fun_start_addr){
-        err_info("There is no such function!");
-        return -1;
+    if (fun_start_addr)
+    {
+        fun_name = string(parent_fun_name);
+        fun_end_addr = elf_fun_end[fun_name];
     }
-    fun_name = string(parent_fun_name);
-    fun_end_addr = elf_fun_end[fun_name];
+    else {
+        fun_start_addr = get_elf_plt_fun_addr(parent_fun_name);
+        if (fun_start_addr)
+        {
+            fun_name = string(parent_fun_name);
+            fun_end_addr = elf_plt_fun_end[fun_name];
+        }
+        else
+        {
+            err_info("There is no such function!");
+            return -1;
+        }
+    }
+    // if (!fun_start_addr){
+    //     err_info("There is no such function!");
+    //     return -1;
+    // }
+    // fun_name = string(parent_fun_name);
+    // fun_end_addr = elf_fun_end[fun_name];
 
     fun_size = fun_end_addr - fun_start_addr;
     // 8字节对齐
@@ -114,7 +134,7 @@ s32 set_parent_node(pid_t pid, char* parent_fun_name)
     parent_node->fun_name = fun_name;
 
     get_addr_data(pid, fun_start_addr, fun_code, fun_size);
-    tree_disasm(fun_code, fun_start_addr, fun_size, fun_name);
+    tree_disasm(pid, fun_code, fun_start_addr, fun_size, fun_name);
 
     return 0;
 
@@ -124,7 +144,7 @@ s32 set_parent_node(pid_t pid, char* parent_fun_name)
 
 void show_fun_tree()
 {
-    printf("Number of subfunctions: %d\n", parent_node->sub_fun_num);
+    printf("sub fun num: %d\n", parent_node->sub_fun_num);
     fun_tree_info_t* temp = NULL;
     for(temp = parent_node->sub_fun; temp; temp = temp->next)
     {
