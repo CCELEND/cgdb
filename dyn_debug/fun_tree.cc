@@ -3,16 +3,16 @@
 
 // │   │       ├── cmdline └──
 
-fun_tree_info_t* parent_node;
-fun_tree_info_t* sub_node;
+fun_tree_node_t* parent_node;
+fun_tree_node_t* sub_node;
 
 void set_sub_node_link(string sub_fun_name)
 {
-    fun_tree_info_t* temp = NULL;
-    sub_node = (fun_tree_info_t*)malloc(sizeof(struct fun_tree_info));
-    memset(sub_node, 0, sizeof(struct fun_tree_info));
+    fun_tree_node_t* temp = NULL;
+    sub_node = (fun_tree_node_t*)malloc(sizeof(struct fun_tree_node));
+    memset(sub_node, 0, sizeof(struct fun_tree_node));
 
-    sub_node->fun_name = sub_fun_name;
+    sub_node->fun_info.fun_name = sub_fun_name;
     sub_node->next = NULL;
 
     if (!parent_node->sub_fun)
@@ -25,13 +25,16 @@ void set_sub_node_link(string sub_fun_name)
     for(temp = parent_node->sub_fun; temp; temp = temp->next)
     {
 
-        if (temp->fun_name == sub_node->fun_name)
+        if ( temp->fun_info.fun_name == sub_node->fun_info.fun_name || 
+             parent_node->fun_info.fun_name == sub_node->fun_info.fun_name )
         {
             free(sub_node);
             sub_node = NULL;
             break;
         }
-        if (!temp->next){
+
+        if (!temp->next)
+        {
             temp->next = sub_node;
             parent_node->sub_fun_num++;
             break;
@@ -57,11 +60,11 @@ void tree_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 num, stri
     if (count > 0) {
         size_t j;
         for (j = 0; j < count; j++) 
-        {            
-            if ( !strcmp(insn[j].mnemonic, "call") || 
-                 !strcmp(insn[j].mnemonic, "jmp")  || 
-                 !strcmp(insn[j].mnemonic, "bnd jmp"))
+        {
+            // if (judg_jump(insn[j].mnemonic))
+            if (!strcmp(insn[j].mnemonic, "bnd jmp") || !strcmp(insn[j].mnemonic, "call"))
             {
+                printf("%s, %s\n",insn[j].mnemonic, insn[j].op_str);
                 u64 fun_start_addr;
                 if (!strcmp(insn[j].mnemonic, "bnd jmp"))
                 {
@@ -70,10 +73,15 @@ void tree_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 num, stri
                     sub_fun_addr = get_addr_val(pid, got_addr);
                     sub_fun_name = get_fun(sub_fun_addr, &fun_start_addr);
                 }
-                else{
+                else
+                {
                     sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
-                    sub_fun_name = get_fun(sub_fun_addr, &fun_start_addr);
+                    if (sub_fun_addr)
+                        sub_fun_name = get_fun(sub_fun_addr, &fun_start_addr);
+                    else
+                        continue;
                 }
+
                 set_sub_node_link(sub_fun_name);
             } 
         }
@@ -87,51 +95,35 @@ void tree_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 num, stri
 
 s32 set_parent_node(pid_t pid, char* parent_fun_name)
 {
-    char fun_code[0x1000];
+    char fun_code[0x3000];
     // if (!fun_code)
     //     fun_code = (char*)malloc(0x1000);
 
     u64 fun_start_addr, fun_end_addr, fun_size;
     string fun_name;
 
-    fun_start_addr = get_elf_fun_addr(parent_fun_name);
-    if (fun_start_addr)
-    {
-        fun_name = string(parent_fun_name);
-        fun_end_addr = elf_fun_end[fun_name];
+    fun_start_addr = get_fun_addr(parent_fun_name, &fun_end_addr);
+    if (!fun_start_addr){
+        err_info("There is no such function!");
+        return -1;
     }
-    else {
-        fun_start_addr = get_elf_plt_fun_addr(parent_fun_name);
-        if (fun_start_addr)
-        {
-            fun_name = string(parent_fun_name);
-            fun_end_addr = elf_plt_fun_end[fun_name];
-        }
-        else
-        {
-            err_info("There is no such function!");
-            return -1;
-        }
-    }
-    // if (!fun_start_addr){
-    //     err_info("There is no such function!");
-    //     return -1;
-    // }
-    // fun_name = string(parent_fun_name);
-    // fun_end_addr = elf_fun_end[fun_name];
 
+    fun_name = string(parent_fun_name);
+    // printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
     fun_size = fun_end_addr - fun_start_addr;
     // 8字节对齐
     fun_size = fun_size + LONG_SIZE - fun_size % LONG_SIZE;
 
-    // memset(fun_code, 0, fun_size+0x10);
-    parent_node = (fun_tree_info_t*)malloc(sizeof(struct fun_tree_info));
-    memset(parent_node, 0, sizeof(struct fun_tree_info));
+    parent_node = (fun_tree_node_t*)malloc(sizeof(struct fun_tree_node));
+    memset(parent_node, 0, sizeof(struct fun_tree_node));
 
     parent_node->next = NULL;
     parent_node->sub_fun = NULL;
     parent_node->sub_fun_num = 0;
-    parent_node->fun_name = fun_name;
+
+    parent_node->fun_info.fun_name = fun_name;
+    parent_node->fun_info.fun_start_addr = fun_start_addr;
+    parent_node->fun_info.fun_end_addr = fun_end_addr;
 
     get_addr_data(pid, fun_start_addr, fun_code, fun_size);
     tree_disasm(pid, fun_code, fun_start_addr, fun_size, fun_name);
@@ -145,22 +137,42 @@ s32 set_parent_node(pid_t pid, char* parent_fun_name)
 void show_fun_tree()
 {
     printf("sub fun num: %d\n", parent_node->sub_fun_num);
-    fun_tree_info_t* temp = NULL;
+    fun_tree_node_t* temp = NULL;
     for(temp = parent_node->sub_fun; temp; temp = temp->next)
     {
-        printf("%s\n", temp->fun_name.c_str());
+        printf("%s\n", temp->fun_info.fun_name.c_str());
     }
 }
 
-void free_fun_tree()
+void free_fun_tree_node()
 {
-    fun_tree_info_t* head = parent_node->sub_fun;
+    fun_tree_node_t* head = parent_node->sub_fun;
     while(head != NULL)
     {
-        fun_tree_info_t* temp = head;
+        fun_tree_node_t* temp = head;
         head = head->next;
         free(temp);
     }
     free(parent_node);
     parent_node = NULL;
 }
+
+// s32
+void show_fun_tree_node()
+{
+    printf("sub fun num: %d\n", parent_node->sub_fun_num);
+    printf("   \033[31m%s\033[0m\n", parent_node->fun_info.fun_name.c_str());
+    fun_tree_node_t* temp = NULL;
+    for(temp = parent_node->sub_fun; temp; temp = temp->next)
+    {
+        
+        if (!temp->next)
+            printf("   └── \033[31m%s\033[0m\n", temp->fun_info.fun_name.c_str());
+        else
+            printf("   ├── \033[31m%s\033[0m\n", temp->fun_info.fun_name.c_str());
+    }
+}
+
+
+
+    // memset(fun_code, 0, fun_size+0x10);

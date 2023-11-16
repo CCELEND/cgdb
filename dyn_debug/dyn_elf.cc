@@ -46,7 +46,6 @@ string get_fun(u64 addr, u64* fun_start_addr)
         {
             fun_name = addr_get_elf_plt_fun(addr);
             *fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
-            // fun_name += "@plt";
             return fun_name;
         }
 
@@ -54,6 +53,42 @@ string get_fun(u64 addr, u64* fun_start_addr)
 
 }
 
+// 通过函数名找开始地址, 结束地址
+u64 get_fun_addr(char* fun_name, u64* fun_end_addr)
+{
+    u64 fun_start_addr;
+
+    fun_start_addr = get_elf_fun_addr(fun_name);
+    if (fun_start_addr)
+    {
+        *fun_end_addr = elf_fun_end[string(fun_name)];
+        return fun_start_addr;
+    }
+    fun_start_addr = get_elf_plt_fun_addr(fun_name);
+    if (fun_start_addr)
+    {
+        *fun_end_addr = elf_plt_fun_end[string(fun_name)];
+        return fun_start_addr;
+    }
+
+    fun_start_addr = get_glibc_fun_addr(fun_name);
+    if (fun_start_addr)
+    {
+        // printf("0x%llx\n",fun_start_addr);
+        *fun_end_addr = get_glibc_fun_end(fun_start_addr, string(fun_name));
+        return fun_start_addr;
+    }
+    fun_start_addr = get_glibc_plt_fun_addr(fun_name);
+    if (fun_start_addr)
+    {
+        *fun_end_addr = fun_start_addr + 0xb;
+        return fun_start_addr;
+    }
+
+    *fun_end_addr = 0;
+    return 0;
+
+}
 
 // 通过函数地址获得函数结束地址
 u64 get_fun_end(pid_t pid, u64 fun_addr)

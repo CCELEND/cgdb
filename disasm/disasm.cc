@@ -9,7 +9,8 @@ bool judg_jump(char* mnemonic)
         !strcmp(mnemonic, "ja"  ) || !strcmp(mnemonic, "jae") ||
         !strcmp(mnemonic, "jb"  ) || !strcmp(mnemonic, "jbe") ||
         !strcmp(mnemonic, "jg"  ) || !strcmp(mnemonic, "jge") ||
-        !strcmp(mnemonic, "jl"  ) || !strcmp(mnemonic, "jle")
+        !strcmp(mnemonic, "jl"  ) || !strcmp(mnemonic, "jle") ||
+        !strcmp(mnemonic, "bnd jmp" )
         )
         return true;
     else

@@ -65,4 +65,60 @@ string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
 
 }
 
+// 通过 glibc plt 函数名获得函数开始地址
+u64 get_glibc_plt_fun_addr(char* fun_name)
+{
+    bool finded = false, is_libc = false;
+    FILE* fp;
+    u64 glibc_plt_fun_addr;
+    string command, exe_command;
+
+    for (int i = 0; i < 2 && !finded; i++)
+    {
+        if (i == 0){
+            command = string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | grep ");
+        }
+        else{
+            is_libc = true;
+            command = string("objdump -d -j .plt.sec libc.so.6 | grep ");
+        }
+
+        exe_command = command + string(fun_name);
+        fp = popen(exe_command.c_str(), "r");
+        if (!fp)
+        {
+            printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+            break;
+        }
+
+        char* result = nullptr;
+        size_t len = 0;
+        ssize_t read;
+        while ((read = getline(&result, &len, fp)) != -1) 
+        {
+            if (string(result).find("<") != string::npos) 
+            {
+                glibc_plt_fun_addr = strtoul(result, nullptr, 16);
+                finded = true;
+                break;
+            }     
+        }
+
+        pclose(fp);   // 关闭管道
+        free(result); // 释放动态分配的内存
+
+    }
+
+    if (is_libc)
+        glibc_plt_fun_addr = glibc_plt_fun_addr + libc_base;
+    else
+        glibc_plt_fun_addr = glibc_plt_fun_addr + ld_base;
+
+    if (!finded)
+        return 0;
+
+    return glibc_plt_fun_addr;
+}
+
+
 

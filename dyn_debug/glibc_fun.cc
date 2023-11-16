@@ -4,8 +4,7 @@
 // 根据地址找所在 glibc 函数名 2.36
 // 704d25fbbb72fa95d517b883131828c0883fe9.debug libc
 // 2e105c0bb3ee8e8f5b917f8af764373d206659.debug ld
-string addr_get_glibc_fun(u64 glibc_fun_addr, 
-    u64* glibc_fun_start)
+string addr_get_glibc_fun(u64 glibc_fun_addr, u64* glibc_fun_start)
 {
     if (glibc_fun_addr % 0x8 != 0)
         glibc_fun_addr = glibc_fun_addr &~ 0xf;
@@ -18,12 +17,12 @@ string addr_get_glibc_fun(u64 glibc_fun_addr,
     if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
         is_libc = false;
         glibc_fun_addr_offset = glibc_fun_addr - ld_base;
-        command = std::string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+        command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
     else {
         is_libc = true;
         glibc_fun_addr_offset = glibc_fun_addr - libc_base;
-        command = std::string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+        command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
     }
 
     stringstream ss;
@@ -87,9 +86,63 @@ string addr_get_glibc_fun(u64 glibc_fun_addr,
 
 }
 
+// 通过 glibc 函数名获得函数开始地址
+u64 get_glibc_fun_addr(char* fun_name)
+{
+    bool finded = false, is_libc = false;
+    FILE* fp;
+    u64 glibc_fun_addr;
+    string command, exe_command;
+
+    for (int i = 0; i < 2 && !finded; i++)
+    {
+        if (i == 0){
+            command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+        }
+        else{
+            is_libc = true;
+            command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+        }
+
+        exe_command = command + string(fun_name);
+        fp = popen(exe_command.c_str(), "r");
+        if (!fp)
+        {
+            printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+            break;
+        }
+
+        char* result = nullptr;
+        size_t len = 0;
+        ssize_t read;
+        while ((read = getline(&result, &len, fp)) != -1) 
+        {
+            if (string(result).find("<") != string::npos) 
+            {
+                glibc_fun_addr = strtoul(result, nullptr, 16);
+                finded = true;
+                break;
+            }     
+        }
+
+        pclose(fp);   // 关闭管道
+        free(result); // 释放动态分配的内存
+
+    }
+
+    if (is_libc)
+        glibc_fun_addr = glibc_fun_addr + libc_base;
+    else
+        glibc_fun_addr = glibc_fun_addr + ld_base;
+
+    if (!finded)
+        return 0;
+
+    return glibc_fun_addr;
+}
+
 // 通过 glibc 函数地址获得函数结束地址
-u64 get_glibc_fun_end(u64 glibc_fun_addr, 
-    string fun_name)
+u64 get_glibc_fun_end(u64 glibc_fun_addr, string fun_name)
 {
     if (glibc_fun_addr % 0x8 != 0)
         glibc_fun_addr = glibc_fun_addr &~ 0xf;
@@ -170,4 +223,6 @@ u64 get_glibc_fun_end(u64 glibc_fun_addr,
     else
         return glibc_fun_end_addr + ld_base;
 }
+
+
 

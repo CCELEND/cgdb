@@ -76,6 +76,7 @@ typedef struct fun_info {
     string fun_name;
     fun_info(): fun_start_addr(0), fun_end_addr(0), fun_name("") {}
 } fun_info_type;
+
 typedef struct fun_list_info {
     fun_info_type fun_list[0x10];
     s32 fun_num;
@@ -102,18 +103,13 @@ extern break_point_type break_point_list[8];
 // ni 断点结构体
 extern break_point_type ni_break_point;
 
-typedef struct fun_tree_info {
-    // u64 fun_addr;
-    struct fun_tree_info* next;
-    struct fun_tree_info* sub_fun;
+typedef struct fun_tree_node {
+    fun_info_type fun_info;
+    struct fun_tree_node* next;
+    struct fun_tree_node* sub_fun;
     s32 sub_fun_num;
-    string fun_name;
-    // 构造函数初始化结构体
-    // fun_tree_info(): next(NULL), sub_fun(NULL), sub_fun_num(0), fun_name("") {}
-} fun_tree_info_t;
-
-// extern fun_tree_info_t* parent_node;
-// extern fun_tree_info_t* sub_node;
+    // string fun_name;
+} fun_tree_node_t;
 
 // 帮助和参数信息
 // arg_help.cc
@@ -157,6 +153,7 @@ void print_bytes(char* codes, s32 len);
 // dyn_elf.cc
 string addr_get_fun(fun_list_info_type* fun_info, u64 addr);
 string get_fun  (u64 addr,  u64* fun_start_addr);
+u64 get_fun_addr(char* fun_name, u64* fun_end_addr);
 u64 get_fun_end (pid_t pid, u64 fun_addr);
 
 // elf 函数
@@ -190,10 +187,12 @@ string addr_get_glibc_fun(u64 glibc_fun_addr,
     u64* glibc_fun_start);
 u64 get_glibc_fun_end(u64 glibc_fun_addr, 
     string fun_name);
+u64 get_glibc_fun_addr(char* fun_name);
 
 // glibc plt 函数
 // glibc_plt_fun.cc
 string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr);
+u64 get_glibc_plt_fun_addr(char* fun_name);
 
 // glibc 数据段处理
 // glibc_data.cc
@@ -232,7 +231,8 @@ void show_elf_fun_call(pid_t pid, char* elf_fun_name);
 
 s32 set_parent_node(pid_t pid, char* parent_fun_name);
 void show_fun_tree();
-void free_fun_tree();
+void show_fun_tree_node();
+void free_fun_tree_node();
 
 // 提示信息
 // info.cc
