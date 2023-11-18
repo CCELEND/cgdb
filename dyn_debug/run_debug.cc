@@ -360,13 +360,16 @@ void run_dyn_debug(Binary* bin)
                 }
 
                 else if (!strcmp(arguments[0], "tree")) {
-                    if (argc == 2)
+                    if (argc == 3)
                     {
-                        if(!set_parent_node(pid, arguments[1]))
+                        if(!set_root_node(arguments[1]))
                         {
+                            int level = stoi(arguments[2]);
                             // show_fun_tree();
-                            show_fun_tree_node();
-                            free_fun_tree_node();
+                            // set_parent_sub_node(pid);
+                            creat_fun_tree(pid, level);
+                            show_fun_tree();
+                            free_fun_tree();
                         }
                     }
                         // show_elf_fun_call(pid, arguments[1]);
@@ -375,9 +378,9 @@ void run_dyn_debug(Binary* bin)
                 }
 
                 else if (!strcmp(arguments[0], "test")) {
-                    u64 fun_end_addr;
-                    u64 addr = get_fun_addr(arguments[1], &fun_end_addr);
-                    printf("0x%llx-0x%llx\n", addr, fun_end_addr);
+                    u64 fun_start_addr, fun_end_addr;
+                    get_fun_addr(arguments[1], &fun_start_addr, &fun_end_addr);
+                    printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
                     // u64 address = strtoul(arguments[1], nullptr, 16);
 
                     // printf("-------------regs:\n");

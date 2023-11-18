@@ -10,12 +10,12 @@ string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
     if (glibc_plt_fun_addr < ld_code_end && glibc_plt_fun_addr > ld_code_start) 
     {
         glibc_plt_fun_addr_offset = glibc_plt_fun_addr - ld_base;
-        command = string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | grep ");
+        command = string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | fgrep ");
     }
     else 
     {
         glibc_plt_fun_addr_offset = glibc_plt_fun_addr - libc_base;
-        command = string("objdump -d -j .plt.sec libc.so.6 | grep ");
+        command = string("objdump -d -j .plt.sec libc.so.6 | fgrep ");
     }
 
     // stringstream 将十六进制数转换为字符串
@@ -76,11 +76,11 @@ u64 get_glibc_plt_fun_addr(char* fun_name)
     for (int i = 0; i < 2 && !finded; i++)
     {
         if (i == 0){
-            command = string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | grep ");
+            command = string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | fgrep ");
         }
         else{
             is_libc = true;
-            command = string("objdump -d -j .plt.sec libc.so.6 | grep ");
+            command = string("objdump -d -j .plt.sec libc.so.6 | fgrep ");
         }
 
         exe_command = command + string(fun_name);

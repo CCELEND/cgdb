@@ -153,7 +153,8 @@ void print_bytes(char* codes, s32 len);
 // dyn_elf.cc
 string addr_get_fun(fun_list_info_type* fun_info, u64 addr);
 string get_fun  (u64 addr,  u64* fun_start_addr);
-u64 get_fun_addr(char* fun_name, u64* fun_end_addr);
+s32 get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr);
+// u64 get_fun_addr(char* fun_name, u64* fun_end_addr);
 u64 get_fun_end (pid_t pid, u64 fun_addr);
 
 // elf 函数
@@ -228,11 +229,12 @@ void set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs);
 // fun_call.cc
 void show_elf_fun_call(pid_t pid, char* elf_fun_name);
 
-
-s32 set_parent_node(pid_t pid, char* parent_fun_name);
+s32 set_root_node(char* root_fun_name);
+s32 set_parent_sub_node(pid_t pid);
+void creat_fun_tree(pid_t pid, s32 level);
 void show_fun_tree();
-void show_fun_tree_node();
-void free_fun_tree_node();
+void free_fun_tree();
+
 
 // 提示信息
 // info.cc
