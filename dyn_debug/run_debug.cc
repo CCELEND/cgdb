@@ -362,15 +362,15 @@ void run_dyn_debug(Binary* bin)
                 else if (!strcmp(arguments[0], "tree")) {
                     if (argc == 3)
                     {
-                        if(!set_root_node(arguments[1]))
+                        if(!creat_root_node(arguments[1]))
                         {
                             int level = stoi(arguments[2]);
-                            // show_fun_tree();
-                            // set_parent_sub_node(pid);
                             creat_fun_tree(pid, level);
-                            show_fun_tree();
+                            show_fun_tree(level);
                             free_fun_tree();
                         }
+                        else
+                            printf("[-] Failed to create node\n");
                     }
                         // show_elf_fun_call(pid, arguments[1]);
                     else 

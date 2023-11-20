@@ -73,7 +73,9 @@ string addr_get_glibc_fun(u64 glibc_fun_addr, u64* glibc_fun_start)
 
         glibc_fun_addr_offset -= 0x8;
         pclose(fp);   // 关闭管道
-        free(result); // 释放动态分配的内存
+        // 释放动态分配的内存
+        if (result)
+            free(result);
     }
 
     if (is_libc)
@@ -93,6 +95,9 @@ u64 get_glibc_fun_addr(char* fun_name)
     FILE* fp;
     u64 glibc_fun_addr;
     string command, exe_command;
+    char* result;
+
+    // printf("%s\n", fun_name);
 
     for (int i = 0; i < 2 && !finded; i++)
     {
@@ -112,7 +117,10 @@ u64 get_glibc_fun_addr(char* fun_name)
             break;
         }
 
-        char* result = nullptr;
+        // char* result = nullptr;
+        // result = nullptr;
+        result = new char[100];
+
         size_t len = 0;
         ssize_t read;
         while ((read = getline(&result, &len, fp)) != -1) 
@@ -126,7 +134,10 @@ u64 get_glibc_fun_addr(char* fun_name)
         }
 
         pclose(fp);   // 关闭管道
-        free(result); // 释放动态分配的内存
+        if (result){
+            // free(result);
+            delete[] result;
+        }
 
     }
 
@@ -215,7 +226,8 @@ u64 get_glibc_fun_end(u64 glibc_fun_addr, string fun_name)
             }   
         }
         pclose(fp);   // 关闭管道
-        free(result); // 释放动态分配的内存
+        if (result)
+            free(result);
     }
 
     if (is_libc)

@@ -54,7 +54,8 @@ string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
     }
 
     pclose(fp);   // 关闭管道
-    free(result); // 释放动态分配的内存
+    if (result)
+        free(result);
 
     if(lib_plt_fun_name != "")
     {
@@ -105,7 +106,8 @@ u64 get_glibc_plt_fun_addr(char* fun_name)
         }
 
         pclose(fp);   // 关闭管道
-        free(result); // 释放动态分配的内存
+        if (result)
+            free(result);
 
     }
 
