@@ -78,7 +78,6 @@ void bp_disasm(pid_t pid, u64 addr)
     cs_insn *insn;
     size_t count;
     
-
     char addr_instruct[32];
     get_addr_data(pid, addr, addr_instruct, 32);
 
@@ -395,6 +394,5 @@ u64 get_next_instruct_addr(char* byte_codes,
     }
 
     // cs_close(&handle);
-
     return next_addr;
 }

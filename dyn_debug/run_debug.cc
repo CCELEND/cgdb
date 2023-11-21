@@ -65,30 +65,33 @@ void run_dyn_debug(Binary* bin)
     {
         // fork 子进程失败
         case -1:
-            err_exit("Failed to create subprocess!");
+            err_info("Failed to create subprocess!");
+            break;
         // 处理子进程
         case 0:
             if (ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0) 
             {
-                err_exit("Ptrace error in subprocess!");
+                err_info("Ptrace error in subprocess!");
+                break;
             }
             // .data 返回一个指向数组中第一个元素的指针，该指针在内部使用
             if (execl(fname.data(), fname.data(), nullptr)) 
             {
-                err_exit("Execl error in subprocess!");
+                err_info("Execl error in subprocess!");
+                break;
             }
             // 子进程，没有成功执行
-            printf("\033[31m\033[1m[-] Invalid input command: %s\033[0m\n", 
-                fname.c_str());
-            exit(3);
+            printf("\033[31m\033[1m[-] Invalid input command: %s\033[0m\n", fname.c_str());
+            break;
         default:
         {
             // 初始化 Capstone
+            printf("[*] Initialize Capstone...\n");
             if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) 
             {
                 ptrace(PTRACE_KILL, pid, nullptr, nullptr);
                 printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-                break;
+                goto debug_stop;
             }
 
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
@@ -110,7 +113,6 @@ void run_dyn_debug(Binary* bin)
             // 开始轮询输入的命令
             while (true) 
             {
-
                 printf("\033[32m\033[1mcgdb> \033[0m");
                 getline(cin, cmd);
 
@@ -133,7 +135,6 @@ void run_dyn_debug(Binary* bin)
                 {
                     // 杀死子进程，避免出现僵尸进程
                     ptrace(PTRACE_KILL, pid, nullptr, nullptr);
-                    // goto debug_stop;
                     break;
                 } 
                 // 单步调试
@@ -470,12 +471,19 @@ void run_dyn_debug(Binary* bin)
                 }
                 next_input: myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
             }
+            // // 等待子进程结束之后父进程再退出
+            // wait(&status);
+
+            debug_stop: 
             // 等待子进程结束之后父进程再退出
             wait(&status);
+            cs_close(&handle);
         }
     }
 
-    debug_stop: 
-    cs_close(&handle);
-    return;
+    // debug_stop: 
+    // // 等待子进程结束之后父进程再退出
+    // wait(&status);
+    // cs_close(&handle);
+    // return;
 } 

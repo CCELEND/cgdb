@@ -14,14 +14,12 @@ fun_tree_node_t* creat_node(u64 addr)
     fun_tree_node_t* node = NULL;
 
     // printf("111\n");
-
     fun_name = get_fun(addr, &fun_start_addr);
-
     // printf("222\n");
     get_fun_addr((char*)fun_name.c_str(), &fun_start_addr, &fun_end_addr); // 3434
 
     node = new fun_tree_node_t;
-    // printf("666\n");
+    printf("666\n");
     if (!node) {
         printf("[-] Failed to create node!\n");
         return NULL;
@@ -34,8 +32,6 @@ fun_tree_node_t* creat_node(u64 addr)
     node->fun_info.fun_name = fun_name;
     node->fun_info.fun_start_addr = fun_start_addr;
     node->fun_info.fun_end_addr = fun_end_addr;
-
-    // printf("%p\n", node);
 
     return node;
 }
@@ -51,6 +47,7 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
     if (!parent_node->sub_fun)
     {
         sub_node = creat_node(sub_fun_addr);
+        printf("head: %s---\n", sub_node->fun_info.fun_name.c_str());
         // printf("%p\n", sub_node);
         parent_node->sub_fun = sub_node;
         parent_node->sub_fun_num++;
@@ -69,6 +66,7 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
         if (!temp->next)
         {
             sub_node = creat_node(sub_fun_addr);
+            printf("%s-------\n", sub_node->fun_info.fun_name.c_str());
             // printf("%p\n", sub_node);
             temp->next = sub_node;
             parent_node->sub_fun_num++;
@@ -83,10 +81,6 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
     // csh handle = 0;
     cs_insn* insn = NULL;
     size_t count;
-    // u64 sub_fun_addr;
-    string sub_fun_name;
-
-    printf("777\n");
 
     // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) 
     // {
@@ -94,9 +88,10 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
     //     return;
     // }
 
-    printf("888\n");
-
+    // printf("888\n");
     count = cs_disasm(handle, (uint8_t*)byte_codes, parent_fun_size, parent_fun_addr, 0, &insn);
+    // printf("999\n");
+
     if (count > 0) {
         size_t j;
         for (j = 0; j < count; j++) 
@@ -182,7 +177,6 @@ s32 creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
     parent_disasm(pid, p_fun_code, p_fun_start_addr, p_fun_size, parent_node);
 
     // printf("%p\n", parent_node);
-    printf("999\n");
 
     delete[] p_fun_code;
     p_fun_code = NULL;
@@ -310,6 +304,8 @@ void creat_fun_tree(pid_t pid, s32 level)
     vector<fun_tree_node_t*> sib_link_next_node;
     fun_tree_node_t* parent_node = root_node;
     int current_depth = 0;
+
+    // printf("%ld\n", sizeof(struct fun_tree_node));
 
     while(parent_node)
     {
