@@ -410,7 +410,7 @@ void run_dyn_debug(Binary* bin)
                             printf("[*] Creating a forked function call tree...\n");
                             int level = stoi(arguments[2]);
                             creat_fun_tree(pid, level);
-                            show_fun_tree(level);
+                            show_fun_tree();
                             free_fun_tree();
                         }
                         else

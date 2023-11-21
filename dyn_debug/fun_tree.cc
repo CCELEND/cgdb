@@ -206,7 +206,7 @@ void free_fun_tree()
     }
 }
 
-void show_fun_tree(s32 level)
+void show_fun_tree()
 {
     vector<fun_tree_node_t*> sib_link_next_node;
     fun_tree_node_t* temp_node = root_node;
@@ -218,8 +218,7 @@ void show_fun_tree(s32 level)
     if (temp_node->sub_fun)
     {
         temp_node = temp_node->sub_fun;
-        // 层级加1
-        ++depth;
+        ++depth; // 层级加1
     }
     else return;
 
@@ -239,12 +238,8 @@ void show_fun_tree(s32 level)
 
         if (temp_node->next)
             printf(" ├─── %s\n", temp_node->fun_info.fun_name.c_str());
-            // printf("├── %s 0x%llx-0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
-            //     temp_node->fun_info.fun_start_addr, temp_node->fun_info.fun_end_addr);
         else
             printf(" └─── %s\n", temp_node->fun_info.fun_name.c_str());
-            // printf("└── %s 0x%llx-0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
-            //     temp_node->fun_info.fun_start_addr, temp_node->fun_info.fun_end_addr);
 
         // 当前节点有子
         if (temp_node->sub_fun)
@@ -315,3 +310,6 @@ void creat_fun_tree(pid_t pid, s32 level)
 // sib_link_next_node.push_back(parent_node->next);
 // = sib_link_next_node.back();
 // sib_link_next_node.pop_back();
+
+// printf("├── %s 0x%llx-0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
+//     temp_node->fun_info.fun_start_addr, temp_node->fun_info.fun_end_addr);

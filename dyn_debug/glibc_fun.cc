@@ -139,7 +139,8 @@ u64 get_glibc_fun_addr(char* fun_name)
         }
 
         pclose(fp);   // 关闭管道
-        if (result){
+        if (result)
+        {
             // free(result);
             delete[] result;
         }
