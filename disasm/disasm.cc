@@ -4,13 +4,13 @@
 bool judg_jump(char* mnemonic)
 {
     if (!strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||
-        !strcmp(mnemonic, "ret" ) || !strcmp(mnemonic, "je" ) ||
+        !strcmp(mnemonic, "je" )  ||
         !strcmp(mnemonic, "jne" ) || !strcmp(mnemonic, "jz" ) ||
         !strcmp(mnemonic, "ja"  ) || !strcmp(mnemonic, "jae") ||
         !strcmp(mnemonic, "jb"  ) || !strcmp(mnemonic, "jbe") ||
         !strcmp(mnemonic, "jg"  ) || !strcmp(mnemonic, "jge") ||
         !strcmp(mnemonic, "jl"  ) || !strcmp(mnemonic, "jle") ||
-        !strcmp(mnemonic, "bnd jmp" )
+        !strcmp(mnemonic, "bnd jmp" ) //|| !strcmp(mnemonic, "ret" )
         )
         return true;
     else
@@ -74,7 +74,7 @@ void dis_show(u64 addr, string fun_name, s32 offset,
 // 只输出两行
 void bp_disasm(pid_t pid, u64 addr)
 {
-    csh handle;
+    // csh handle;
     cs_insn *insn;
     size_t count;
     
@@ -82,10 +82,10 @@ void bp_disasm(pid_t pid, u64 addr)
     char addr_instruct[32];
     get_addr_data(pid, addr, addr_instruct, 32);
 
-    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-        printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-        return;
-    }
+    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
+    //     return;
+    // }
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 32, addr, 0, &insn);
     if (count > 0) 
     {
@@ -120,7 +120,7 @@ void bp_disasm(pid_t pid, u64 addr)
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    cs_close(&handle);
+    // cs_close(&handle);
 }
 
 
@@ -128,17 +128,17 @@ void bp_disasm(pid_t pid, u64 addr)
 void call_disasm(char* byte_codes, 
     u64 addr, s32 num, string call_fun_name)
 {
-    csh handle;
+    // csh handle;
     cs_insn *insn;
     size_t count;
     u64 fun_addr;
     string fun_name;
     s32 offset;
 
-    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-        printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-        return;
-    }    
+    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
+    //     return;
+    // }    
 
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) {
@@ -179,7 +179,7 @@ void call_disasm(char* byte_codes,
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    cs_close(&handle);
+    // cs_close(&handle);
 }
 
 // 输出跳转指令流操作数的函数符号和偏移
@@ -203,7 +203,7 @@ void flow_change_op(char* ops)
 
 void show_disasm(pid_t pid, u64 rip_val)
 {
-    csh handle;
+    // csh handle;
     cs_insn *insn;
     size_t count;
     s32 fun_offset;
@@ -223,10 +223,10 @@ void show_disasm(pid_t pid, u64 rip_val)
     }
 
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
-    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-        printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-        return;
-    }
+    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
+    //     return;
+    // }
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 176, disasm_addr, 0, &insn);
     if (count > 0) {
         size_t j;
@@ -328,22 +328,22 @@ void show_disasm(pid_t pid, u64 rip_val)
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    cs_close(&handle);
+    // cs_close(&handle);
 }
 
 //输出 line 行反汇编, 只输出 mnemonic 操作码, op_str 操作数
 void disasm_mne_op(char* byte_codes, 
     u64 addr, s32 num, s32 line)
 {
-    csh handle;
+    // csh handle;
     cs_insn *insn;
     size_t count;
     u64 plt_addr;
 
-    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-        printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-        return;
-    }    
+    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
+    //     return;
+    // }    
 
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) {
@@ -365,35 +365,36 @@ void disasm_mne_op(char* byte_codes,
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    cs_close(&handle);
+    // cs_close(&handle);
 }
 
 // 获得下一条指令地址
 u64 get_next_instruct_addr(char* byte_codes, 
     u64 addr, s32 num)
 {
-    csh handle;
-    cs_insn *insn;
+    // csh handle;
+    cs_insn* insn;
     size_t count;
     u64 next_addr;
 
-    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-        printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-        return 0;
-    }
+    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
+    //     return 0;
+    // }
 
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) {
         next_addr = insn[1].address;
         cs_free(insn, count);        
     }
-    else {
+    else 
+    {
         printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
-        cs_close(&handle);
+        // cs_close(&handle);
         return 0;
     }
 
-    cs_close(&handle);
+    // cs_close(&handle);
 
     return next_addr;
 }

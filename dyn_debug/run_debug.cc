@@ -51,6 +51,9 @@ fun_list_info_type regs_fun_info;
 fun_list_info_type dis_fun_info;
 fun_list_info_type flow_change_fun_info;
 
+// 反汇编框架句柄
+csh handle = 0;
+
 void run_dyn_debug(Binary* bin)
 {
     pid_t pid;
@@ -80,6 +83,14 @@ void run_dyn_debug(Binary* bin)
             exit(3);
         default:
         {
+            // 初始化 Capstone
+            if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) 
+            {
+                ptrace(PTRACE_KILL, pid, nullptr, nullptr);
+                printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
+                break;
+            }
+
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
             sleep(1);
             // 获取子进程的虚拟地址
@@ -87,7 +98,6 @@ void run_dyn_debug(Binary* bin)
             printf("[+] elf base: 0x%llx\n", elf_base);
 
             set_elf_rdata(bin);
-
             // 建立函数名和结束地址的映射
             map_fun_end(pid);
             map_plt_fun_end(pid);
@@ -102,13 +112,12 @@ void run_dyn_debug(Binary* bin)
             {
 
                 printf("\033[32m\033[1mcgdb> \033[0m");
-
                 getline(cin, cmd);
+
                 // 上、下、左、右这四个光标键对应的 ASCII 码值不是一个值而是三个，
                 // 准确的说光标键的 ASCII 码值是一个组合
                 all_sum = cmd[0] + cmd[1] + cmd[2];
-                if (all_sum == KEYCODE_U)
-                    cmd = old_cmd;
+                if (all_sum == KEYCODE_U) cmd = old_cmd;
 
                 debug_start:
                 //输入参数解析
@@ -120,12 +129,16 @@ void run_dyn_debug(Binary* bin)
                     arguments[i] = (char*) myargv[i].data();
 
                 // 退出操作
-                if (!strcmp(arguments[0], "q")) {
+                if (!strcmp(arguments[0], "q")) 
+                {
                     // 杀死子进程，避免出现僵尸进程
                     ptrace(PTRACE_KILL, pid, nullptr, nullptr);
-                    goto debug_stop;
+                    // goto debug_stop;
+                    break;
                 } 
-                else if (!strcmp(arguments[0], "si")) {//单步调试
+                // 单步调试
+                else if (!strcmp(arguments[0], "si")) 
+                {
                     old_cmd = cmd;
 
                     // 发送 single step 给子进程
@@ -133,7 +146,8 @@ void run_dyn_debug(Binary* bin)
                     // 等待主进程收到 sigtrap 信号
                     wait(&status);
                     // 执行到最后一条指令, 子进程正常结束, 退出循环
-                    if (WIFEXITED(status)) {
+                    if (WIFEXITED(status)) 
+                    {
                         printf("\033[32m\033[1m[+] Process: %d exited normally.\033[0m\n", pid);
                         break;
                     }
@@ -144,7 +158,8 @@ void run_dyn_debug(Binary* bin)
                     copy_regs_to_last_regs(&last_regs, &regs);
 
                 } 
-                else if (!strcmp(arguments[0], "ni")) {
+                else if (!strcmp(arguments[0], "ni")) 
+                {
                     old_cmd = cmd;
                     get_regs(pid, &regs);
                     set_ni_break_point(pid, regs.rip);
@@ -152,14 +167,16 @@ void run_dyn_debug(Binary* bin)
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
                     wait(&status);
 
-                    if (WIFEXITED(status)) {
+                    if (WIFEXITED(status)) 
+                    {
                         printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
                         break;
                     }
 
                     break_point_handler(pid, status, ni_break_point, false);
                 }
-                else if (!strcmp(arguments[0], "c")) {
+                else if (!strcmp(arguments[0], "c")) 
+                {
                     printf("[*] Continuing...\n");
 
                     // 继续执行，一直到子进程发出发出暂停或者结束信号
@@ -180,17 +197,19 @@ void run_dyn_debug(Binary* bin)
                         break_point_handler(pid, status, break_point_list[index], true);
 
                     // 没有断点, 子进程结束
-                    if (WIFEXITED(status)) {
+                    if (WIFEXITED(status)) 
+                    {
                         printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
                         break;
                     }
                 } 
-                else if (!strcmp(arguments[0], "ic")) { // 计算执行完毕所需指令数
+                // 计算执行完毕所需指令数
+                else if (!strcmp(arguments[0], "ic")) 
+                { 
                     printf("[*] Calculating the number of instructions after this...\n");
                     s64 count = 0;
                     while (true) 
                     {
-
                         // 当前子进程还是暂停状态，父进程被阻塞
                         wait(&status);
                         if (WIFEXITED(status)) 
@@ -208,11 +227,13 @@ void run_dyn_debug(Binary* bin)
                 }
 
 
-                else if (!strcmp(arguments[0], "bf") || !strcmp(arguments[0], "b")) {
+                else if (!strcmp(arguments[0], "bf") || !strcmp(arguments[0], "b")) 
+                {
                     if (argc == 2) 
                     {
                         u64 break_point_fun_addr;
                         break_point_fun_addr = get_elf_fun_addr(arguments[1]);
+
                         if (!break_point_fun_addr)
                             err_info("There is no such function!");
                         else  // 打断点
@@ -221,9 +242,12 @@ void run_dyn_debug(Binary* bin)
                     else 
                         err_info("Please enter the break point function name!");
                 } 
-                else if (!strcmp(arguments[0], "ba")) {
-                    if (argc == 2) { 
+                else if (!strcmp(arguments[0], "ba")) 
+                {
+                    if (argc == 2) 
+                    { 
                         u64 break_point_addr = strtoul(arguments[1], nullptr, 16);
+
                         if (!judg_addr_code(break_point_addr))
                             err_info("Illegal address!");
                         else // 打断点
@@ -233,7 +257,8 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please enter the break point address!");
 
                 }             
-                else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) {
+                else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) 
+                {
                     if (argc == 3) 
                     {
                         s32 num = stoi(arguments[2]);
@@ -247,8 +272,8 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please enter the break point number to delete!");
 
                 } 
-                else if (!strcmp(arguments[0], "ib")) {
-
+                else if (!strcmp(arguments[0], "ib")) 
+                {
                     s32 fun_offset;
                     string fun_name = "";
                     u64 fun_start_addr;
@@ -274,7 +299,8 @@ void run_dyn_debug(Binary* bin)
                 }
 
 
-                else if (!strcmp(arguments[0], "x")) {
+                else if (!strcmp(arguments[0], "x")) 
+                {
                     if (argc == 3) 
                     {
                         int num = stoi(arguments[1]);
@@ -288,7 +314,8 @@ void run_dyn_debug(Binary* bin)
                     else 
                         err_info("Please enter the address and read quantity!");
                 } 
-                else if (!strcmp(arguments[0], "stack")) {
+                else if (!strcmp(arguments[0], "stack")) 
+                {
                     if (argc == 2) 
                     {
                         get_regs(pid, &regs);
@@ -297,51 +324,60 @@ void run_dyn_debug(Binary* bin)
                     }
                     else 
                         err_info("Please Enter the correct quantity!");
-
                 }
 
 
-                else if (!strcmp(arguments[0], "vmmap")) {
+                else if (!strcmp(arguments[0], "vmmap")) 
+                {
                     show_vmmap(pid);
                 } 
-                else if (!strcmp(arguments[0], "base")) {
+                else if (!strcmp(arguments[0], "base")) 
+                {
 
                     printf("[+] elf base:     0x%llx\n", elf_base);
                     printf("[+] libc base:    0x%llx\n", libc_base);
                     printf("[+] ld base:      0x%llx\n", ld_base);
                 } 
-                else if (!strcmp(arguments[0], "libc")) {
+                else if (!strcmp(arguments[0], "libc")) 
+                {
                     printf("[+] libc base: 0x%llx\n", libc_base);
                     printf("[+] ld base:   0x%llx\n", ld_base);
                 } 
-                else if (!strcmp(arguments[0], "code")) {
+                else if (!strcmp(arguments[0], "code")) 
+                {
                     printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start,  elf_code_end);
                     printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
                     printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start,   ld_code_end);
                     printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
                 } 
-                else if (!strcmp(arguments[0], "data")) {
+                else if (!strcmp(arguments[0], "data")) 
+                {
                     printf("[+] elf data:  \033[35m0x%llx-0x%llx\033[0m\n", elf_data_start,  elf_data_end);
                     printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", libc_data_start, libc_data_end);
                     printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", ld_data_start,   ld_data_end);
                 }
-                else if (!strcmp(arguments[0], "stackbase")) {
+                else if (!strcmp(arguments[0], "stackbase")) 
+                {
                     printf("[+] stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
                 } 
-                else if (!strcmp(arguments[0], "heapbase")) {
+                else if (!strcmp(arguments[0], "heapbase")) 
+                {
                     printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n",  heap_base,  heap_end);
                 }
 
 
-                else if (!strcmp(arguments[0], "lfun")) {
+                else if (!strcmp(arguments[0], "lfun")) 
+                {
                     dyn_show_elf_fun();
                 } 
-
-                else if (!strcmp(arguments[0], "lplt")) {
+                else if (!strcmp(arguments[0], "lplt")) 
+                {
                     dyn_show_elf_plt_fun();
                 } 
-                else if (!strcmp(arguments[0], "plt")) {
-                    if (argc == 2) {
+                else if (!strcmp(arguments[0], "plt")) 
+                {
+                    if (argc == 2) 
+                    {
                         u64 address = strtoul(arguments[1], nullptr, 16);
 
                         if ( addr_get_elf_plt_fun(address)== "" )
@@ -352,18 +388,21 @@ void run_dyn_debug(Binary* bin)
                     else 
                         err_info("Please enter the function address!");
                 }
-                else if (!strcmp(arguments[0], "fun")) {
+                else if (!strcmp(arguments[0], "fun")) 
+                {
                     if (argc == 2)
                         show_elf_fun_call(pid, arguments[1]);
                     else 
                         err_info("Please enter the function name!");
                 }
 
-                else if (!strcmp(arguments[0], "tree")) {
+                else if (!strcmp(arguments[0], "tree")) 
+                {
                     if (argc == 3)
                     {
                         if(!creat_root_node(arguments[1]))
                         {
+                            printf("creat_fun_tree.\n");
                             int level = stoi(arguments[2]);
                             creat_fun_tree(pid, level);
                             show_fun_tree(level);
@@ -377,9 +416,14 @@ void run_dyn_debug(Binary* bin)
                         err_info("Please enter the function name!");
                 }
 
-                else if (!strcmp(arguments[0], "test")) {
-                    u64 fun_start_addr, fun_end_addr;
-                    get_fun_addr(arguments[1], &fun_start_addr, &fun_end_addr);
+                else if (!strcmp(arguments[0], "test")) 
+                {
+                    string fun_name;
+                    u64 addr, fun_start_addr, fun_end_addr;
+                    // get_fun_addr(arguments[1], &fun_start_addr, &fun_end_addr);
+                    addr = strtoul(arguments[1], nullptr, 16);
+                    fun_name = addr_get_glibc_fun_start_and_end(addr, &fun_start_addr, &fun_end_addr);
+                    printf("%s\n", fun_name.c_str());
                     printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
                     // u64 address = strtoul(arguments[1], nullptr, 16);
 
@@ -413,12 +457,14 @@ void run_dyn_debug(Binary* bin)
                     // printf("regs.r9:  0x%llx\n", regs.r9);
                 }
 
-                else if (!strcmp(arguments[0], "help") || !strcmp(arguments[0], "h")) {
+                else if (!strcmp(arguments[0], "help") || !strcmp(arguments[0], "h")) 
+                {
                     // 显示帮助信息
                     old_cmd = cmd;
                     show_help();
                 } 
-                else {
+                else 
+                {
                     err_info("Command not found!");
                     printf("Enter 'h' to view supported commands.\n");
                 }
@@ -428,5 +474,8 @@ void run_dyn_debug(Binary* bin)
             wait(&status);
         }
     }
-    debug_stop: return;
+
+    debug_stop: 
+    cs_close(&handle);
+    return;
 } 

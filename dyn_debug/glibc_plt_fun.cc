@@ -5,17 +5,21 @@
 string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr) 
 {
     u64 glibc_plt_fun_addr_offset;
-    string command;
+    string exe_cmd, command, command2;
+    string lib_plt_fun_name = "";
+    bool finded = false;
 
     if (glibc_plt_fun_addr < ld_code_end && glibc_plt_fun_addr > ld_code_start) 
     {
         glibc_plt_fun_addr_offset = glibc_plt_fun_addr - ld_base;
         command = string("objdump -d -j .plt.sec ld-linux-x86-64.so.2 | fgrep ");
+        command2 = command;
     }
     else 
     {
         glibc_plt_fun_addr_offset = glibc_plt_fun_addr - libc_base;
         command = string("objdump -d -j .plt.sec libc.so.6 | fgrep ");
+        command2 = string("objdump -d -j .plt.got libc.so.6 | fgrep ");
     }
 
     // stringstream 将十六进制数转换为字符串
@@ -23,39 +27,79 @@ string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
     ss << hex << glibc_plt_fun_addr_offset; // 使用十六进制输出
     string addr_hex_str = ss.str();
     // 去掉前缀"0x"
-    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") 
+    {
         addr_hex_str = addr_hex_str.substr(2);
         addr_hex_str = "0" + addr_hex_str;
     }
 
     command += addr_hex_str;
-    FILE* fp = popen(command.c_str(), "r");
-    if (!fp)
-    {
-        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
-        return "";
-    }
+    command2 += addr_hex_str;
 
-    char* result = nullptr;
-    size_t len = 0;
-    ssize_t read;
-    s32 lib_plt_fun_str_start, lib_plt_fun_str_end;
-    string lib_plt_fun_name = "";
-
-    while ((read = getline(&result, &len, fp)) != -1) 
+    for (int i = 0; i < 2 && !finded; i++)
     {
-        if (string(result).find("<") != string::npos) 
+        if (i == 0) 
+            exe_cmd = command;
+        else 
+            exe_cmd = command2;
+
+        FILE* fp = popen(exe_cmd.c_str(), "r");
+        if (!fp)
         {
-            lib_plt_fun_str_start = string(result).find("<");
-            lib_plt_fun_str_end = string(result).find(">");
-            lib_plt_fun_name = string(result).substr(lib_plt_fun_str_start+1, 
-                lib_plt_fun_str_end - lib_plt_fun_str_start-1);
-        }     
+            printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+            return "";
+        }
+
+        char* result = nullptr;
+        size_t len = 0;
+        ssize_t read;
+        s32 lib_plt_fun_str_start, lib_plt_fun_str_end;
+        // string lib_plt_fun_name = "";
+
+        while ((read = getline(&result, &len, fp)) != -1) 
+        {
+            if (string(result).find("<") != string::npos) 
+            {
+                lib_plt_fun_str_start = string(result).find("<");
+                lib_plt_fun_str_end = string(result).find(">");
+                lib_plt_fun_name = string(result).substr(lib_plt_fun_str_start+1, 
+                    lib_plt_fun_str_end - lib_plt_fun_str_start-1);
+                finded = true;
+            }     
+        }
+
+        pclose(fp);   // 关闭管道
+        if (result)
+            free(result);
     }
 
-    pclose(fp);   // 关闭管道
-    if (result)
-        free(result);
+    // FILE* fp = popen(command.c_str(), "r");
+    // if (!fp)
+    // {
+    //     printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+    //     return "";
+    // }
+
+    // char* result = nullptr;
+    // size_t len = 0;
+    // ssize_t read;
+    // s32 lib_plt_fun_str_start, lib_plt_fun_str_end;
+    // string lib_plt_fun_name = "";
+
+    // while ((read = getline(&result, &len, fp)) != -1) 
+    // {
+    //     if (string(result).find("<") != string::npos) 
+    //     {
+    //         lib_plt_fun_str_start = string(result).find("<");
+    //         lib_plt_fun_str_end = string(result).find(">");
+    //         lib_plt_fun_name = string(result).substr(lib_plt_fun_str_start+1, 
+    //             lib_plt_fun_str_end - lib_plt_fun_str_start-1);
+    //     }     
+    // }
+
+    // pclose(fp);   // 关闭管道
+    // if (result)
+    //     free(result);
 
     if(lib_plt_fun_name != "")
     {

@@ -77,11 +77,14 @@ s32 get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
     addr = get_glibc_fun_addr(fun_name);
     if (addr)
     {
-        *fun_start_addr = addr;
-        *fun_end_addr = get_glibc_fun_end(addr, string(fun_name));
+        // *fun_start_addr = addr;
+        // *fun_end_addr = get_glibc_fun_end(addr, string(fun_name));
+        // printf("333\n");
+        addr_get_glibc_fun_start_and_end(addr, fun_start_addr, fun_end_addr);
         return 0;
     }
 
+    
     addr = get_glibc_plt_fun_addr(fun_name);
     if (addr)
     {

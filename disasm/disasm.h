@@ -10,6 +10,8 @@
 
 using namespace std;
 
+extern csh handle;
+
 bool judg_jump(char* mnemonic);
 void bp_disasm(pid_t pid, u64 addr);
 void call_disasm(char* byte_codes, u64  addr, s32 num, string call_fun_name);

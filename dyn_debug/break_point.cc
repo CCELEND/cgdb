@@ -43,7 +43,7 @@ void set_break_point(pid_t pid, u64 break_point_addr)
     {
         if (break_point_list[i].addr == break_point_addr)
         {
-            err_info("Break pos32 already exists!");
+            err_info("Break point already exists!");
             return;
         }
     }
@@ -58,7 +58,7 @@ void set_break_point(pid_t pid, u64 break_point_addr)
             fun_name = get_fun(break_point_addr, &fun_start_addr);
             fun_offset = break_point_addr - fun_start_addr;
             link_file = get_addr_file_base(break_point_addr, &base_addr);
-            printf("[+] Break pos32 %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
+            printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
                     i, link_file.c_str(), break_point_addr-base_addr, break_point_addr);
 
             if (fun_offset)
@@ -116,7 +116,7 @@ s32 break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag
             else 
             {
                 if (showbp_flag)
-                    printf("[+] Break pos32 at: \033[31m0x%llx\033[0m\n", bp.addr);
+                    printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
 
                 // 把 s32 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);

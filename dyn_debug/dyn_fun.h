@@ -189,6 +189,8 @@ u64 get_glibc_fun_end(u64 glibc_fun_addr,
     string fun_name);
 u64 get_glibc_fun_addr(char* fun_name);
 
+string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glibc_fun_end);
+
 // glibc plt 函数
 // glibc_plt_fun.cc
 string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr);
