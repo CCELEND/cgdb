@@ -53,6 +53,7 @@ fun_list_info_type flow_change_fun_info;
 
 // 反汇编框架句柄
 csh handle = 0;
+char* p_fun_code = NULL;
 
 void run_dyn_debug(Binary* bin)
 {
@@ -93,6 +94,9 @@ void run_dyn_debug(Binary* bin)
                 printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
                 goto debug_stop;
             }
+
+            p_fun_code = (char*)calloc(1, 0x1000);
+            memset(p_fun_code, 0, 0x1000);
 
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
             sleep(1);
@@ -403,7 +407,7 @@ void run_dyn_debug(Binary* bin)
                     {
                         if(!creat_root_node(arguments[1]))
                         {
-                            printf("creat_fun_tree.\n");
+                            printf("[*] Creating a forked function call tree...\n");
                             int level = stoi(arguments[2]);
                             creat_fun_tree(pid, level);
                             show_fun_tree(level);
@@ -477,6 +481,7 @@ void run_dyn_debug(Binary* bin)
             debug_stop: 
             // 等待子进程结束之后父进程再退出
             wait(&status);
+            free(p_fun_code);
             cs_close(&handle);
         }
     }

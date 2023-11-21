@@ -70,6 +70,8 @@ extern regs_struct regs;
 extern regs_struct last_regs;
 extern regs_struct fun_args_regs;
 
+extern char* p_fun_code;
+
 typedef struct fun_info {
     u64 fun_start_addr;
     u64 fun_end_addr;

@@ -14,12 +14,14 @@ string addr_get_glibc_fun(u64 glibc_fun_addr, u64* glibc_fun_start)
     string glibc_fun_name = "";
     bool is_libc, break_flag = false;
 
-    if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) {
+    if (glibc_fun_addr < ld_code_end && glibc_fun_addr > ld_code_start) 
+    {
         is_libc = false;
         glibc_fun_addr_offset = glibc_fun_addr - ld_base;
         command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
-    else {
+    else 
+    {
         is_libc = true;
         glibc_fun_addr_offset = glibc_fun_addr - libc_base;
         command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
@@ -78,10 +80,14 @@ string addr_get_glibc_fun(u64 glibc_fun_addr, u64* glibc_fun_start)
             free(result);
     }
 
-    if (is_libc)
+    if (is_libc){
         *glibc_fun_start = glibc_fun_addr_offset + libc_base + 0x8;
-    else
+        // glibc_fun_name = "libc." + glibc_fun_name;
+    }
+    else{
         *glibc_fun_start = glibc_fun_addr_offset + ld_base + 0x8;
+        // glibc_fun_name = "ld." + glibc_fun_name;
+    }
 
     return glibc_fun_name;
 
@@ -100,7 +106,7 @@ u64 get_glibc_fun_addr(char* fun_name)
 
     for (int i = 0; i < 2 && !finded; i++)
     {
-        if (i == 0){
+        if (i == 1){
             command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
         }
         else{
@@ -108,7 +114,7 @@ u64 get_glibc_fun_addr(char* fun_name)
             command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
         }
 
-        exe_command = command + string(fun_name);
+        exe_command = command + string(fun_name) + "\\>";
         fp = popen(exe_command.c_str(), "r");
         if (!fp)
         {
@@ -328,9 +334,7 @@ string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u6
         pclose(fp);   // 关闭管道
         // 释放动态分配的内存
         if (result) {
-            // printf("444\n");
             delete[] result;
-            // printf("555\n");
         }
             // free(result);
 

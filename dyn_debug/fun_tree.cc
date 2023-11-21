@@ -13,25 +13,25 @@ fun_tree_node_t* creat_node(u64 addr)
 
     fun_tree_node_t* node = NULL;
 
-    // printf("111\n");
     fun_name = get_fun(addr, &fun_start_addr);
-    // printf("222\n");
+    // 不一致 有可能重复名字
     get_fun_addr((char*)fun_name.c_str(), &fun_start_addr, &fun_end_addr); // 3434
 
+    // try{}
     node = new fun_tree_node_t;
-    printf("666\n");
+    // printf("666\n");
     if (!node) {
         printf("[-] Failed to create node!\n");
         return NULL;
     }
     memset(node, 0, sizeof(struct fun_tree_node));
 
+    node->fun_info.fun_start_addr = fun_start_addr;
+    node->fun_info.fun_end_addr = fun_end_addr;
+    node->fun_info.fun_name = fun_name;
     node->next = NULL;
     node->sub_fun = NULL;
     node->sub_fun_num = 0;
-    node->fun_info.fun_name = fun_name;
-    node->fun_info.fun_start_addr = fun_start_addr;
-    node->fun_info.fun_end_addr = fun_end_addr;
 
     return node;
 }
@@ -46,8 +46,9 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
 
     if (!parent_node->sub_fun)
     {
+        // printf("create\n");
         sub_node = creat_node(sub_fun_addr);
-        printf("head: %s---\n", sub_node->fun_info.fun_name.c_str());
+        // printf("head: %s---\n", sub_node->fun_info.fun_name.c_str());
         // printf("%p\n", sub_node);
         parent_node->sub_fun = sub_node;
         parent_node->sub_fun_num++;
@@ -65,8 +66,9 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
 
         if (!temp->next)
         {
+            // printf("create\n");
             sub_node = creat_node(sub_fun_addr);
-            printf("%s-------\n", sub_node->fun_info.fun_name.c_str());
+            // printf("%s-------\n", sub_node->fun_info.fun_name.c_str());
             // printf("%p\n", sub_node);
             temp->next = sub_node;
             parent_node->sub_fun_num++;
@@ -78,17 +80,10 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
 void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_fun_size,
     fun_tree_node_t* parent_node)
 {
-    // csh handle = 0;
     cs_insn* insn = NULL;
     size_t count;
 
-    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) 
-    // {
-    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-    //     return;
-    // }
-
-    // printf("888\n");
+    // printf("%d\n", parent_fun_size);
     count = cs_disasm(handle, (uint8_t*)byte_codes, parent_fun_size, parent_fun_addr, 0, &insn);
     // printf("999\n");
 
@@ -99,7 +94,7 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
             if (judg_jump(insn[j].mnemonic))
             {
                 u64 sub_fun_addr = 0;
-                printf("%s, %s\n",insn[j].mnemonic, insn[j].op_str);
+                // printf("%s, %s\n",insn[j].mnemonic, insn[j].op_str);
 
                 // u64 fun_start_addr;
                 if (!strcmp(insn[j].mnemonic, "bnd jmp"))
@@ -107,7 +102,7 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
                     u64 got_addr;
                     got_addr = insn[j].address + get_hex_in_string(insn[j].op_str) + 7;
                     sub_fun_addr = get_addr_val(pid, got_addr);
-                    printf("0x%llx\n", sub_fun_addr);
+                    // printf("0x%llx\n", sub_fun_addr);
                 }
                 else
                 {
@@ -161,7 +156,6 @@ s32 creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
 {
     u64 p_fun_start_addr, p_fun_end_addr, p_fun_size;
     string p_fun_name;
-    char* p_fun_code = NULL;
 
     p_fun_name = parent_node->fun_info.fun_name;
     p_fun_start_addr = parent_node->fun_info.fun_start_addr;
@@ -170,16 +164,12 @@ s32 creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
     p_fun_size = p_fun_end_addr - p_fun_start_addr;
     p_fun_size = p_fun_size + LONG_SIZE - p_fun_size % LONG_SIZE; // 8字节对齐
 
-    p_fun_code = new char[p_fun_size];
+    if (p_fun_size > 0x1000) 
+        p_fun_code = (char*)realloc(p_fun_code, p_fun_size);
     memset(p_fun_code, 0, p_fun_size);
 
     get_addr_data(pid, p_fun_start_addr, p_fun_code, p_fun_size);
     parent_disasm(pid, p_fun_code, p_fun_start_addr, p_fun_size, parent_node);
-
-    // printf("%p\n", parent_node);
-
-    delete[] p_fun_code;
-    p_fun_code = NULL;
 
     return 0;
 }
@@ -190,11 +180,11 @@ void free_fun_tree()
     vector<fun_tree_node_t*> sib_link_next_node;
     fun_tree_node_t *temp = NULL, *parent_node = root_node;
 
-    printf("free-----------------\n");
+    // printf("free-----------------\n");
 
     while(parent_node)
     {
-        printf("%s\n", parent_node->fun_info.fun_name.c_str());
+        // printf("%s\n", parent_node->fun_info.fun_name.c_str());
         // 当前节点兄节点压栈
         sib_link_next_node.push_back(parent_node->next);
         temp = parent_node;
@@ -208,7 +198,7 @@ void free_fun_tree()
         // 当前节点无子
         else
         {
-            printf("free no sub: %ld\n", sib_link_next_node.size());
+            // printf("free no sub: %ld\n", sib_link_next_node.size());
             // 弹出空值
             while (!sib_link_next_node.back())
             {
@@ -218,8 +208,8 @@ void free_fun_tree()
 
             if (!sib_link_next_node.size())
             {
-                printf("free3\n");
-                // memset(temp, 0, sizeof(struct fun_tree_node));
+                // printf("free3\n");
+                memset(temp, 0, sizeof(struct fun_tree_node));
                 delete temp;
                 break;
             }
@@ -229,7 +219,7 @@ void free_fun_tree()
         }
 
         // printf("%p\n", temp);
-        // memset(temp, 0, sizeof(struct fun_tree_node));
+        memset(temp, 0, sizeof(struct fun_tree_node));
         delete temp;
     }
 }
@@ -242,7 +232,7 @@ void show_fun_tree(s32 level)
 
     sib_link_next_node.push_back(temp_node->next);
     // 输出根节点
-    printf("%s\n", temp_node->fun_info.fun_name.c_str());
+    printf(" %s\n", temp_node->fun_info.fun_name.c_str());
     if (temp_node->sub_fun)
     {
         temp_node = temp_node->sub_fun;
@@ -256,21 +246,28 @@ void show_fun_tree(s32 level)
 
         // 当前节点兄弟节点压栈
         sib_link_next_node.push_back(temp_node->next);
-
         // 输出当前节点
-        // for (int i = 0; i < depth-2; i++) printf("│   ");
-        for (int i = 0; i < depth-1; i++) printf("│   ");
+        // for (int i = 0; i < depth-1; i++) printf("│   ");
+
+        // for (int i = 0; i < depth-1; i++) 
+        for (int i = 1; i < depth; i++)
+        {
+            if (sib_link_next_node[i])
+                printf(" │   ");
+            else
+                printf("     ");
+        }
 
         // for (int i = 0; i < depth-1; i++) printf("    ");
         // temp_node->fun_info.fun_start_addr
         if (temp_node->next)
-            printf("├── %s\n", temp_node->fun_info.fun_name.c_str());
-            // printf("├── %s 0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
-            //     temp_node->fun_info.fun_start_addr);
+            printf(" ├─── %s\n", temp_node->fun_info.fun_name.c_str());
+            // printf("├── %s 0x%llx-0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
+            //     temp_node->fun_info.fun_start_addr, temp_node->fun_info.fun_end_addr);
         else
-            printf("└── %s\n", temp_node->fun_info.fun_name.c_str());
-            // printf("└── %s 0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
-            //     temp_node->fun_info.fun_start_addr);
+            printf(" └─── %s\n", temp_node->fun_info.fun_name.c_str());
+            // printf("└── %s 0x%llx-0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
+            //     temp_node->fun_info.fun_start_addr, temp_node->fun_info.fun_end_addr);
 
         // 当前节点有子
         if (temp_node->sub_fun)
@@ -309,7 +306,7 @@ void creat_fun_tree(pid_t pid, s32 level)
 
     while(parent_node)
     {
-        printf("%s\n", parent_node->fun_info.fun_name.c_str());
+        // printf("%s\n", parent_node->fun_info.fun_name.c_str());
         // 当前节点兄节点压栈
         sib_link_next_node.push_back(parent_node->next);
 
