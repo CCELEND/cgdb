@@ -267,7 +267,7 @@ void show_fun_tree()
     }
 }
 
-// level 2
+
 void creat_fun_tree(pid_t pid, s32 level)
 {
     vector<fun_tree_node_t*> sib_link_next_node;

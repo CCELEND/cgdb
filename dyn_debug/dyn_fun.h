@@ -233,11 +233,9 @@ void set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs);
 void show_elf_fun_call(pid_t pid, char* elf_fun_name);
 
 s32 creat_root_node(char* root_fun_name);
-// s32 set_parent_sub_node(pid_t pid);
 void creat_fun_tree(pid_t pid, s32 level);
 void show_fun_tree();
 void free_fun_tree();
-// void free1();
 
 
 // 提示信息
