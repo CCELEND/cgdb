@@ -1,7 +1,8 @@
 
 #include "loader_elf.h"
 
-void show_elf_help() 
+void 
+show_elf_help() 
 {
     printf(" \033[34msym\033[0m: Show function symbols.\n");
     printf(" \033[34mdyn\033[0m: Show dynamic symbols.\n");

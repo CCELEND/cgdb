@@ -1,11 +1,12 @@
 
 #include "dyn_fun.h"
 
-void set_elf_rdata(Binary* bin)
+void 
+set_elf_rdata(Binary* bin)
 {
-    Section *sec;
+    Section* sec;
 
-    for(int i = 0; i < bin->sections.size(); i++) 
+    for(s32 i = 0; i < bin->sections.size(); i++) 
     {
         sec = &bin->sections[i];
 

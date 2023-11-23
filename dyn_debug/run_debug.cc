@@ -53,9 +53,11 @@ fun_list_info_type flow_change_fun_info;
 
 // 反汇编框架句柄
 csh handle = 0;
+// 动态分配储存机器码空间
 char* p_fun_code = NULL;
 
-void run_dyn_debug(Binary* bin)
+void 
+run_dyn_debug(Binary* bin)
 {
     pid_t pid;
     Symbol* sym;
@@ -190,7 +192,7 @@ void run_dyn_debug(Binary* bin)
                     wait(&status);
 
                     s32 index = -1;
-                    for (int i = 0; i < 8; i++) 
+                    for (s32 i = 0; i < 8; i++) 
                     {
                         if (break_point_list[i].break_point_state) 
                         {
@@ -245,7 +247,7 @@ void run_dyn_debug(Binary* bin)
                             set_break_point(pid, break_point_fun_addr);
                     } 
                     else 
-                        err_info("Please enter the break point function name!");
+                        err_info("Please enter the break pos32 function name!");
                 } 
                 else if (!strcmp(arguments[0], "ba")) 
                 {
@@ -259,7 +261,7 @@ void run_dyn_debug(Binary* bin)
                             set_break_point(pid, break_point_addr);
                     } 
                     else 
-                        err_info("Please enter the break point address!");
+                        err_info("Please enter the break pos32 address!");
 
                 }             
                 else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) 
@@ -269,12 +271,12 @@ void run_dyn_debug(Binary* bin)
                         s32 num = stoi(arguments[2]);
 
                         if (num >= 8 || num < 0)
-                            err_info("Error break point number!");
+                            err_info("Error break pos32 number!");
                         else
                             break_point_delete(pid, num);
                     }
                     else
-                        err_info("Please enter the break point number to delete!");
+                        err_info("Please enter the break pos32 number to delete!");
 
                 } 
                 else if (!strcmp(arguments[0], "ib")) 
@@ -292,7 +294,7 @@ void run_dyn_debug(Binary* bin)
                                 &fun_start_addr, &fun_end_addr);
                             fun_offset = break_point_list[i].addr - fun_start_addr;
 
-                            printf("%-11dbreak point     \033[31m0x%llx\033[0m ",
+                            printf("%-11dbreak pos32     \033[31m0x%llx\033[0m ",
                                 i, break_point_list[i].addr
                             );
 
@@ -309,7 +311,7 @@ void run_dyn_debug(Binary* bin)
                 {
                     if (argc == 3) 
                     {
-                        int num = stoi(arguments[1]);
+                        s32 num = stoi(arguments[1]);
                         if (num < 0) 
                             err_info("Wrong number of reads!");
                         else {
@@ -339,7 +341,6 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "base")) 
                 {
-
                     printf("[+] elf base:     0x%llx\n", elf_base);
                     printf("[+] libc base:    0x%llx\n", libc_base);
                     printf("[+] ld base:      0x%llx\n", ld_base);
@@ -351,16 +352,23 @@ void run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "code")) 
                 {
-                    printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", elf_code_start,  elf_code_end);
-                    printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", libc_code_start, libc_code_end);
-                    printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", ld_code_start,   ld_code_end);
-                    printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", vdso_code_start, vdso_code_end);
+                    printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", 
+                        elf_code_start,  elf_code_end);
+                    printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", 
+                        libc_code_start, libc_code_end);
+                    printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", 
+                        ld_code_start,   ld_code_end);
+                    printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", 
+                        vdso_code_start, vdso_code_end);
                 } 
                 else if (!strcmp(arguments[0], "data")) 
                 {
-                    printf("[+] elf data:  \033[35m0x%llx-0x%llx\033[0m\n", elf_data_start,  elf_data_end);
-                    printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", libc_data_start, libc_data_end);
-                    printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", ld_data_start,   ld_data_end);
+                    printf("[+] elf data:  \033[35m0x%llx-0x%llx\033[0m\n", 
+                        elf_data_start,  elf_data_end);
+                    printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", 
+                        libc_data_start, libc_data_end);
+                    printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", 
+                        ld_data_start,   ld_data_end);
                 }
                 else if (!strcmp(arguments[0], "stackbase")) 
                 {
@@ -401,64 +409,47 @@ void run_dyn_debug(Binary* bin)
                     else 
                         err_info("Please enter the function name!");
                 }
-
                 else if (!strcmp(arguments[0], "tree")) 
                 {
                     if (argc == 3)
                     {
-                        if(!creat_root_node(arguments[1]))
+                        s32 level = stoi(arguments[2]);
+                        if (level > 5)
                         {
-                            printf("[*] Creating a forked function call tree...\n");
-                            int level = stoi(arguments[2]);
-                            creat_fun_tree(pid, level);
-                            show_fun_tree();
-                            free_fun_tree();
+                            printf("[-] Too many levels\n");
                         }
                         else
-                            printf("[-] Failed to create node\n");
+                        {
+                            if(!creat_root_node(arguments[1]))
+                            {
+                                printf("[*] Creating a forked function call tree...\n");
+                                
+                                creat_fun_tree(pid, level);
+                                show_fun_tree();
+                                free_fun_tree();
+                            }
+                            else
+                                printf("[-] Failed to create node\n");
+                        }
+
                     }
-                        // show_elf_fun_call(pid, arguments[1]);
-                    else 
+                    else
+                    {
                         err_info("Please enter the function name!");
+                    }
                 }
 
                 else if (!strcmp(arguments[0], "test")) 
                 {
                     string fun_name;
                     u64 addr, fun_start_addr, fun_end_addr;
+
                     addr = strtoul(arguments[1], nullptr, 16);
-                    fun_name = addr_get_glibc_fun_start_and_end(addr, &fun_start_addr, &fun_end_addr);
+                    fun_name = addr_get_glibc_fun_start_and_end(addr, 
+                        &fun_start_addr, &fun_end_addr);
+
                     printf("%s\n", fun_name.c_str());
                     printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
-
-                    // printf("-------------regs:\n");
-                    // show_fun_list(&regs_fun_info);
-                    // printf("--------------dis:\n");
-                    // show_fun_list(&dis_fun_info);
-                    // printf("--------------flow_change_fun:\n");
-                    // show_fun_list(&flow_change_fun_info);
-
-                    // for (auto it : fun_start) {
-                    //     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
-                    // }
-                    // printf("\n");
-                    // for (auto i : fun_end) {
-                    //     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
-                    // }
-
-                    // printf("fun_args_regs.rdi: 0x%llx\n", fun_args_regs.rdi);
-                    // printf("fun_args_regs.rsi: 0x%llx\n", fun_args_regs.rsi);
-                    // printf("fun_args_regs.rdx: 0x%llx\n", fun_args_regs.rdx);
-                    // printf("fun_args_regs.rcx: 0x%llx\n", fun_args_regs.rcx);
-                    // printf("fun_args_regs.r8:  0x%llx\n", fun_args_regs.r8);
-                    // printf("fun_args_regs.r9:  0x%llx\n", fun_args_regs.r9);
-
-                    // printf("regs.rdi: 0x%llx\n", regs.rdi);
-                    // printf("regs.rsi: 0x%llx\n", regs.rsi);
-                    // printf("regs.rdx: 0x%llx\n", regs.rdx);
-                    // printf("regs.rcx: 0x%llx\n", regs.rcx);
-                    // printf("regs.r8:  0x%llx\n", regs.r8);
-                    // printf("regs.r9:  0x%llx\n", regs.r9);
                 }
 
                 else if (!strcmp(arguments[0], "help") || !strcmp(arguments[0], "h")) 
@@ -475,7 +466,6 @@ void run_dyn_debug(Binary* bin)
                 next_input: myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
             }
 
-
             debug_stop: 
             // 等待子进程结束之后父进程再退出
             wait(&status);
@@ -484,3 +474,32 @@ void run_dyn_debug(Binary* bin)
         }
     }
 } 
+
+// printf("-------------regs:\n");
+// show_fun_list(&regs_fun_info);
+// printf("--------------dis:\n");
+// show_fun_list(&dis_fun_info);
+// printf("--------------flow_change_fun:\n");
+// show_fun_list(&flow_change_fun_info);
+
+// for (auto it : fun_start) {
+//     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
+// }
+// printf("\n");
+// for (auto i : fun_end) {
+//     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
+// }
+
+// printf("fun_args_regs.rdi: 0x%llx\n", fun_args_regs.rdi);
+// printf("fun_args_regs.rsi: 0x%llx\n", fun_args_regs.rsi);
+// printf("fun_args_regs.rdx: 0x%llx\n", fun_args_regs.rdx);
+// printf("fun_args_regs.rcx: 0x%llx\n", fun_args_regs.rcx);
+// printf("fun_args_regs.r8:  0x%llx\n", fun_args_regs.r8);
+// printf("fun_args_regs.r9:  0x%llx\n", fun_args_regs.r9);
+
+// printf("regs.rdi: 0x%llx\n", regs.rdi);
+// printf("regs.rsi: 0x%llx\n", regs.rsi);
+// printf("regs.rdx: 0x%llx\n", regs.rdx);
+// printf("regs.rcx: 0x%llx\n", regs.rcx);
+// printf("regs.r8:  0x%llx\n", regs.r8);
+// printf("regs.r9:  0x%llx\n", regs.r9);

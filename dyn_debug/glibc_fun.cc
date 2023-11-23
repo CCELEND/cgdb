@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 通过 glibc 函数名获得函数开始地址
-u64 get_glibc_fun_addr(char* fun_name)
+u64 
+get_glibc_fun_addr(char* fun_name)
 {
     bool is_libc = false;
     u64 glibc_fun_addr = 0;
@@ -60,7 +61,8 @@ u64 get_glibc_fun_addr(char* fun_name)
 
 
 // 通过 glibc 地址获得函数名, 函数开始地址, 函数结束地址
-string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glibc_fun_end)
+string 
+addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glibc_fun_end)
 {
     u64 glibc_fun_addr_offset, glibc_fun_start_addr, glibc_fun_end_addr;
     string command = "", glibc_fun_name = "";

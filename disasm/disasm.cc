@@ -1,7 +1,8 @@
 #include "disasm.h"
 
 // 判断操作码是否是跳转指令
-bool judg_jump(char* mnemonic)
+bool 
+judg_jump(char* mnemonic)
 {
     if (
         !strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||
@@ -21,7 +22,8 @@ bool judg_jump(char* mnemonic)
 // addr:汇编代码的地址, fun_name:函数名, offset:偏移, 
 // 指令码:codes, 操作码:mnemonic, 操作数:ops 
 // 高亮显示
-void dis_highlight_show(u64 addr, string fun_name, s32 offset, 
+void 
+dis_highlight_show(u64 addr, string fun_name, s32 offset, 
     char* codes, char* mnemonic, char* ops)
 {
     string jump_fun_name = "";
@@ -29,7 +31,8 @@ void dis_highlight_show(u64 addr, string fun_name, s32 offset,
     s32 jump_fun_offset;
 
     printf("\033[32m\033[1m ► 0x%llx\033[0m ", addr);
-    if(fun_name != ""){
+    if(fun_name != "")
+    {
         printf("\033[32m\033[1m<%s+%04d>   ", fun_name.c_str(), offset);
     }
     printf("\033[34m\033[1m%-20s\033[0m", codes);
@@ -48,7 +51,8 @@ void dis_highlight_show(u64 addr, string fun_name, s32 offset,
             printf("\033[32m\033[1m<%s>", jump_fun_name.c_str());
     }
 }
-void dis_show(u64 addr, string fun_name, s32 offset, 
+void 
+dis_show(u64 addr, string fun_name, s32 offset, 
     char* codes, char* mnemonic, char* ops)
 {
     string jump_fun_name = "";
@@ -77,7 +81,8 @@ void dis_show(u64 addr, string fun_name, s32 offset,
 }
 
 // 只输出两行
-void bp_disasm(pid_t pid, u64 addr)
+void 
+bp_disasm(pid_t pid, u64 addr)
 {
     cs_insn* insn;
     size_t count;
@@ -95,7 +100,8 @@ void bp_disasm(pid_t pid, u64 addr)
         for (j = 0; j < 2 && j < count-1; j++)
         {
             char code[32];
-            dis_fun_name = get_fun_start_end(insn[j].address, &fun_start_addr, &fun_end_addr);
+            dis_fun_name = get_fun_start_end(insn[j].address, 
+                &fun_start_addr, &fun_end_addr);
             fun_offset = insn[j].address - fun_start_addr;
             
             for(s32 i = 0; i < insn[j].size; ++i)
@@ -123,7 +129,8 @@ void bp_disasm(pid_t pid, u64 addr)
 
 
 // 显示调用函数符号和信息
-void call_disasm(char* byte_codes, 
+void 
+call_disasm(char* byte_codes, 
     u64 addr, s32 num, string call_fun_name)
 {
     // csh handle;
@@ -133,13 +140,9 @@ void call_disasm(char* byte_codes,
     string fun_name;
     s32 offset;
 
-    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-    //     return;
-    // }    
-
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
-    if (count > 0) {
+    if (count > 0) 
+    {
         size_t j;
         for (j = 0; j < count; j++) 
         {
@@ -159,12 +162,13 @@ void call_disasm(char* byte_codes,
                 fun_addr = strtoul(insn[j].op_str, nullptr, 16);
 
                 fun_name = addr_get_elf_fun(fun_addr);
-                if (fun_name == ""){
+                if (fun_name == "")
+                {
                     fun_name = addr_get_elf_plt_fun(fun_addr);
                     offset = addr_get_elf_plt_fun_offset(fun_addr);
-                    // fun_name += "@plt";
                 }
-                else{
+                else
+                {
                     offset = addr_get_elf_fun_offset(fun_addr);
                 }
                 printf("  -> 0x%lx(\033[31m%s\033[0m+0x%llx) call \033[31m%15s\033[0m: ", 
@@ -177,15 +181,16 @@ void call_disasm(char* byte_codes,
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    // cs_close(&handle);
 }
 
 // 输出跳转指令流操作数的函数符号和偏移
-void flow_change_op(char* ops)
+void 
+flow_change_op(char* ops)
 {
     u64 flow_change_addr;
     string flow_change_fun_name = "";
     s32 offset;
+
     flow_change_addr = strtoul(ops, nullptr, 16);
     if (!flow_change_addr)
         return;
@@ -193,15 +198,16 @@ void flow_change_op(char* ops)
     set_fun_list(&flow_change_fun_info, flow_change_addr);
     flow_change_fun_name = addr_get_fun(&flow_change_fun_info, flow_change_addr);
     offset = addr_get_fun_offset(&flow_change_fun_info, flow_change_addr);
+
     if (!offset)
         cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
     else
         printf("<\033[31m%s+%d\033[0m>", flow_change_fun_name.c_str(), offset);
 }
 
-void show_disasm(pid_t pid, u64 rip_val)
+void 
+show_disasm(pid_t pid, u64 rip_val)
 {
-
     cs_insn* insn;
     size_t count;
     s32 fun_offset;
@@ -291,7 +297,8 @@ void show_disasm(pid_t pid, u64 rip_val)
                 printf("\n");
 
             }
-            else{
+            else
+            {
 
                 printf("   0x%lx ", insn[j].address);
 
@@ -330,13 +337,13 @@ void show_disasm(pid_t pid, u64 rip_val)
 }
 
 //输出 line 行反汇编, 只输出 mnemonic 操作码, op_str 操作数
-void disasm_mne_op(char* byte_codes, 
+void 
+disasm_mne_op(char* byte_codes, 
     u64 addr, s32 num, s32 line)
 {
     cs_insn *insn;
     size_t count;
     u64 plt_addr;
-
 
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) 
@@ -363,7 +370,8 @@ void disasm_mne_op(char* byte_codes,
 }
 
 // 获得下一条指令地址
-u64 get_next_instruct_addr(char* byte_codes, 
+u64 
+get_next_instruct_addr(char* byte_codes, 
     u64 addr, s32 num)
 {
 

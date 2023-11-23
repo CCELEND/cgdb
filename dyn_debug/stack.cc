@@ -3,7 +3,8 @@
 
 
 // 输出栈信息
-void show_stack(pid_t pid, regs_struct* regs)
+void 
+show_stack(pid_t pid, regs_struct* regs)
 {
     struct winsize size;
     u64 stack = regs->rsp;
@@ -17,12 +18,16 @@ void show_stack(pid_t pid, regs_struct* regs)
 
     for (s32 i = 0; i < 8; i++)
     {
-        if (stack == regs->rsp) {
+        if (stack == regs->rsp) 
+        {
             printf("%02d:%04x  rsp  ", i, i*8);
-        } else if (stack == regs->rbp){
+        } 
+        else if (stack == regs->rbp)
+        {
             printf("%02d:%04x  rbp  ", i, i*8);
         }
-        else {
+        else 
+        {
             printf("%02d:%04x       ", i, i*8);
         }
 
@@ -33,7 +38,8 @@ void show_stack(pid_t pid, regs_struct* regs)
     }
 }
 
-void show_num_stack(pid_t pid, regs_struct* regs, s32 num)
+void 
+show_num_stack(pid_t pid, regs_struct* regs, s32 num)
 {
     if (num < 0 || num > 0x100){
         printf("[-] Number of errors!\n");
@@ -43,12 +49,16 @@ void show_num_stack(pid_t pid, regs_struct* regs, s32 num)
     u64 stack = regs->rsp;
     for (s32 i = 0; i < num; i++)
     {
-        if (stack == regs->rsp) {
+        if (stack == regs->rsp) 
+        {
             printf("%02d:%04x  rsp  ", i, i*8);
-        } else if (stack == regs->rbp){
+        } 
+        else if (stack == regs->rbp)
+        {
             printf("%02d:%04x  rbp  ", i, i*8);
         }
-        else {
+        else 
+        {
             printf("%02d:%04x       ", i, i*8);
         }
 

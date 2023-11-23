@@ -135,8 +135,10 @@ load_dynsym_bfd(bfd* bfd_h, Binary* bin)
               bfd_errmsg(bfd_get_error()));
       goto fail;
     }
-    for(i = 0; i < nsyms; i++) {
-      if(bfd_dynsym[i]->flags & BSF_FUNCTION) {
+    for(i = 0; i < nsyms; i++) 
+    {
+      if(bfd_dynsym[i]->flags & BSF_FUNCTION) 
+      {
         bin->symbols.push_back(Symbol());
         sym = &bin->symbols.back();
         sym->type = Symbol::SYM_TYPE_FUNC;
@@ -232,7 +234,8 @@ load_binary_bfd(string &fname, Binary* bin, Binary::BinaryType type)
   bfd_h = NULL;
 
   bfd_h = open_bfd(fname);
-  if(!bfd_h) {
+  if(!bfd_h) 
+  {
     goto fail;
   }
 

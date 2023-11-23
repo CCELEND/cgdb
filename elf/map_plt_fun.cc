@@ -2,7 +2,8 @@
 #include "loader_elf.h"
 
 // 建立函数名和 plt 地址的映射
-void map_plt_fun_start()
+void 
+map_plt_fun_start()
 {
     string command = string("objdump -d -j .plt.sec -M intel ") + fname;
     FILE* fp = popen(command.c_str(), "r");

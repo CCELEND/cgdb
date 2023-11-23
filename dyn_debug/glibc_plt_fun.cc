@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 根据地址找所在 glibc plt 函数名
-string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr) 
+string 
+addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr) 
 {
     u64 glibc_plt_fun_addr_offset;
     string exe_cmd, command, command2;
@@ -111,7 +112,8 @@ string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
 }
 
 // 通过 glibc plt 函数名获得函数开始地址
-u64 get_glibc_plt_fun_addr(char* fun_name)
+u64 
+get_glibc_plt_fun_addr(char* fun_name)
 {
     bool finded = false, is_libc = false;
     FILE* fp;

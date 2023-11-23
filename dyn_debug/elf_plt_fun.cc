@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 输出 elf plt 函数的函数名和地址
-void dyn_show_elf_plt_fun()
+void 
+dyn_show_elf_plt_fun()
 {
     printf("[+] PLT function \033[32mplt<@plt>\033[0m\n");
     printf("%-30saddress\n", "name");
@@ -12,7 +13,8 @@ void dyn_show_elf_plt_fun()
 }
 
 // 根据实际 elf plt 函数地址找函数名
-string addr_get_elf_plt_fun(u64 addr)
+string 
+addr_get_elf_plt_fun(u64 addr)
 {
     for (auto it : elf_plt_fun_start) 
     {
@@ -24,7 +26,8 @@ string addr_get_elf_plt_fun(u64 addr)
 }
 
 // 通过 elf plt 函数名获得 elf plt 函数地址
-u64 get_elf_plt_fun_addr(char* plt_fun_name)
+u64 
+get_elf_plt_fun_addr(char* plt_fun_name)
 {
     for (auto it : elf_plt_fun_start) 
     {
@@ -37,7 +40,8 @@ u64 get_elf_plt_fun_addr(char* plt_fun_name)
 
 
 // 根据地址找所在 elf plt 函数偏移
-int addr_get_elf_plt_fun_offset(u64 addr)
+s32 
+addr_get_elf_plt_fun_offset(u64 addr)
 {
     for (auto it : elf_plt_fun_start) 
     {

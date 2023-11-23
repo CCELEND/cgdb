@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 从函数信息结构体获取对应地址的信息
-string addr_get_fun(fun_list_info_type* fun_info, u64 addr)
+string 
+addr_get_fun(fun_list_info_type* fun_info, u64 addr)
 {
     for (s32 i = 0; i < 0x10; i++)
     {
@@ -15,8 +16,8 @@ string addr_get_fun(fun_list_info_type* fun_info, u64 addr)
 }
 
 // 通过地址找函数名, 函数开始地址, 结束地址
-// string get_fun(u64 addr, u64* fun_start_addr)
-string get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
+string 
+get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
 {
     string fun_name;
     if (addr > 0x7f0000000000)
@@ -60,7 +61,8 @@ string get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
 
 
 // 通过函数名找函数开始地址, 结束地址
-s32 get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
+s32 
+get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
 {
     u64 addr;
 
@@ -102,7 +104,8 @@ s32 get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
 }
 
 // 通过函数地址获得函数结束地址
-u64 get_fun_end(pid_t pid, u64 fun_addr)
+u64 
+get_fun_end(pid_t pid, u64 fun_addr)
 {
     char buf[0x1000];
     union u 

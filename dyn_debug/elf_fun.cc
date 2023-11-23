@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 输出 elf 函数的函数名和地址
-void dyn_show_elf_fun()
+void 
+dyn_show_elf_fun()
 {
     printf("[+] Intrinsic function\n");
     printf("%-30saddress\n", "name");
@@ -12,7 +13,8 @@ void dyn_show_elf_fun()
 }
 
 // 通过 elf 函数名获得 elf 函数地址
-u64 get_elf_fun_addr(char* fun_name)
+u64 
+get_elf_fun_addr(char* fun_name)
 {
     for (auto it : elf_fun_start) 
     {
@@ -24,7 +26,8 @@ u64 get_elf_fun_addr(char* fun_name)
 }
 
 // 根据地址找所在 elf 函数名
-string addr_get_elf_fun(u64 addr)
+string 
+addr_get_elf_fun(u64 addr)
 {
     for (auto it : elf_fun_start) 
     {
@@ -37,7 +40,8 @@ string addr_get_elf_fun(u64 addr)
 }
 
 // 根据地址找所在 elf 函数偏移
-int addr_get_elf_fun_offset(u64 addr)
+s32 
+addr_get_elf_fun_offset(u64 addr)
 {
     for (auto it : elf_fun_start) 
     {
@@ -50,7 +54,8 @@ int addr_get_elf_fun_offset(u64 addr)
 }
 
 // 建立 elf 函数名和结束地址的映射
-void map_fun_end(pid_t pid)
+void 
+map_fun_end(pid_t pid)
 {
     for (auto it : elf_fun_start) 
         elf_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);

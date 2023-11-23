@@ -6,7 +6,8 @@
 // root node
 fun_tree_node_t* root_node = NULL;
 
-fun_tree_node_t* creat_node(u64 addr)
+fun_tree_node_t* 
+creat_node(u64 addr)
 {
     string fun_name;
     u64 fun_start_addr, fun_end_addr;
@@ -33,7 +34,8 @@ fun_tree_node_t* creat_node(u64 addr)
     return node;
 }
 
-void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
+void 
+insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
 {
     if ( sub_fun_addr >= parent_node->fun_info.fun_start_addr && 
          sub_fun_addr <= parent_node->fun_info.fun_end_addr )
@@ -70,7 +72,8 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
     }
 }
 
-void parent_disasm(pid_t pid, char* byte_codes, 
+void 
+parent_disasm(pid_t pid, char* byte_codes, 
     u64 parent_fun_addr, s32 parent_fun_size,
     fun_tree_node_t* parent_node)
 {
@@ -112,7 +115,8 @@ void parent_disasm(pid_t pid, char* byte_codes,
 }
 
 // 建立根节点
-s32 creat_root_node(char* root_fun_name)
+s32 
+creat_root_node(char* root_fun_name)
 {
     u64 r_fun_start_addr, r_fun_end_addr;
     string r_fun_name;
@@ -143,7 +147,8 @@ s32 creat_root_node(char* root_fun_name)
 }
 
 // 根据父节点数据建立子函数链表
-s32 creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
+s32 
+creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
 {
     u64 p_fun_start_addr, p_fun_end_addr, p_fun_size;
     string p_fun_name;
@@ -167,7 +172,8 @@ s32 creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
 }
 
 
-void free_fun_tree()
+void 
+free_fun_tree()
 {
     vector<fun_tree_node_t*> sib_link_next_node;
     fun_tree_node_t *temp = NULL, *parent_node = root_node;
@@ -208,7 +214,8 @@ void free_fun_tree()
     }
 }
 
-void show_fun_tree()
+void 
+show_fun_tree()
 {
     vector<fun_tree_node_t*> sib_link_next_node;
     fun_tree_node_t* temp_node = root_node;
@@ -271,7 +278,8 @@ void show_fun_tree()
 }
 
 
-void creat_fun_tree(pid_t pid, s32 level)
+void 
+creat_fun_tree(pid_t pid, s32 level)
 {
     vector<fun_tree_node_t*> sib_link_next_node;
     fun_tree_node_t* parent_node = root_node;

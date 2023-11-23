@@ -2,14 +2,16 @@
 #include "dyn_fun.h"
 
 // 获得 user_regs_struct
-void get_regs(pid_t pid, regs_struct* regs)
+void 
+get_regs(pid_t pid, regs_struct* regs)
 {
     ptrace(PTRACE_GETREGS, pid, nullptr, regs);
 }
 
 
 // 输出寄存器信息
-void show_regs(pid_t pid, regs_struct* regs)
+void 
+show_regs(pid_t pid, regs_struct* regs)
 {
 
     struct winsize size;
@@ -54,7 +56,8 @@ void show_regs(pid_t pid, regs_struct* regs)
 
 }
 
-void copy_regs_to_last_regs(regs_struct* last_regs, regs_struct* regs)
+void 
+copy_regs_to_last_regs(regs_struct* last_regs, regs_struct* regs)
 {
     memcpy(last_regs, regs, sizeof(struct user_regs_struct));
 }

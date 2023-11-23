@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 解析输入参数
-void argparse() 
+void 
+argparse() 
 {
     string param;
     // 用到空格进行分割，为了防止最后一个参数分割不到加一个空格
@@ -21,7 +22,8 @@ void argparse()
     }
 }
 
-void show_help() 
+void 
+show_help() 
 {
     printf(" \033[34mq\033[0m: Stop process.\n");
     printf(" \033[34msi\033[0m: Single step.\n");
@@ -50,6 +52,7 @@ void show_help()
     printf(" \033[34mlfun\033[0m: Display internal function name and address.\n");
     printf(" \033[34mlplt\033[0m: Display PLT function name and address.\n");
     printf(" \033[34mplt [addr]\033[0m: Find the corresponding PLT function based on the address.\n");
+    printf(" \033[34mtree [fun name] [level]\033[0m: Output [level] level function call tree.\n");
 
     printf(" \033[34mKEYCODE_U\033[0m: Enter the up key on the keyboard to execute the previous command.\n");
 

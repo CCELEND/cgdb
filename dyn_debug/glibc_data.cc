@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 根据地址找所在 glibc data 段符号名
-string addr_get_glibc_data(u64 glibc_data_addr) 
+string 
+addr_get_glibc_data(u64 glibc_data_addr) 
 {
     u64 glibc_data_addr_offset;
     string command;
@@ -26,7 +27,8 @@ string addr_get_glibc_data(u64 glibc_data_addr)
     ss << hex << glibc_data_addr_offset; // 使用十六进制输出
     string addr_hex_str = ss.str();
     // 去掉前缀"0x"
-    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") 
+    {
         addr_hex_str = addr_hex_str.substr(2);
         addr_hex_str = "0" + addr_hex_str;
     }
@@ -50,7 +52,6 @@ string addr_get_glibc_data(u64 glibc_data_addr)
         if (string(result).find("<") != string::npos) 
         {
             lib_data_str_start = string(result).find("<");
-            // lib_data_str_end = string(result).find("@");
             lib_data_str_end = string(result).find(">");
             lib_data_name = string(result).substr(lib_data_str_start+1, 
                 lib_data_str_end - lib_data_str_start-1);

@@ -2,13 +2,13 @@
 #include "dyn_fun.h"
 
 // 得到虚拟内存地址
-void get_vma_address(pid_t pid)
+void 
+get_vma_address(pid_t pid)
 {
-    // if (libc_base) return;
-
     string maps_path = "/proc/" + to_string(pid) + "/maps";
     ifstream inf(maps_path.data());//建立输入流
-    if (!inf) {
+    if (!inf) 
+    {
         err_info("Read failed!");
         return;
     }
@@ -28,6 +28,7 @@ void get_vma_address(pid_t pid)
                 elf_code_start = strtoul(line.data(), nullptr, 16);
                 elf_code_end   = strtoul(line.data()+13, nullptr, 16);
             }
+            
             else if ( line.find("rw-p") != string::npos   && 
                       line.find("[heap]") != string::npos &&
                       !heap_base)
@@ -45,7 +46,8 @@ void get_vma_address(pid_t pid)
 
         }
         // glibc stack
-        else {
+        else 
+        {
 
             if ( line.find("libc") != string::npos && 
                  !libc_base) 
@@ -120,11 +122,13 @@ void get_vma_address(pid_t pid)
 }
  
 // 显示虚拟内存地址空间
-void show_vmmap(pid_t pid) 
+void 
+show_vmmap(pid_t pid) 
 {
     string maps_path = "/proc/" + to_string(pid) + "/maps";
     ifstream inf(maps_path.data());//建立输入流
-    if (!inf) {
+    if (!inf) 
+    {
         err_info("Read failed!");
         return;
     }
@@ -144,7 +148,8 @@ void show_vmmap(pid_t pid)
         if (line.find("-xp") != string::npos) 
         {
             printf("\033[31m%s\033[0m\n", line.c_str());
-        } else if (line.find("rw-p") != string::npos) 
+        } 
+        else if (line.find("rw-p") != string::npos) 
         {
             if (line.find("[stack]") != string::npos)
             {
@@ -156,7 +161,8 @@ void show_vmmap(pid_t pid)
             {
                 printf("\033[35m%s\033[0m\n", line.c_str());
             }
-        } else 
+        } 
+        else 
         {
             printf("%s\n", line.c_str());
         }

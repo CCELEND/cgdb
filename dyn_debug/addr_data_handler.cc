@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 获取该地址8字节的值
-u64 get_addr_val(pid_t pid, u64 addr)
+u64 
+get_addr_val(pid_t pid, u64 addr)
 {
     u64 val;
     val = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
@@ -10,7 +11,8 @@ u64 get_addr_val(pid_t pid, u64 addr)
 }
 
 // 从子进程指定地址读取 len 字节长度数据到 str
-void get_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
+void 
+get_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
     // 计算一共需要读取多少个字
@@ -37,7 +39,8 @@ void get_addr_data(pid_t pid, u64 addr, char* str, s32 len)
 }
 
 // 从 str 插入 len 字节长度数据到子进程指定地址
-void put_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
+void 
+put_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
     s32 i = 0, j = len >> 3;
@@ -65,7 +68,8 @@ void put_addr_data(pid_t pid, u64 addr, char* str, s32 len)
 }
 
 // 按照字节打印数据
-void print_bytes(char* codes, s32 len) 
+void 
+print_bytes(char* codes, s32 len) 
 {
     for (s32 i = 0; i < len; ++i) 
     {
@@ -75,7 +79,8 @@ void print_bytes(char* codes, s32 len)
 }
 
 // 输出带颜色的地址以标记所属地址范围 addr_flag 为真会显示地址所属文件
-void flag_addr_printf(u64 addr, bool addr_flag)
+void 
+flag_addr_printf(u64 addr, bool addr_flag)
 {
     if (addr == 0) {
         printf("0x%llx", addr);
@@ -182,7 +187,8 @@ void flag_addr_printf(u64 addr, bool addr_flag)
 }
 
 // 输出指定地址的数据，输出 num 组，每组8字节
-void show_addr_data(pid_t pid, s32 num, u64 addr)
+void 
+show_addr_data(pid_t pid, s32 num, u64 addr)
 {
     union u {
         long val;
@@ -219,7 +225,8 @@ void show_addr_data(pid_t pid, s32 num, u64 addr)
 }
 
 // 输出地址的多重指针
-void show_addr_point(pid_t pid, u64 address, bool addr_flag)
+void 
+show_addr_point(pid_t pid, u64 address, bool addr_flag)
 {
     u64 addr;
     u64 val;
@@ -262,7 +269,8 @@ void show_addr_point(pid_t pid, u64 address, bool addr_flag)
 }
 
 // 字节流转换字符串
-void val_to_string(u64 val)
+void 
+val_to_string(u64 val)
 {
     union u {
         u64 val;
@@ -281,7 +289,8 @@ void val_to_string(u64 val)
 }
 
 // 判断地址是否可执行
-bool judg_addr_code(u64 addr)
+bool 
+judg_addr_code(u64 addr)
 {
     if (addr > elf_code_start && addr < elf_code_end) 
         return true;
@@ -300,7 +309,8 @@ bool judg_addr_code(u64 addr)
 }
 
 // 通过地址获取文件名和加载基址
-string get_addr_file_base(u64 addr, u64* base_addr)
+string 
+get_addr_file_base(u64 addr, u64* base_addr)
 {
     if (addr > elf_code_start && addr < elf_code_end) 
     {
@@ -322,7 +332,8 @@ string get_addr_file_base(u64 addr, u64* base_addr)
 }
 
 // qword ptr [rip + 0x2f25]
-u64 get_hex_in_string(char* str)
+u64 
+get_hex_in_string(char* str)
 {
     u64 hex_val;
     s32 hex_str_start, hex_str_end;

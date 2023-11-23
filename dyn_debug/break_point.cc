@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 断点注入
-void break_point_inject(pid_t pid, break_point& bp) 
+void 
+break_point_inject(pid_t pid, break_point& bp) 
 {
     // int3 中断指令
     char code[CODE_SIZE] = { static_cast<char>(0xcc) };
@@ -13,7 +14,8 @@ void break_point_inject(pid_t pid, break_point& bp)
 }
 
 // 设置 ni 断点
-void set_ni_break_point(pid_t pid, u64 addr)
+void 
+set_ni_break_point(pid_t pid, u64 addr)
 {
     char rip_instruct[32];
     u64 next_addr;
@@ -36,8 +38,8 @@ void set_ni_break_point(pid_t pid, u64 addr)
 }
 
 // 设置普通断点
-// void set_break_point(pid_t pid, char* bp_fun)
-void set_break_point(pid_t pid, u64 break_point_addr)
+void 
+set_break_point(pid_t pid, u64 break_point_addr)
 {
     for (s32 i = 0; i < 8; i++) 
     {
@@ -80,7 +82,8 @@ void set_break_point(pid_t pid, u64 break_point_addr)
 }
 
 // 删除断点
-void break_point_delete(pid_t pid, s32 num)
+void 
+break_point_delete(pid_t pid, s32 num)
 {
     // 指令恢复
     put_addr_data(pid, break_point_list[num].addr, break_point_list[num].backup, CODE_SIZE);
@@ -90,7 +93,8 @@ void break_point_delete(pid_t pid, s32 num)
 }
 
 // 断点处理
-s32 break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag) 
+s32 
+break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag) 
 {
     struct user_regs_struct bp_regs{};
     // 判断信号类型
@@ -119,7 +123,7 @@ s32 break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag
                 if (showbp_flag)
                     printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
 
-                // 把 s32 3 patch 回本来正常的指令
+                // 把 init 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
                 // 执行流回退，重新执行正确的指令
                 bp_regs.rip = bp.addr;

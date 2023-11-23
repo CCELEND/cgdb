@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 // 显示父函数调用的子函数和地址
-void show_elf_fun_call(pid_t pid, char* elf_fun_name)
+void 
+show_elf_fun_call(pid_t pid, char* elf_fun_name)
 {
     char fun_code[0x1000];
     u64 fun_start_addr, fun_end_addr, fun_size;
