@@ -37,7 +37,9 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
 {
     if ( sub_fun_addr >= parent_node->fun_info.fun_start_addr && 
          sub_fun_addr <= parent_node->fun_info.fun_end_addr )
+    {
         return;
+    }
 
     fun_tree_node_t *temp = NULL, *sub_node = NULL;
 
@@ -68,14 +70,17 @@ void insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
     }
 }
 
-void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_fun_size,
+void parent_disasm(pid_t pid, char* byte_codes, 
+    u64 parent_fun_addr, s32 parent_fun_size,
     fun_tree_node_t* parent_node)
 {
     cs_insn* insn = NULL;
     size_t count;
 
-    count = cs_disasm(handle, (uint8_t*)byte_codes, parent_fun_size, parent_fun_addr, 0, &insn);
-    if (count > 0) {
+    count = cs_disasm(handle, (uint8_t*)byte_codes, 
+        parent_fun_size, parent_fun_addr, 0, &insn);
+    if (count > 0) 
+    {
         size_t j;
         for (j = 0; j < count; j++) 
         {
@@ -102,7 +107,8 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
 
         cs_free(insn, count);
     }
-    else printf("\033[31m\033[1m[-] Failed to disassemble given code!\033[0m\n");
+    else 
+        printf("\033[31m\033[1m[-] Failed to disassemble given code!\033[0m\n");
 }
 
 // 建立根节点
@@ -216,7 +222,8 @@ void show_fun_tree()
         temp_node = temp_node->sub_fun;
         ++depth; // 层级加1
     }
-    else return;
+    else 
+        return;
 
     while(temp_node)
     {

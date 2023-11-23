@@ -426,12 +426,10 @@ void run_dyn_debug(Binary* bin)
                 {
                     string fun_name;
                     u64 addr, fun_start_addr, fun_end_addr;
-                    // get_fun_addr(arguments[1], &fun_start_addr, &fun_end_addr);
                     addr = strtoul(arguments[1], nullptr, 16);
                     fun_name = addr_get_glibc_fun_start_and_end(addr, &fun_start_addr, &fun_end_addr);
                     printf("%s\n", fun_name.c_str());
                     printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
-                    // u64 address = strtoul(arguments[1], nullptr, 16);
 
                     // printf("-------------regs:\n");
                     // show_fun_list(&regs_fun_info);
@@ -476,8 +474,7 @@ void run_dyn_debug(Binary* bin)
                 }
                 next_input: myargv.clear(); // 下一轮参数输入之前需要把当前存储的命令清除
             }
-            // // 等待子进程结束之后父进程再退出
-            // wait(&status);
+
 
             debug_stop: 
             // 等待子进程结束之后父进程再退出
@@ -486,10 +483,4 @@ void run_dyn_debug(Binary* bin)
             cs_close(&handle);
         }
     }
-
-    // debug_stop: 
-    // // 等待子进程结束之后父进程再退出
-    // wait(&status);
-    // cs_close(&handle);
-    // return;
 } 
