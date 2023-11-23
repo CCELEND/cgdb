@@ -332,12 +332,11 @@ string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u6
             }
         }
 
-        pclose(fp);   // 关闭管道
+        // 关闭管道
+        pclose(fp);   
         // 释放动态分配的内存
-        if (result) {
-            delete[] result;
-        }
-            // free(result);
+        if (result) delete[] result;
+
 
         glibc_fun_addr_offset -= sub_num;
 

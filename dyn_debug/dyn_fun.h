@@ -100,11 +100,12 @@ typedef struct break_point {
     // 构造函数初始化结构体
     break_point(): addr(0), break_point_state(false) {}
 } break_point_type;
-// 断点结构体列表
+// 普通断点结构体列表
 extern break_point_type break_point_list[8];
 // ni 断点结构体
 extern break_point_type ni_break_point;
 
+// 函数调用树节点
 typedef struct fun_tree_node {
     fun_info_type fun_info;
     struct fun_tree_node* next;
@@ -116,6 +117,7 @@ typedef struct fun_tree_node {
 // arg_help.cc
 void argparse();
 void show_help();
+
 // 运行动态调试
 // run_debug.cc
 void run_dyn_debug(Binary* bin);
@@ -155,7 +157,6 @@ void print_bytes(char* codes, s32 len);
 string addr_get_fun(fun_list_info_type* fun_info, u64 addr);
 string get_fun  (u64 addr,  u64* fun_start_addr);
 s32 get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr);
-// u64 get_fun_addr(char* fun_name, u64* fun_end_addr);
 u64 get_fun_end (pid_t pid, u64 fun_addr);
 
 // elf 函数
@@ -232,7 +233,8 @@ void set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs);
 // fun_call.cc
 void show_elf_fun_call(pid_t pid, char* elf_fun_name);
 
-s32 creat_root_node(char* root_fun_name);
+// 函数调用树
+s32  creat_root_node(char* root_fun_name);
 void creat_fun_tree(pid_t pid, s32 level);
 void show_fun_tree();
 void free_fun_tree();
