@@ -41,6 +41,7 @@ void dis_highlight_show(u64 addr, string fun_name, s32 offset,
         jump_fun_name = get_fun_start_end(jump_addr, 
             &jump_fun_start_addr, &jump_fun_end_addr);
         jump_fun_offset = jump_addr - jump_fun_start_addr;
+
         if (jump_fun_offset)
             printf("\033[32m\033[1m<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
         else
@@ -67,6 +68,7 @@ void dis_show(u64 addr, string fun_name, s32 offset,
         jump_fun_name = get_fun_start_end(jump_addr, 
             &jump_fun_start_addr, &jump_fun_end_addr);
         jump_fun_offset = jump_addr - jump_fun_start_addr;
+
         if (jump_fun_offset)
             printf("<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
         else
@@ -77,10 +79,8 @@ void dis_show(u64 addr, string fun_name, s32 offset,
 // 只输出两行
 void bp_disasm(pid_t pid, u64 addr)
 {
-
-    cs_insn *insn;
+    cs_insn* insn;
     size_t count;
-    
     char addr_instruct[32];
     get_addr_data(pid, addr, addr_instruct, 32);
 
@@ -107,7 +107,8 @@ void bp_disasm(pid_t pid, u64 addr)
                 dis_highlight_show(insn[j].address, dis_fun_name, fun_offset, 
                     code, insn[j].mnemonic, insn[j].op_str);
             }
-            else{
+            else
+            {
                 dis_show(insn[j].address, dis_fun_name, fun_offset, 
                     code, insn[j].mnemonic, insn[j].op_str);
             }
@@ -115,7 +116,8 @@ void bp_disasm(pid_t pid, u64 addr)
         }
         cs_free(insn, count);
     }
-    else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    else 
+        printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
 }
 
@@ -200,7 +202,7 @@ void flow_change_op(char* ops)
 void show_disasm(pid_t pid, u64 rip_val)
 {
 
-    cs_insn *insn;
+    cs_insn* insn;
     size_t count;
     s32 fun_offset;
 
@@ -221,7 +223,8 @@ void show_disasm(pid_t pid, u64 rip_val)
 
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 176, disasm_addr, 0, &insn);
-    if (count > 0) {
+    if (count > 0) 
+    {
         size_t j;
         s32 num;
         s32 line = 0;
@@ -321,7 +324,8 @@ void show_disasm(pid_t pid, u64 rip_val)
         disasm_addr_synchronous = false;
         cs_free(insn, count);
     }
-    else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    else 
+        printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
 }
 
@@ -335,7 +339,8 @@ void disasm_mne_op(char* byte_codes,
 
 
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
-    if (count > 0) {
+    if (count > 0) 
+    {
         size_t j;
         for (j = 0; j < line; j++) 
         {
@@ -352,7 +357,8 @@ void disasm_mne_op(char* byte_codes,
         }
         cs_free(insn, count);
     }
-    else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    else 
+        printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
 }
 
