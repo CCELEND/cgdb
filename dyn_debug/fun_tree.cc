@@ -1,7 +1,7 @@
 
 #include "dyn_fun.h"
 
-// │   │       ├── cmdline └──
+// │   ├──  └──
 
 // root node
 fun_tree_node_t* root_node = NULL;
@@ -10,14 +10,14 @@ fun_tree_node_t* creat_node(u64 addr)
 {
     string fun_name;
     u64 fun_start_addr, fun_end_addr;
-
     fun_tree_node_t* node = NULL;
 
     fun_name = get_fun_start_end(addr, &fun_start_addr, &fun_end_addr);
 
     // try{}
     node = new fun_tree_node_t;
-    if (!node) {
+    if (!node) 
+    {
         printf("[-] Failed to create node!\n");
         return NULL;
     }
@@ -74,9 +74,7 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
     cs_insn* insn = NULL;
     size_t count;
 
-    // printf("%d\n", parent_fun_size);
     count = cs_disasm(handle, (uint8_t*)byte_codes, parent_fun_size, parent_fun_addr, 0, &insn);
-
     if (count > 0) {
         size_t j;
         for (j = 0; j < count; j++) 
@@ -91,13 +89,12 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
                     u64 got_addr;
                     got_addr = insn[j].address + get_hex_in_string(insn[j].op_str) + 7;
                     sub_fun_addr = get_addr_val(pid, got_addr);
-                    // printf("0x%llx\n", sub_fun_addr);
                 }
                 else
                 {
                     sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
-                    if (!sub_fun_addr)
-                        continue;
+
+                    if (!sub_fun_addr) continue;
                 }
                 insert_sub_link(sub_fun_addr, parent_node);
             }
@@ -126,6 +123,7 @@ s32 creat_root_node(char* root_fun_name)
 
     root_node = new fun_tree_node_t;
     if (!root_node) return -1;
+
     memset(root_node, 0, sizeof(struct fun_tree_node));
 
     root_node->next = NULL;
@@ -153,6 +151,7 @@ s32 creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
 
     if (p_fun_size > 0x1000) 
         p_fun_code = (char*)realloc(p_fun_code, p_fun_size);
+
     memset(p_fun_code, 0, p_fun_size);
 
     get_addr_data(pid, p_fun_start_addr, p_fun_code, p_fun_size);
@@ -307,6 +306,3 @@ void creat_fun_tree(pid_t pid, s32 level)
 // sib_link_next_node.push_back(parent_node->next);
 // = sib_link_next_node.back();
 // sib_link_next_node.pop_back();
-
-// printf("├── %s 0x%llx-0x%llx\n", temp_node->fun_info.fun_name.c_str(), 
-//     temp_node->fun_info.fun_start_addr, temp_node->fun_info.fun_end_addr);

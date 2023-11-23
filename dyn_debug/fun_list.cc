@@ -43,12 +43,12 @@ void set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
                 else
                 {
                     u64 glibc_fun_start, glibc_fun_end;
-                    // fun_name = addr_get_glibc_fun(fun_addr, &glibc_fun_start);
-                    fun_name = addr_get_glibc_fun_start_and_end(fun_addr, &glibc_fun_start, &glibc_fun_end);
+                    fun_name = addr_get_glibc_fun_start_and_end(fun_addr, 
+                        &glibc_fun_start, &glibc_fun_end);
+
                     fun_info->fun_list[i].fun_name = fun_name;
                     fun_info->fun_list[i].fun_start_addr = glibc_fun_start;
                     fun_info->fun_list[i].fun_end_addr = glibc_fun_end;
-                    // get_glibc_fun_end(glibc_fun_start, fun_name);
                     fun_info->fun_num++;
                     break;
                 }
@@ -71,7 +71,6 @@ void set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
                     fun_name = addr_get_elf_plt_fun(fun_addr);
                     fun_info->fun_list[i].fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
                     fun_info->fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
-                    // fun_name += "@plt";
                     fun_info->fun_list[i].fun_name = fun_name;
                     fun_info->fun_num++;
                     break;

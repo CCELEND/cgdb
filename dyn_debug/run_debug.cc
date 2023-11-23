@@ -288,8 +288,8 @@ void run_dyn_debug(Binary* bin)
                     {
                         if (break_point_list[i].break_point_state) 
                         {
-                            // fun_name = get_fun(break_point_list[i].addr, &fun_start_addr);
-                            fun_name = get_fun_start_end(break_point_list[i].addr, &fun_start_addr, &fun_end_addr);
+                            fun_name = get_fun_start_end(break_point_list[i].addr, 
+                                &fun_start_addr, &fun_end_addr);
                             fun_offset = break_point_list[i].addr - fun_start_addr;
 
                             printf("%-11dbreak point     \033[31m0x%llx\033[0m ",
