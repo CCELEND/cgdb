@@ -3,15 +3,16 @@
 // 判断操作码是否是跳转指令
 bool judg_jump(char* mnemonic)
 {
-    if (!strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||
-        !strcmp(mnemonic, "je" )  ||
+    if (
+        !strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||
+        !strcmp(mnemonic, "je"  ) ||
         !strcmp(mnemonic, "jne" ) || !strcmp(mnemonic, "jz" ) ||
         !strcmp(mnemonic, "ja"  ) || !strcmp(mnemonic, "jae") ||
         !strcmp(mnemonic, "jb"  ) || !strcmp(mnemonic, "jbe") ||
         !strcmp(mnemonic, "jg"  ) || !strcmp(mnemonic, "jge") ||
         !strcmp(mnemonic, "jl"  ) || !strcmp(mnemonic, "jle") ||
         !strcmp(mnemonic, "bnd jmp" ) //|| !strcmp(mnemonic, "ret" )
-        )
+       )
         return true;
     else
         return false;
@@ -37,8 +38,8 @@ void dis_highlight_show(u64 addr, string fun_name, s32 offset,
     if (judg_jump(mnemonic))
     {
         jump_addr = strtoul(ops, nullptr, 16);
-        // jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
-        jump_fun_name = get_fun_start_end(jump_addr, &jump_fun_start_addr, &jump_fun_end_addr);
+        jump_fun_name = get_fun_start_end(jump_addr, 
+            &jump_fun_start_addr, &jump_fun_end_addr);
         jump_fun_offset = jump_addr - jump_fun_start_addr;
         if (jump_fun_offset)
             printf("\033[32m\033[1m<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
@@ -63,8 +64,8 @@ void dis_show(u64 addr, string fun_name, s32 offset,
     if (judg_jump(mnemonic))
     {
         jump_addr = strtoul(ops, nullptr, 16);
-        // jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
-        jump_fun_name = get_fun_start_end(jump_addr, &jump_fun_start_addr, &jump_fun_end_addr);
+        jump_fun_name = get_fun_start_end(jump_addr, 
+            &jump_fun_start_addr, &jump_fun_end_addr);
         jump_fun_offset = jump_addr - jump_fun_start_addr;
         if (jump_fun_offset)
             printf("<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
@@ -76,17 +77,13 @@ void dis_show(u64 addr, string fun_name, s32 offset,
 // 只输出两行
 void bp_disasm(pid_t pid, u64 addr)
 {
-    // csh handle;
+
     cs_insn *insn;
     size_t count;
     
     char addr_instruct[32];
     get_addr_data(pid, addr, addr_instruct, 32);
 
-    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-    //     return;
-    // }
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 32, addr, 0, &insn);
     if (count > 0) 
     {
@@ -98,9 +95,7 @@ void bp_disasm(pid_t pid, u64 addr)
         for (j = 0; j < 2 && j < count-1; j++)
         {
             char code[32];
-
-            // dis_fun_name = get_fun(insn[j].address, &fun_start_addr);
-
+            dis_fun_name = get_fun_start_end(insn[j].address, &fun_start_addr, &fun_end_addr);
             fun_offset = insn[j].address - fun_start_addr;
             
             for(s32 i = 0; i < insn[j].size; ++i)
@@ -122,7 +117,6 @@ void bp_disasm(pid_t pid, u64 addr)
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    // cs_close(&handle);
 }
 
 
@@ -205,7 +199,7 @@ void flow_change_op(char* ops)
 
 void show_disasm(pid_t pid, u64 rip_val)
 {
-    // csh handle;
+
     cs_insn *insn;
     size_t count;
     s32 fun_offset;
@@ -220,15 +214,12 @@ void show_disasm(pid_t pid, u64 rip_val)
 
     char addr_instruct[176];
     // 反汇编开始地址与 rip 同步
-    if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) {
+    if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) 
+    {
         disasm_addr = rip_val;
     }
 
     get_addr_data(pid, disasm_addr, addr_instruct, 176);
-    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-    //     return;
-    // }
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 176, disasm_addr, 0, &insn);
     if (count > 0) {
         size_t j;
@@ -279,7 +270,8 @@ void show_disasm(pid_t pid, u64 rip_val)
                     "\033[36m\033[1m%s\033[0m ", 
                         code, insn[j].mnemonic, insn[j].op_str);
 
-                if (!strcmp(insn[j].mnemonic, "endbr64")){
+                if (!strcmp(insn[j].mnemonic, "endbr64"))
+                {
                     set_fun_args_regs(&regs, &fun_args_regs);
                 }
 
@@ -316,7 +308,8 @@ void show_disasm(pid_t pid, u64 rip_val)
 
                     printf("\n\n");
                 }
-                else {
+                else 
+                {
                     printf("\033[33m\033[2m%-16s\033[0m" "\033[36m\033[2m%s\033[0m\n",
                         insn[j].mnemonic, insn[j].op_str);
                 }
@@ -330,22 +323,16 @@ void show_disasm(pid_t pid, u64 rip_val)
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    // cs_close(&handle);
 }
 
 //输出 line 行反汇编, 只输出 mnemonic 操作码, op_str 操作数
 void disasm_mne_op(char* byte_codes, 
     u64 addr, s32 num, s32 line)
 {
-    // csh handle;
     cs_insn *insn;
     size_t count;
     u64 plt_addr;
 
-    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-    //     return;
-    // }    
 
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) {
@@ -367,35 +354,28 @@ void disasm_mne_op(char* byte_codes,
     }
     else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
 
-    // cs_close(&handle);
 }
 
 // 获得下一条指令地址
 u64 get_next_instruct_addr(char* byte_codes, 
     u64 addr, s32 num)
 {
-    // csh handle;
+
     cs_insn* insn;
     size_t count;
     u64 next_addr;
 
-    // if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
-    //     printf("\033[31m\033[1m[-] Failed to initialize Capstone!\033[0m\n");
-    //     return 0;
-    // }
-
     count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
-    if (count > 0) {
+    if (count > 0) 
+    {
         next_addr = insn[1].address;
         cs_free(insn, count);        
     }
     else 
     {
         printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
-        // cs_close(&handle);
         return 0;
     }
 
-    // cs_close(&handle);
     return next_addr;
 }
