@@ -50,12 +50,13 @@ void set_break_point(pid_t pid, u64 break_point_addr)
 
     s32 fun_offset;
     string fun_name = "", link_file = "";
-    u64 fun_start_addr, base_addr;
+    u64 fun_start_addr, fun_end_addr, base_addr;
     for (s32 i = 0; i < 8; i++) 
     {
         if (!break_point_list[i].addr)
         {
-            fun_name = get_fun(break_point_addr, &fun_start_addr);
+            // fun_name = get_fun(break_point_addr, &fun_start_addr);
+            fun_name = get_fun_start_end(break_point_addr, &fun_start_addr, &fun_end_addr);
             fun_offset = break_point_addr - fun_start_addr;
             link_file = get_addr_file_base(break_point_addr, &base_addr);
             printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 

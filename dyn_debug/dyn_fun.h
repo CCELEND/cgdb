@@ -158,6 +158,7 @@ string addr_get_fun(fun_list_info_type* fun_info, u64 addr);
 string get_fun  (u64 addr,  u64* fun_start_addr);
 s32 get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr);
 u64 get_fun_end (pid_t pid, u64 fun_addr);
+string get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr);
 
 // elf 函数
 // elf_fun.cc

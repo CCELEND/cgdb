@@ -103,9 +103,10 @@ void flag_addr_printf(u64 addr, bool addr_flag)
             fun_name = addr_get_fun(&regs_fun_info, addr);
             offset = addr_get_fun_offset(&regs_fun_info, addr);
             if (!offset)
-                printf("\033[31m0x%llx (libc.%s)\033[0m", addr, fun_name.c_str());
+                // printf("\033[31m0x%llx (libc.%s)\033[0m", addr, fun_name.c_str());
+                printf("\033[31m0x%llx (%s)\033[0m", addr, fun_name.c_str());
             else
-                printf("\033[31m0x%llx (libc.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+                printf("\033[31m0x%llx (%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
         } 
         else if (addr > stack_base && addr < stack_end) 
@@ -128,9 +129,9 @@ void flag_addr_printf(u64 addr, bool addr_flag)
             fun_name = addr_get_fun(&regs_fun_info, addr);
             offset = addr_get_fun_offset(&regs_fun_info, addr);
             if (!offset)
-                printf("\033[31m0x%llx (ld.%s)\033[0m", addr, fun_name.c_str());
+                printf("\033[31m0x%llx (%s)\033[0m", addr, fun_name.c_str());
             else
-                printf("\033[31m0x%llx (ld.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+                printf("\033[31m0x%llx (%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 
         } 
         else if (addr > ld_data_start && addr < ld_data_end) 

@@ -24,7 +24,7 @@ void dis_highlight_show(u64 addr, string fun_name, s32 offset,
     char* codes, char* mnemonic, char* ops)
 {
     string jump_fun_name = "";
-    u64 jump_addr, jump_fun_start_addr;
+    u64 jump_addr, jump_fun_start_addr, jump_fun_end_addr;
     s32 jump_fun_offset;
 
     printf("\033[32m\033[1m ► 0x%llx\033[0m ", addr);
@@ -37,7 +37,8 @@ void dis_highlight_show(u64 addr, string fun_name, s32 offset,
     if (judg_jump(mnemonic))
     {
         jump_addr = strtoul(ops, nullptr, 16);
-        jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
+        // jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
+        jump_fun_name = get_fun_start_end(jump_addr, &jump_fun_start_addr, &jump_fun_end_addr);
         jump_fun_offset = jump_addr - jump_fun_start_addr;
         if (jump_fun_offset)
             printf("\033[32m\033[1m<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
@@ -49,7 +50,7 @@ void dis_show(u64 addr, string fun_name, s32 offset,
     char* codes, char* mnemonic, char* ops)
 {
     string jump_fun_name = "";
-    u64 jump_addr, jump_fun_start_addr;
+    u64 jump_addr, jump_fun_start_addr, jump_fun_end_addr;
     s32 jump_fun_offset;
 
     printf("   0x%llx ", addr);
@@ -62,7 +63,8 @@ void dis_show(u64 addr, string fun_name, s32 offset,
     if (judg_jump(mnemonic))
     {
         jump_addr = strtoul(ops, nullptr, 16);
-        jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
+        // jump_fun_name = get_fun(jump_addr, &jump_fun_start_addr);
+        jump_fun_name = get_fun_start_end(jump_addr, &jump_fun_start_addr, &jump_fun_end_addr);
         jump_fun_offset = jump_addr - jump_fun_start_addr;
         if (jump_fun_offset)
             printf("<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
@@ -91,13 +93,14 @@ void bp_disasm(pid_t pid, u64 addr)
         size_t j;
         s32 fun_offset;
         string dis_fun_name = "";
-        u64 fun_start_addr;
+        u64 fun_start_addr, fun_end_addr;
 
         for (j = 0; j < 2 && j < count-1; j++)
         {
             char code[32];
 
-            dis_fun_name = get_fun(insn[j].address, &fun_start_addr);
+            // dis_fun_name = get_fun(insn[j].address, &fun_start_addr);
+
             fun_offset = insn[j].address - fun_start_addr;
             
             for(s32 i = 0; i < insn[j].size; ++i)

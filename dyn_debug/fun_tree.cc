@@ -13,9 +13,7 @@ fun_tree_node_t* creat_node(u64 addr)
 
     fun_tree_node_t* node = NULL;
 
-    fun_name = get_fun(addr, &fun_start_addr);
-    // 不一致 有可能重复名字
-    get_fun_addr((char*)fun_name.c_str(), &fun_start_addr, &fun_end_addr); // 3434
+    fun_name = get_fun_start_end(addr, &fun_start_addr, &fun_end_addr);
 
     // try{}
     node = new fun_tree_node_t;
@@ -88,7 +86,6 @@ void parent_disasm(pid_t pid, char* byte_codes, u64 parent_fun_addr, s32 parent_
                 u64 sub_fun_addr = 0;
                 // printf("%s, %s\n",insn[j].mnemonic, insn[j].op_str);
 
-                // u64 fun_start_addr;
                 if (!strcmp(insn[j].mnemonic, "bnd jmp"))
                 {
                     u64 got_addr;

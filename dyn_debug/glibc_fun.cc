@@ -96,65 +96,59 @@ string addr_get_glibc_fun(u64 glibc_fun_addr, u64* glibc_fun_start)
 // 通过 glibc 函数名获得函数开始地址
 u64 get_glibc_fun_addr(char* fun_name)
 {
-    bool finded = false, is_libc = false;
-    FILE* fp;
-    u64 glibc_fun_addr;
-    string command, exe_command;
-    char* result;
+    bool is_libc = false;
+    u64 glibc_fun_addr = 0;
+    string glibc_fun_name, command, exe_command;
+    char* result = new char[100];
 
-    // printf("%s\n", fun_name);
-
-    for (int i = 0; i < 2 && !finded; i++)
+    if (string(fun_name).find("libc.") != string::npos)
     {
-        if (i == 1){
-            command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
-        }
-        else{
-            is_libc = true;
-            command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
-        }
-
-        exe_command = command + string(fun_name) + "\\>";
-        fp = popen(exe_command.c_str(), "r");
-        if (!fp)
-        {
-            printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
-            break;
-        }
-
-        // char* result = nullptr;
-        // result = nullptr;
-        result = new char[100];
-
-        size_t len = 0;
-        ssize_t read;
-        while ((read = getline(&result, &len, fp)) != -1) 
-        {
-            if (string(result).find("<") != string::npos) 
-            {
-                glibc_fun_addr = strtoul(result, nullptr, 16);
-                finded = true;
-                break;
-            }     
-        }
-
-        pclose(fp);   // 关闭管道
-        if (result)
-        {
-            // free(result);
-            delete[] result;
-        }
-
+        is_libc = true;
+        command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
+        glibc_fun_name = string(fun_name).substr(5);
     }
+    else
+    {
+        command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
+        glibc_fun_name = string(fun_name).substr(3);
+    }
+
+    FILE* fp;
+    // exe_command = command + string(fun_name) + "\\>";
+    exe_command = command + glibc_fun_name + "\\>";
+    fp = popen(exe_command.c_str(), "r");
+    if (!fp)
+    {
+        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+        if (result) delete[] result;
+        return 0;
+    }
+
+    // result = new char[100];
+    memset(result, 0, 100);
+
+    size_t len = 0;
+    ssize_t read;
+    while ((read = getline(&result, &len, fp)) != -1) 
+    {
+        if (string(result).find("<") != string::npos) 
+        {
+            glibc_fun_addr = strtoul(result, nullptr, 16);
+            break;
+        }     
+    }
+
+    pclose(fp);   // 关闭管道
+    if (result) 
+        delete[] result;
+
+    if (!glibc_fun_addr) 
+        return 0;
 
     if (is_libc)
         glibc_fun_addr = glibc_fun_addr + libc_base;
     else
         glibc_fun_addr = glibc_fun_addr + ld_base;
-
-    if (!finded)
-        return 0;
-
     return glibc_fun_addr;
 }
 
@@ -246,20 +240,22 @@ u64 get_glibc_fun_end(u64 glibc_fun_addr, string fun_name)
 }
 
 
-// 通过 glibc 地址获得函数开始地址, 函数结束地址
+// 通过 glibc 地址获得函数名, 函数开始地址, 函数结束地址
 string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glibc_fun_end)
 {
     u64 glibc_fun_addr_offset, glibc_fun_start_addr, glibc_fun_end_addr;
     string command = "", glibc_fun_name = "";
-    s32 sub_num;
+    s32 sub_num = 0x1;
     bool is_libc, break_flag = false;
 
+    // ld
     if (glibc_addr > ld_code_start && glibc_addr < ld_code_end) 
     {
         is_libc = false;
         glibc_fun_addr_offset = glibc_addr - ld_base;
         command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
+    // libc
     else 
     {
         is_libc = true;
@@ -267,14 +263,9 @@ string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u6
         command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
     }
 
-    // if (glibc_fun_addr_offset % 8 == 0)
-    //     sub_num = 0x8;
-    // else
-        sub_num = 0x1;
-
     stringstream ss;
     FILE* fp;
-    char* result;
+    char* result = new char[100];
     
     while (!break_flag)
     {
@@ -293,18 +284,18 @@ string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u6
         addr_hex_str = "0" + addr_hex_str;
         exe_command += addr_hex_str;
         exe_command += " -A 3";
+
         fp = popen(exe_command.c_str(), "r");
         if (!fp)
         {
             printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
             *glibc_fun_start = 0;
             *glibc_fun_end = 0;
+            if (result) delete[] result;
             return "";
         }
 
-        // char* result = nullptr;
-
-        result = new char[100];
+        // result = new char[100];
         memset(result, 0, 100);
         
         size_t len = 0;
@@ -335,24 +326,66 @@ string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u6
         // 关闭管道
         pclose(fp);   
         // 释放动态分配的内存
-        if (result) delete[] result;
-
-
+        // if (result) delete[] result;
         glibc_fun_addr_offset -= sub_num;
-
         // printf("0x%llx\n", glibc_fun_addr_offset);
     }
+
+    if (result) delete[] result;
 
     if (is_libc)
     {
         *glibc_fun_start = glibc_fun_start_addr + libc_base;
         *glibc_fun_end = glibc_fun_end_addr + libc_base;
+        glibc_fun_name = "libc." + glibc_fun_name;
     }
     else
     {
         *glibc_fun_start = glibc_fun_start_addr + ld_base;
         *glibc_fun_end = glibc_fun_end_addr + ld_base;
+        glibc_fun_name = "ld." + glibc_fun_name;
     }
     return glibc_fun_name;
 
 }
+
+
+    // printf("%s\n", fun_name);
+
+    // for (int i = 0; i < 2 && !finded; i++)
+    // {
+    //     if (i == 1){
+    //         command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
+    //     }
+    //     else{
+    //         is_libc = true;
+    //         command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
+    //     }
+
+    //     exe_command = command + string(fun_name) + "\\>";
+    //     fp = popen(exe_command.c_str(), "r");
+    //     if (!fp)
+    //     {
+    //         printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+    //         break;
+    //     }
+
+    //     // result = new char[100];
+    //     memset(result, 0, 100);
+
+    //     size_t len = 0;
+    //     ssize_t read;
+    //     while ((read = getline(&result, &len, fp)) != -1) 
+    //     {
+    //         if (string(result).find("<") != string::npos) 
+    //         {
+    //             glibc_fun_addr = strtoul(result, nullptr, 16);
+    //             finded = true;
+    //             break;
+    //         }     
+    //     }
+
+    //     pclose(fp);   // 关闭管道
+    //     if (result) delete[] result;
+
+    // }

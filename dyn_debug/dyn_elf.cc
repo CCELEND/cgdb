@@ -14,8 +14,9 @@ string addr_get_fun(fun_list_info_type* fun_info, u64 addr)
     return "";
 }
 
-// 通过地址找函数名, 函数开始地址
-string get_fun(u64 addr, u64* fun_start_addr)
+// 通过地址找函数名, 函数开始地址, 结束地址
+// string get_fun(u64 addr, u64* fun_start_addr)
+string get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
 {
     string fun_name;
     if (addr > 0x7f0000000000)
@@ -24,11 +25,13 @@ string get_fun(u64 addr, u64* fun_start_addr)
         if (fun_name != "") 
         {
             *fun_start_addr = addr;
+            *fun_end_addr = addr + 0xb;
             return fun_name;
         }
         else
         {
-            fun_name = addr_get_glibc_fun(addr, fun_start_addr);
+            // fun_name = addr_get_glibc_fun(addr, fun_start_addr);
+            fun_name = addr_get_glibc_fun_start_and_end(addr, fun_start_addr, fun_end_addr);
             return fun_name;
         }
     }
@@ -40,12 +43,14 @@ string get_fun(u64 addr, u64* fun_start_addr)
         if (fun_name != "") 
         {
             *fun_start_addr = elf_fun_start[fun_name] + elf_base;
+            *fun_end_addr = elf_fun_end[fun_name];
             return fun_name;
         }
         else 
         {
             fun_name = addr_get_elf_plt_fun(addr);
             *fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
+            *fun_end_addr = elf_plt_fun_end[fun_name];
             return fun_name;
         }
 
