@@ -78,11 +78,44 @@ print_bytes(char* codes, s32 len)
     }
 }
 
+void
+elf_code_fun_printf(u64 addr)
+{
+    string fun_name;
+    s32 offset;
+
+    set_fun_list(&regs_fun_info, addr);
+    fun_name = addr_get_fun(&regs_fun_info, addr);
+    offset = addr_get_fun_offset(&regs_fun_info, addr);
+
+    if (!offset)
+        printf("\033[31m0x%llx (elf.%s)\033[0m", addr, fun_name.c_str());
+    else
+        printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);  
+}
+void
+glibc_code_fun_printf(u64 addr)
+{
+    string fun_name;
+    s32 offset;
+
+    set_fun_list(&regs_fun_info, addr);
+    fun_name = addr_get_fun(&regs_fun_info, addr);
+    offset = addr_get_fun_offset(&regs_fun_info, addr);
+
+    if (!offset)
+        printf("\033[31m0x%llx (%s)\033[0m", addr, fun_name.c_str());
+    else
+        printf("\033[31m0x%llx (%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+}
+
+
 // 输出带颜色的地址以标记所属地址范围 addr_flag 为真会显示地址所属文件
 void 
 flag_addr_printf(u64 addr, bool addr_flag)
 {
-    if (addr == 0) {
+    if (!addr) 
+    {
         printf("0x%llx", addr);
         return;
     }
@@ -93,25 +126,11 @@ flag_addr_printf(u64 addr, bool addr_flag)
     {
         if (addr > elf_code_start && addr < elf_code_end) 
         {
-            set_fun_list(&regs_fun_info, addr);
-            fun_name = addr_get_fun(&regs_fun_info, addr);
-            offset = addr_get_fun_offset(&regs_fun_info, addr);
-            if (!offset)
-                printf("\033[31m0x%llx (elf.%s)\033[0m", addr, fun_name.c_str());
-            else
-                printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);
-
+            elf_code_fun_printf(addr);
         } 
         else if (addr > libc_code_start && addr < libc_code_end) 
         {
-            set_fun_list(&regs_fun_info, addr);
-            fun_name = addr_get_fun(&regs_fun_info, addr);
-            offset = addr_get_fun_offset(&regs_fun_info, addr);
-            if (!offset)
-                printf("\033[31m0x%llx (%s)\033[0m", addr, fun_name.c_str());
-            else
-                printf("\033[31m0x%llx (%s+%d)\033[0m", addr, fun_name.c_str(), offset);
-
+            glibc_code_fun_printf(addr);
         } 
         else if (addr > stack_base && addr < stack_end) 
         {
@@ -129,14 +148,7 @@ flag_addr_printf(u64 addr, bool addr_flag)
         } 
         else if (!ld_base || addr > ld_code_start && addr < ld_code_end) 
         {
-            set_fun_list(&regs_fun_info, addr);
-            fun_name = addr_get_fun(&regs_fun_info, addr);
-            offset = addr_get_fun_offset(&regs_fun_info, addr);
-            if (!offset)
-                printf("\033[31m0x%llx (%s)\033[0m", addr, fun_name.c_str());
-            else
-                printf("\033[31m0x%llx (%s+%d)\033[0m", addr, fun_name.c_str(), offset);
-
+            glibc_code_fun_printf(addr);
         } 
         else if (addr > ld_data_start && addr < ld_data_end) 
         {
@@ -171,7 +183,9 @@ flag_addr_printf(u64 addr, bool addr_flag)
             printf("0x%llx (elf[rodata])", addr);
         }
         else
+        {
             printf("0x%llx", addr);
+        }
     }
     else
     {
@@ -190,7 +204,8 @@ flag_addr_printf(u64 addr, bool addr_flag)
 void 
 show_addr_data(pid_t pid, s32 num, u64 addr)
 {
-    union u {
+    union u 
+    {
         long val;
         char chars[LONG_SIZE];
     } word{};
@@ -328,7 +343,10 @@ get_addr_file_base(u64 addr, u64* base_addr)
         return "ld";
     }
     else
+    {
+        *base_addr = 0;
         return "";
+    }
 }
 
 // qword ptr [rip + 0x2f25]
