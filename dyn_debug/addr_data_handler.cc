@@ -94,6 +94,19 @@ elf_code_fun_printf(u64 addr)
         printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);  
 }
 void
+elf_ini_printf(u64 addr)
+{
+    string ini_name = addr_get_elf_fini(addr);
+
+    if (ini_name != "")
+        printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
+    else 
+    {
+        ini_name = addr_get_elf_init(addr);
+        printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
+    }
+}
+void
 glibc_code_fun_printf(u64 addr)
 {
     string fun_name;
@@ -170,13 +183,7 @@ flag_addr_printf(u64 addr, bool addr_flag)
         } 
         else if (addr > elf_ini_start && addr < elf_ini_end) 
         {
-            ini_name = addr_get_elf_fini(addr);
-            if (ini_name != "")
-                printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
-            else {
-                ini_name = addr_get_elf_init(addr);
-                printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
-            }
+            elf_ini_printf(addr);
         } 
         else if (addr > elf_rodata_start && addr < elf_rodata_end) 
         {
