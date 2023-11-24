@@ -287,7 +287,8 @@ show_addr_point(pid_t pid, u64 address, bool addr_flag)
 void 
 val_to_string(u64 val)
 {
-    union u {
+    union u 
+    {
         u64 val;
         char chars[LONG_SIZE];
     } word{};
@@ -298,7 +299,7 @@ val_to_string(u64 val)
     {
         if ( long((unsigned char)word.chars[i]) == 0x00 ) 
             break;
-        
+
         if ( long((unsigned char)word.chars[i]) >= 0x21 &&
              long((unsigned char)word.chars[i]) <= 0x7e ) 
             printf("%c", word.chars[i]);
