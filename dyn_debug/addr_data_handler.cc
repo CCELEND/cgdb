@@ -296,9 +296,12 @@ val_to_string(u64 val)
     printf(" '");
     for(s32 i = 0; i < CODE_SIZE; ++i)
     {
-        if ( long((unsigned char)word.chars[i]) == 0x00 ) break;
+        if ( long((unsigned char)word.chars[i]) == 0x00 ) 
+            break;
+        
         if ( long((unsigned char)word.chars[i]) >= 0x21 &&
-             long((unsigned char)word.chars[i]) <= 0x7e ) printf("%c", word.chars[i]);
+             long((unsigned char)word.chars[i]) <= 0x7e ) 
+            printf("%c", word.chars[i]);
     }
     printf("'");
 }
