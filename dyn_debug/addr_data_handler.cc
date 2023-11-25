@@ -123,6 +123,24 @@ glibc_code_fun_printf(u64 addr)
     else
         printf("\033[31m0x%llx (%s+%d)\033[0m", addr, fun_name.c_str(), offset);
 }
+void
+glibc_data_printf(u64 addr)
+{
+    string data_name;
+
+    data_name = addr_get_glibc_data(addr);
+    printf("\033[35m0x%llx (%s)\033[0m", addr, data_name.c_str());
+}
+void 
+stack_printf(u64 addr)
+{
+    if (addr > regs.rsp)
+        printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-regs.rsp);
+    else if(addr < regs.rsp) 
+        printf("\033[33m0x%llx (stack-0x%llx)\033[0m", addr, regs.rsp-addr);
+    else
+        printf("\033[33m0x%llx (stack)\033[0m", addr); 
+}
 
 
 // 输出带颜色的地址以标记所属地址范围 addr_flag 为真会显示地址所属文件
@@ -149,13 +167,7 @@ flag_addr_printf(u64 addr, bool addr_flag)
         } 
         else if (addr > stack_base && addr < stack_end) 
         {
-            if (addr > regs.rsp)
-                printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-regs.rsp);
-            else if(addr < regs.rsp) 
-                printf("\033[33m0x%llx (stack-0x%llx)\033[0m", addr, regs.rsp-addr);
-            else
-                printf("\033[33m0x%llx (stack)\033[0m", addr);
-
+            stack_printf(addr);
         } 
         else if (addr > heap_base && addr < heap_end) 
         {
@@ -165,23 +177,10 @@ flag_addr_printf(u64 addr, bool addr_flag)
         {
             glibc_code_fun_printf(addr);
         } 
-        else if (addr > ld_data_start && addr < ld_data_end) 
+        else if ( addr > ld_data_start   && addr < ld_data_end || 
+                  addr > libc_data_start && addr < libc_data_end ) 
         {
-            data_name = addr_get_glibc_data(addr); 
-            if (data_name != "")
-                printf("\033[35m0x%llx (ld.%s)\033[0m", addr, data_name.c_str());
-            else
-                printf("\033[35m0x%llx (ld[data])\033[0m", addr);
-
-        } 
-        else if (addr > libc_data_start && addr < libc_data_end) 
-        {
-            data_name = addr_get_glibc_data(addr);
-            if (data_name != "")
-                printf("\033[35m0x%llx (libc.%s)\033[0m", addr, data_name.c_str());
-            else
-                printf("\033[35m0x%llx (libc[data])\033[0m", addr);
-
+            glibc_data_printf(addr);
         } 
         else if (addr > elf_ini_start && addr < elf_ini_end) 
         {

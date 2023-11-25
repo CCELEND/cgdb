@@ -13,12 +13,14 @@ get_glibc_fun_addr(char* fun_name)
     if (string(fun_name).find("libc.") != string::npos)
     {
         is_libc = true;
-        command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
+        command = string(
+            "objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
         glibc_fun_name = string(fun_name).substr(5);
     }
     else
     {
-        command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
+        command = string(
+            "objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
         glibc_fun_name = string(fun_name).substr(3);
     }
 
@@ -74,14 +76,16 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glib
     {
         is_libc = false;
         glibc_fun_addr_offset = glibc_addr - ld_base;
-        command = string("objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+        command = string(
+            "objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
     // libc
     else 
     {
         is_libc = true;
         glibc_fun_addr_offset = glibc_addr - libc_base;
-        command = string("objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+        command = string(
+            "objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
     }
 
     stringstream ss;

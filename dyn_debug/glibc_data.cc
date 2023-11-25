@@ -7,6 +7,7 @@ addr_get_glibc_data(u64 glibc_data_addr)
 {
     u64 glibc_data_addr_offset;
     string command;
+    bool is_libc = false;
 
     if (glibc_data_addr > ld_data_start && glibc_data_addr < ld_data_end) 
     {
@@ -18,6 +19,7 @@ addr_get_glibc_data(u64 glibc_data_addr)
     else 
     {
         glibc_data_addr_offset = glibc_data_addr - libc_base;
+        is_libc = true;
         command = string(
             "objdump -d -j .data 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
         // command = string("objdump -d -j .data libc.so.6 | grep ");
@@ -65,10 +67,22 @@ addr_get_glibc_data(u64 glibc_data_addr)
     pclose(fp);
     if (result) delete[] result;
 
-    if(lib_data_name != "")
-        return lib_data_name;
+    if (lib_data_name == "")
+    {
+        if (is_libc)
+            lib_data_name = "libc[data]";
+        else
+            lib_data_name = "ld[data]";
+    }
+    else
+    {
+        if (is_libc)
+            lib_data_name = "libc." + lib_data_name;
+        else
+            lib_data_name = "ld." + lib_data_name;
+    }
 
-    return "";
+    return lib_data_name;
 
 }
 
