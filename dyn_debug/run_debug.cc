@@ -242,7 +242,6 @@ run_dyn_debug(Binary* bin)
                     if (argc == 2) 
                     {
                         u64 break_point_fun_addr, end_addr;
-                        // break_point_fun_addr = get_elf_fun_addr(arguments[1]);
                         get_fun_addr(arguments[1], &break_point_fun_addr, &end_addr);
 
                         if (!break_point_fun_addr)

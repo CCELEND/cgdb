@@ -56,5 +56,7 @@ show_help()
            "     (Maximum level is 5)\n");
 
     printf(" \033[34mKEYCODE_U\033[0m: Enter the up key on the keyboard to execute the previous command.\n");
+    printf(" [*] Note that when entering the function name, if it is a glibc function, please enter the prefix('libc.' or 'ld.')\n"
+           "     for example: libc._IO_puts\n");
 
 }
