@@ -207,15 +207,10 @@ run_dyn_debug(Binary* bin)
                             break;
                         }
                     }
+
                     if (index != -1)
                         break_point_handler(pid, status, break_point_list[index], true);
 
-                    // // 没有断点, 子进程结束
-                    // if (WIFEXITED(status)) 
-                    // {
-                    //     printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
-                    //     break;
-                    // }
                 } 
                 // 计算执行完毕所需指令数
                 else if (!strcmp(arguments[0], "ic")) 
@@ -226,7 +221,7 @@ run_dyn_debug(Binary* bin)
                     {
                         // 当前子进程还是暂停状态，父进程被阻塞
                         wait(&status);
-                        
+
                         if (WIFEXITED(status)) 
                         {
                             printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
