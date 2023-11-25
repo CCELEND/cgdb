@@ -100,10 +100,26 @@ parent_disasm(pid_t pid, char* byte_codes,
                 }
                 else
                 {
-                    sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
+                    if (string(insn[j].op_str).find("rip") != string::npos)
+                    {
+                        u64 got_addr, addr;
+                        addr = get_hex_in_string(insn[j].op_str);
+                        got_addr = insn[j].address + addr + 6;
+                        sub_fun_addr = get_addr_val(pid, got_addr);
+                        // printf("0x%llx\n", sub_fun_addr);
+                    }
+                    else
+                    {
+                        sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
+                    }
 
-                    if (!sub_fun_addr) continue;
+                    if (!sub_fun_addr) 
+                    {
+                        continue;
+                    }
+
                 }
+
                 insert_sub_link(sub_fun_addr, parent_node);
             }
         }

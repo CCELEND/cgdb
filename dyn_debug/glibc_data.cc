@@ -11,14 +11,16 @@ addr_get_glibc_data(u64 glibc_data_addr)
     if (glibc_data_addr > ld_data_start && glibc_data_addr < ld_data_end) 
     {
         glibc_data_addr_offset = glibc_data_addr - ld_base;
+        command = string(
+            "objdump -d -j .data 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
         // command = string("objdump -d -j .data ld-linux-x86-64.so.2 | grep ");
-        command = string("objdump -d -j .data 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
     }
     else 
     {
         glibc_data_addr_offset = glibc_data_addr - libc_base;
+        command = string(
+            "objdump -d -j .data 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
         // command = string("objdump -d -j .data libc.so.6 | grep ");
-        command = string("objdump -d -j .data 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
         
     }
 
@@ -41,11 +43,13 @@ addr_get_glibc_data(u64 glibc_data_addr)
         return "";
     }
 
-    char* result = nullptr;
+    char* result = new char[100];
+    memset(result, 0, 100);
+
     size_t len = 0;
     ssize_t read;
     s32 lib_data_str_start, lib_data_str_end;
-    string lib_data_name = "";
+    string lib_data_name;
 
     while ((read = getline(&result, &len, fp)) != -1) 
     {
@@ -58,13 +62,11 @@ addr_get_glibc_data(u64 glibc_data_addr)
         }     
     }
 
-    pclose(fp);   // 关闭管道
-    free(result); // 释放动态分配的内存
+    pclose(fp);
+    if (result) delete[] result;
 
     if(lib_data_name != "")
-    {
         return lib_data_name;
-    }
 
     return "";
 

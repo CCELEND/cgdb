@@ -10,32 +10,34 @@ get_addr_val(pid_t pid, u64 addr)
     return val;
 }
 
-// 从子进程指定地址读取 len 字节长度数据到 str
+// 从子进程指定地址读取 len 字节长度数据到 str, len 需要8字节对齐
 void 
 get_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
-    // 计算一共需要读取多少个字
-    s32 i = 0, j = len >> 3;
-    union u {
+    u64 data_addr = addr;
+    s32 j = len >> 3;
+    union u 
+    {
         long val;
         char chars[LONG_SIZE];
     } word{};
 
-    while (i < j) 
-    {   // 每次读取1个字，8个字节，每次地址加8(LONG_SIZE)
-        word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
-        if (word.val == -1) err_info("Trace error!");
-        memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进数组
-        ++i;
+    for (s32 i = 0; i < j; i++)
+    {
+        data_addr = addr + i * LONG_SIZE;
+        word.val = ptrace(PTRACE_PEEKDATA, pid, data_addr, nullptr);
+        if (word.val == -1) 
+        {
+            err_info("Trace error!");
+            return;
+        }
+
+        memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进 laddr 数组
         laddr += LONG_SIZE;
     }
-    j = len % LONG_SIZE;// 不足一个字的虚读一个字
-    if (j != 0) {
-        word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
-        if (word.val == -1) err_info("Trace error!");
-    }
     str[len] = '\0';
+
 }
 
 // 从 str 插入 len 字节长度数据到子进程指定地址
@@ -43,27 +45,26 @@ void
 put_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
-    s32 i = 0, j = len >> 3;
-    union u {
+    u64 data_addr = addr;
+    s32 j = len >> 3;
+    union u 
+    {
         long val;
         char chars[LONG_SIZE];
     } word{};
 
-    while (i < j) 
+    for (s32 i = 0; i < j; i++)
     {
         memcpy(word.chars, laddr, LONG_SIZE);
-        if (ptrace(PTRACE_POKEDATA, pid, addr + i * LONG_SIZE, word.val) == -1)
+
+        data_addr = addr + i * LONG_SIZE;
+        if (ptrace(PTRACE_POKEDATA, pid, data_addr, word.val) == -1) 
+        {
             err_info("Trace error!");
-        ++i;
+            return;
+        }
+
         laddr += LONG_SIZE;
-    }
-    j = len % LONG_SIZE;
-    if (j != 0) 
-    {
-        word.val = 0;
-        memcpy(word.chars, laddr, j);
-        if (ptrace(PTRACE_POKEDATA, pid, addr + i * LONG_SIZE, word.val) == -1) 
-            err_info("Trace error!");
     }
 }
 
@@ -74,6 +75,7 @@ print_bytes(char* codes, s32 len)
     for (s32 i = 0; i < len; ++i) 
     {
         printf("%02x", (unsigned char) codes[i]);
+
         if ((i + 1) % 8 == 0) printf("\n");
     }
 }
@@ -235,13 +237,14 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
         memcpy(laddr, word.chars, LONG_SIZE);
 
         printf("0x");
-        for (int j = 7; j > -1; --j)
+        for (s32 j = 7; j > -1; --j)
         {
-            printf("%02x", (unsigned char) laddr[j]);
+            printf("%02x", (unsigned char)laddr[j]);
             if (j == 0) printf("     ");
         }
 
-        if (( i + 1 ) % 2 == 0 || (i + 1 ) == num) printf("\n");
+        if (( i + 1 ) % 2 == 0 || ( i + 1 ) == num) 
+            printf("\n");
     }
 
 }
@@ -361,6 +364,7 @@ get_addr_file_base(u64 addr, u64* base_addr)
 }
 
 // qword ptr [rip + 0x2f25]
+// 从字符串获取十六进制值
 u64 
 get_hex_in_string(char* str)
 {

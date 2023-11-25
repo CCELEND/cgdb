@@ -86,7 +86,8 @@ bp_disasm(pid_t pid, u64 addr)
 {
     cs_insn* insn;
     size_t count;
-    char addr_instruct[32];
+
+    char addr_instruct[33];
     get_addr_data(pid, addr, addr_instruct, 32);
 
     count = cs_disasm(handle, (uint8_t*)addr_instruct, 32, addr, 0, &insn);
@@ -133,7 +134,6 @@ void
 call_disasm(char* byte_codes, 
     u64 addr, s32 num, string call_fun_name)
 {
-    // csh handle;
     cs_insn *insn;
     size_t count;
     u64 fun_addr;
@@ -220,7 +220,7 @@ show_disasm(pid_t pid, u64 rip_val)
     show_str(str_count);
     printf("\033[0m\n");
 
-    char addr_instruct[176];
+    char addr_instruct[177];
     // 反汇编开始地址与 rip 同步
     if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) 
     {
