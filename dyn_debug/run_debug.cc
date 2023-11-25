@@ -188,8 +188,15 @@ run_dyn_debug(Binary* bin)
 
                     // 继续执行，一直到子进程发出发出暂停或者结束信号
                     ptrace(PTRACE_CONT, pid, nullptr, nullptr);
+
                     // 等待子进程停止或者结束，并获取子进程状态值
                     wait(&status);
+
+                    if (WIFEXITED(status)) 
+                    {
+                        printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
+                        break;
+                    }
 
                     s32 index = -1;
                     for (s32 i = 0; i < 8; i++) 
@@ -203,12 +210,12 @@ run_dyn_debug(Binary* bin)
                     if (index != -1)
                         break_point_handler(pid, status, break_point_list[index], true);
 
-                    // 没有断点, 子进程结束
-                    if (WIFEXITED(status)) 
-                    {
-                        printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
-                        break;
-                    }
+                    // // 没有断点, 子进程结束
+                    // if (WIFEXITED(status)) 
+                    // {
+                    //     printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
+                    //     break;
+                    // }
                 } 
                 // 计算执行完毕所需指令数
                 else if (!strcmp(arguments[0], "ic")) 
@@ -219,6 +226,7 @@ run_dyn_debug(Binary* bin)
                     {
                         // 当前子进程还是暂停状态，父进程被阻塞
                         wait(&status);
+                        
                         if (WIFEXITED(status)) 
                         {
                             printf("[+] Process: \033[32m%d\033[0m exited normally.\n", pid);
@@ -238,8 +246,9 @@ run_dyn_debug(Binary* bin)
                 {
                     if (argc == 2) 
                     {
-                        u64 break_point_fun_addr;
-                        break_point_fun_addr = get_elf_fun_addr(arguments[1]);
+                        u64 break_point_fun_addr, end_addr;
+                        // break_point_fun_addr = get_elf_fun_addr(arguments[1]);
+                        get_fun_addr(arguments[1], &break_point_fun_addr, &end_addr);
 
                         if (!break_point_fun_addr)
                             err_info("There is no such function!");

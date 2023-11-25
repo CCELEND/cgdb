@@ -27,11 +27,14 @@ get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
         {
             *fun_start_addr = addr;
             *fun_end_addr = addr + 0xb;
+
             return fun_name;
         }
         else
         {
-            fun_name = addr_get_glibc_fun_start_and_end(addr, fun_start_addr, fun_end_addr);
+            fun_name = addr_get_glibc_fun_start_and_end(addr, 
+                fun_start_addr, fun_end_addr);
+
             return fun_name;
         }
     }
@@ -44,6 +47,7 @@ get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
         {
             *fun_start_addr = elf_fun_start[fun_name] + elf_base;
             *fun_end_addr = elf_fun_end[fun_name];
+
             return fun_name;
         }
         else 
@@ -51,6 +55,7 @@ get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
             fun_name = addr_get_elf_plt_fun(addr);
             *fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
             *fun_end_addr = elf_plt_fun_end[fun_name];
+
             return fun_name;
         }
 
@@ -70,6 +75,7 @@ get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
     {
         *fun_start_addr = addr;
         *fun_end_addr = elf_fun_end[string(fun_name)];
+
         return 0;
     }
     addr = get_elf_plt_fun_addr(fun_name);
@@ -77,13 +83,16 @@ get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
     {
         *fun_start_addr = addr;
         *fun_end_addr = elf_plt_fun_end[string(fun_name)];
+
         return 0;
     }
 
     addr = get_glibc_fun_addr(fun_name);
     if (addr)
     {
-        addr_get_glibc_fun_start_and_end(addr, fun_start_addr, fun_end_addr);
+        addr_get_glibc_fun_start_and_end(addr, 
+            fun_start_addr, fun_end_addr);
+
         return 0;
     }
 
@@ -93,11 +102,13 @@ get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
     {
         *fun_start_addr = addr;
         *fun_end_addr = addr + 0xb;
+
         return 0;
     }
 
     *fun_start_addr = 0;
     *fun_end_addr = 0;
+
     return -1;
 
 }
@@ -113,10 +124,13 @@ get_fun_end(pid_t pid, u64 fun_addr)
         char chars[LONG_SIZE];
     } word{};
 
-    for (s32 i = 0; i < 0x1000; i += LONG_SIZE){
-        word.val = ptrace(PTRACE_PEEKDATA, pid, fun_addr + i, nullptr);
+    for (s32 i = 0; i < 0x1000; i += LONG_SIZE)
+    {
+        word.val = get_addr_val(pid, fun_addr + i);
+        // word.val = ptrace(PTRACE_PEEKDATA, pid, fun_addr + i, nullptr);
         if (word.val == -1)
-            err_info("Trace error!");
+            return 0;
+
         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
 
         for (s32 j = i; j < i + 8; j++)

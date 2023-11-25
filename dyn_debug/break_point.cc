@@ -108,11 +108,12 @@ break_point_handler(pid_t pid,
 {
     struct user_regs_struct bp_regs{};
     // 判断信号类型
-    // exit 信号
-    if (WIFEXITED(status)) {
-        err_info("The child process has ended!");
-        return -1;
-    }
+    // // exit 信号
+    // if (WIFEXITED(status)) 
+    // {
+    //     err_info("The child process has ended!");
+    //     return -1;
+    // }
     // 如果是 STOP 信号
     if (WIFSTOPPED(status)) 
     {
