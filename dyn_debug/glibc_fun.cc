@@ -146,7 +146,6 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glib
             }
         }
 
-        // 关闭管道
         pclose(fp);   
         glibc_fun_addr_offset -= sub_num;
         // printf("0x%llx\n", glibc_fun_addr_offset);

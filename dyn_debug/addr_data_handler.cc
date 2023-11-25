@@ -2,12 +2,31 @@
 #include "dyn_fun.h"
 
 // 获取该地址8字节的值
-u64 
+s64 
 get_addr_val(pid_t pid, u64 addr)
 {
     u64 val;
+
     val = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
+    if (val == -1)
+    {
+        perror("Read failure");
+        return -1;
+    }
+
     return val;
+}
+// 往指定地址写入8字节值
+s64
+put_addr_val(pid_t pid, u64 addr, s64 val)
+{
+    if (ptrace(PTRACE_POKEDATA, pid, addr, val) == -1) 
+    {
+        perror("Write failed");
+        return -1;
+    }
+
+    return 0;
 }
 
 // 从子进程指定地址读取 len 字节长度数据到 str, len 需要8字节对齐
@@ -26,12 +45,10 @@ get_addr_data(pid_t pid, u64 addr, char* str, s32 len)
     for (s32 i = 0; i < j; i++)
     {
         data_addr = addr + i * LONG_SIZE;
-        word.val = ptrace(PTRACE_PEEKDATA, pid, data_addr, nullptr);
-        if (word.val == -1) 
-        {
-            err_info("Trace error!");
+
+        word.val = get_addr_val(pid, data_addr);
+        if (word.val == -1)
             return;
-        }
 
         memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进 laddr 数组
         laddr += LONG_SIZE;
@@ -56,13 +73,10 @@ put_addr_data(pid_t pid, u64 addr, char* str, s32 len)
     for (s32 i = 0; i < j; i++)
     {
         memcpy(word.chars, laddr, LONG_SIZE);
-
         data_addr = addr + i * LONG_SIZE;
-        if (ptrace(PTRACE_POKEDATA, pid, data_addr, word.val) == -1) 
-        {
-            err_info("Trace error!");
+
+        if (put_addr_val(pid, data_addr, word.val) == -1)
             return;
-        }
 
         laddr += LONG_SIZE;
     }
@@ -76,7 +90,8 @@ print_bytes(char* codes, s32 len)
     {
         printf("%02x", (unsigned char) codes[i]);
 
-        if ((i + 1) % 8 == 0) printf("\n");
+        if ((i + 1) % 8 == 0) 
+            printf("\n");
     }
 }
 
@@ -107,6 +122,14 @@ elf_ini_printf(u64 addr)
         ini_name = addr_get_elf_init(addr);
         printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
     }
+}
+void
+elf_heap_printf(u64 addr)
+{
+    if (addr == heap_base)
+        printf("\033[34m0x%llx (heap)\033[0m", addr);
+    else
+        printf("\033[34m0x%llx (heap+0x%llx)\033[0m", addr, addr-heap_base);
 }
 void
 glibc_code_fun_printf(u64 addr)
@@ -169,9 +192,9 @@ flag_addr_printf(u64 addr, bool addr_flag)
         {
             stack_printf(addr);
         } 
-        else if (addr > heap_base && addr < heap_end) 
+        else if (addr >= heap_base && addr <= heap_end) 
         {
-            printf("\033[34m0x%llx (heap+0x%llx)\033[0m", addr, addr-heap_base);
+            elf_heap_printf(addr);
         } 
         else if (!ld_base || addr > ld_code_start && addr < ld_code_end) 
         {
@@ -203,6 +226,9 @@ flag_addr_printf(u64 addr, bool addr_flag)
         else if (addr > stack_base && addr < stack_end) 
             printf("\033[33m0x%llx\033[0m", addr);
 
+        else if (addr >= heap_base && addr <= heap_end)
+            printf("\033[34m0x%llx\033[0m", addr);
+
         else 
             printf("0x%llx", addr);
     }
@@ -227,12 +253,10 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
             printf(": ");
         }
 
-        word.val = ptrace(PTRACE_PEEKDATA, pid, addr + i * LONG_SIZE, nullptr);
-        if (word.val == -1) 
-        {
-            err_info("Invalid read address!");
+        word.val = get_addr_val(pid, addr + i * LONG_SIZE);
+        if (word.val == -1)
             return;
-        }
+
         memcpy(laddr, word.chars, LONG_SIZE);
 
         printf("0x");
@@ -248,13 +272,33 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
 
 }
 
+void
+end_output(pid_t pid, u64 addr, u64 val)
+{
+    char addr_instruct[17];
+
+    printf(" ◂— ");
+    
+    if (judg_addr_code(addr)) 
+    {
+        get_addr_data(pid, addr, addr_instruct, 16);
+        disasm_mne_op(addr_instruct, addr, 16, 1);
+    }
+    else 
+    {
+        flag_addr_printf(val, false);
+        if (val > 0x7fffffffffff && val != 0xffffffffffffffff)
+            val_to_string(val);
+    }
+}
+
 // 输出地址的多重指针
 void 
 show_addr_point(pid_t pid, u64 address, bool addr_flag)
 {
     u64 addr;
     u64 val;
-    char addr_instruct[16]; // one line dis
+    // char addr_instruct[17]; // one line dis
     flag_addr_printf(address, addr_flag);
 
     if (address < 0x550000000000 || address > 0x7fffffffffff)
@@ -264,22 +308,10 @@ show_addr_point(pid_t pid, u64 address, bool addr_flag)
     while (true)
     {
         val = get_addr_val(pid, addr);
+
         if (val < 0x550000000000 || val > 0x7fffffffffff || val == addr) 
         {
-            printf(" ◂— ");
-            
-            if (judg_addr_code(addr)) 
-            {
-                get_addr_data(pid, addr, addr_instruct, 16);
-                disasm_mne_op(addr_instruct, addr, 16, 1);
-            }
-            else 
-            {
-                flag_addr_printf(val, false);
-                if (val > 0x7fffffffffff && val != 0xffffffffffffffff)
-                    val_to_string(val);
-            }
-
+            end_output(pid, addr, val);
             break;
         }
         else 

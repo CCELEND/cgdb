@@ -32,7 +32,8 @@ set_ni_break_point(pid_t pid, u64 addr)
 
     ni_break_point.addr = next_addr;
     // 需要打断点的地址上指令取出备份
-    get_addr_data(pid, next_addr, ni_break_point.backup, CODE_SIZE);
+    get_addr_data(pid, next_addr, 
+        ni_break_point.backup, CODE_SIZE);
     break_point_inject(pid, ni_break_point);
 
 }
@@ -58,10 +59,13 @@ set_break_point(pid_t pid, u64 break_point_addr)
         if (!break_point_list[i].addr)
         {
             // fun_name = get_fun(break_point_addr, &fun_start_addr);
-            fun_name = get_fun_start_end(break_point_addr, &fun_start_addr, &fun_end_addr);
+            fun_name = get_fun_start_end(break_point_addr, 
+                &fun_start_addr, &fun_end_addr);
             fun_offset = break_point_addr - fun_start_addr;
             link_file = get_addr_file_base(break_point_addr, &base_addr);
-            printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
+
+            printf(
+                "[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
                     i, link_file.c_str(), break_point_addr-base_addr, break_point_addr);
 
             if (fun_offset)
@@ -71,7 +75,9 @@ set_break_point(pid_t pid, u64 break_point_addr)
 
             break_point_list[i].addr = break_point_addr;
             // 需要打断点的地址上指令取出备份
-            get_addr_data(pid, break_point_addr, break_point_list[i].backup, CODE_SIZE);
+            get_addr_data(pid, 
+                break_point_addr, break_point_list[i].backup, 
+                CODE_SIZE);
             // 输出2行断点地址的反汇编
             bp_disasm(pid, break_point_addr);
             // 注入断点
@@ -86,7 +92,10 @@ void
 break_point_delete(pid_t pid, s32 num)
 {
     // 指令恢复
-    put_addr_data(pid, break_point_list[num].addr, break_point_list[num].backup, CODE_SIZE);
+    put_addr_data(pid, 
+        break_point_list[num].addr, 
+        break_point_list[num].backup, 
+        CODE_SIZE);
 
     break_point_list[num].addr = 0;
     break_point_list[num].break_point_state = false;
@@ -94,7 +103,8 @@ break_point_delete(pid_t pid, s32 num)
 
 // 断点处理
 s32 
-break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag) 
+break_point_handler(pid_t pid, 
+    s32 status, break_point& bp, bool showbp_flag) 
 {
     struct user_regs_struct bp_regs{};
     // 判断信号类型
@@ -108,20 +118,23 @@ break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag)
     {
         // 如果触发了 SIGTRAP,说明碰到了断点
         if (WSTOPSIG(status) == SIGTRAP) 
-        {                  
-            ptrace(PTRACE_GETREGS, pid, nullptr, &bp_regs);    // 读取寄存器的值，为回退做准备
+        {
+            // 读取寄存器的值，为回退做准备          
+            ptrace(PTRACE_GETREGS, pid, nullptr, &bp_regs);
 
             // 如果满足关系，说明断点命中
             if (bp.addr != (bp_regs.rip - 1)) 
             {
                 // 未命中
-                printf("\033[31m\033[1m[-] Break point: 0x%llx failure!\033[0m\n", bp_regs.rip);
+                printf("\033[31m\033[1m[-] Break point: 0x%llx failure!\033[0m\n", 
+                    bp_regs.rip);
                 return -1;
             } 
             else 
             {
                 if (showbp_flag)
-                    printf("[+] Break point at: \033[31m0x%llx\033[0m\n", bp.addr);
+                    printf("[+] Break point at: \033[31m0x%llx\033[0m\n", 
+                        bp.addr);
 
                 // 把 init 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
@@ -142,5 +155,33 @@ break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag)
         }
     }
     return 0;
+}
+
+
+void
+break_point_info()
+{
+    s32 fun_offset;
+    string fun_name = "";
+    u64 fun_start_addr, fun_end_addr;
+
+    printf("Num        Type            Address\n");
+    for (s32 i = 0; i < 8; i++) 
+    {
+        if (break_point_list[i].break_point_state) 
+        {
+            fun_name = get_fun_start_end(break_point_list[i].addr, 
+                &fun_start_addr, &fun_end_addr);
+            fun_offset = break_point_list[i].addr - fun_start_addr;
+
+            printf("%-11dbreak point     \033[31m0x%llx\033[0m ",
+                i, break_point_list[i].addr );
+
+            if (fun_offset)
+                printf("<%s+%d>\n", fun_name.c_str(), fun_offset);
+            else
+                printf("<%s>\n", fun_name.c_str());
+        }
+    }
 }
 

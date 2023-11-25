@@ -281,29 +281,7 @@ run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "ib")) 
                 {
-                    s32 fun_offset;
-                    string fun_name = "";
-                    u64 fun_start_addr, fun_end_addr;
-
-                    printf("Num        Type            Address\n");
-                    for (s32 i = 0; i < 8; i++) 
-                    {
-                        if (break_point_list[i].break_point_state) 
-                        {
-                            fun_name = get_fun_start_end(break_point_list[i].addr, 
-                                &fun_start_addr, &fun_end_addr);
-                            fun_offset = break_point_list[i].addr - fun_start_addr;
-
-                            printf("%-11dbreak pos32     \033[31m0x%llx\033[0m ",
-                                i, break_point_list[i].addr
-                            );
-
-                            if (fun_offset)
-                                printf("<%s+%d>\n", fun_name.c_str(), fun_offset);
-                            else
-                                printf("<%s>\n", fun_name.c_str());
-                        }
-                    }
+                    break_point_info();
                 }
 
 
@@ -341,44 +319,28 @@ run_dyn_debug(Binary* bin)
                 } 
                 else if (!strcmp(arguments[0], "base")) 
                 {
-                    printf("[+] elf base:     0x%llx\n", elf_base);
-                    printf("[+] libc base:    0x%llx\n", libc_base);
-                    printf("[+] ld base:      0x%llx\n", ld_base);
+                    show_base_addr();
                 } 
                 else if (!strcmp(arguments[0], "libc")) 
                 {
-                    printf("[+] libc base: 0x%llx\n", libc_base);
-                    printf("[+] ld base:   0x%llx\n", ld_base);
+                    show_glibc_addr();
                 } 
                 else if (!strcmp(arguments[0], "code")) 
                 {
-                    printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", 
-                        elf_code_start,  elf_code_end);
-                    printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", 
-                        libc_code_start, libc_code_end);
-                    printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", 
-                        ld_code_start,   ld_code_end);
-                    printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", 
-                        vdso_code_start, vdso_code_end);
+                    show_code_addr();
                 } 
                 else if (!strcmp(arguments[0], "data")) 
                 {
-                    printf("[+] elf data:  \033[35m0x%llx-0x%llx\033[0m\n", 
-                        elf_data_start,  elf_data_end);
-                    printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", 
-                        libc_data_start, libc_data_end);
-                    printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", 
-                        ld_data_start,   ld_data_end);
+                    show_data_addr();
                 }
                 else if (!strcmp(arguments[0], "stackbase")) 
                 {
-                    printf("[+] stack: \033[33m0x%llx-0x%llx\033[0m\n", stack_base, stack_end);
+                    show_stack_addr();
                 } 
                 else if (!strcmp(arguments[0], "heapbase")) 
                 {
-                    printf("[+] heap: \033[34m0x%llx-0x%llx\033[0m\n",  heap_base,  heap_end);
+                    show_heap_addr();
                 }
-
 
                 else if (!strcmp(arguments[0], "lfun")) 
                 {

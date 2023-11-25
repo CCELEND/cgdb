@@ -134,14 +134,20 @@ void copy_regs_to_last_regs(regs_struct* last_regs, regs_struct* regs);
 void show_stack     (pid_t pid, regs_struct* regs);
 void show_num_stack (pid_t pid, regs_struct* regs, int num);
 
-// 显示寄存器，反汇编，栈信息
+// 显示寄存器，反汇编，栈信息, 和各种基地址
 // show_info.cc
 void show_regs_dis_stack_info(pid_t pid, regs_struct* regs);
+void show_base_addr();
+void show_code_addr();
+void show_data_addr();
+void show_stack_addr();
+void show_heap_addr();
+void show_glibc_addr();
 
 // 地址数据处理
 // addr_data_handler.cc
 string get_addr_file_base(u64 addr, u64* base_addr);
-u64 get_addr_val(pid_t pid, u64 addr);
+s64 get_addr_val(pid_t pid, u64 addr);
 u64 get_hex_in_string(char* str);
 bool judg_addr_code  (u64 addr);
 void val_to_string   (u64 val);
@@ -218,6 +224,7 @@ void break_point_inject (pid_t pid, break_point& bp);
 void set_break_point    (pid_t pid, u64 break_point_addr);
 void set_ni_break_point (pid_t pid, u64 addr);
 void break_point_delete (pid_t pid, s32 idx);
+void break_point_info();
 
 
 // 虚拟内存地址空间
@@ -235,6 +242,7 @@ void set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs);
 void show_elf_fun_call(pid_t pid, char* elf_fun_name);
 
 // 函数调用树
+// fun_tree.cc
 s32  creat_root_node(char* root_fun_name);
 void creat_fun_tree(pid_t pid, s32 level);
 void show_fun_tree();

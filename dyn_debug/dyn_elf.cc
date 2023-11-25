@@ -31,7 +31,6 @@ get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
         }
         else
         {
-            // fun_name = addr_get_glibc_fun(addr, fun_start_addr);
             fun_name = addr_get_glibc_fun_start_and_end(addr, fun_start_addr, fun_end_addr);
             return fun_name;
         }
