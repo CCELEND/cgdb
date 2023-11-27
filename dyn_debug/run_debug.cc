@@ -54,7 +54,7 @@ fun_list_info_type flow_change_fun_info;
 // 反汇编框架句柄
 csh handle = 0;
 // 动态分配储存机器码空间
-char* p_fun_code = NULL;
+char* disasm_code = NULL;
 
 void 
 run_dyn_debug(Binary* bin)
@@ -97,8 +97,8 @@ run_dyn_debug(Binary* bin)
                 goto debug_stop;
             }
 
-            p_fun_code = (char*)calloc(1, 0x1000);
-            memset(p_fun_code, 0, 0x1000);
+            disasm_code = (char*)calloc(1, 0x1000);
+            memset(disasm_code, 0, 0x1000);
 
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
             sleep(1);
@@ -250,7 +250,7 @@ run_dyn_debug(Binary* bin)
                             set_break_point(pid, break_point_fun_addr);
                     } 
                     else 
-                        err_info("Please enter the break pos32 function name!");
+                        err_info("Please enter the break point function name!");
                 } 
                 else if (!strcmp(arguments[0], "ba")) 
                 {
@@ -264,7 +264,7 @@ run_dyn_debug(Binary* bin)
                             set_break_point(pid, break_point_addr);
                     } 
                     else 
-                        err_info("Please enter the break pos32 address!");
+                        err_info("Please enter the break point address!");
 
                 }             
                 else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) 
@@ -274,12 +274,12 @@ run_dyn_debug(Binary* bin)
                         s32 num = stoi(arguments[2]);
 
                         if (num >= 8 || num < 0)
-                            err_info("Error break pos32 number!");
+                            err_info("Error break point number!");
                         else
                             break_point_delete(pid, num);
                     }
                     else
-                        err_info("Please enter the break pos32 number to delete!");
+                        err_info("Please enter the break point number to delete!");
 
                 } 
                 else if (!strcmp(arguments[0], "ib")) 
@@ -362,7 +362,7 @@ run_dyn_debug(Binary* bin)
                         if ( addr_get_elf_plt_fun(address)== "" )
                             printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
                         else
-                            cout << "<" << addr_get_elf_plt_fun(address) << "@plt>" << endl;
+                            printf("%s\n", addr_get_elf_plt_fun(address).c_str());
                     } 
                     else 
                         err_info("Please enter the function address!");
@@ -434,7 +434,7 @@ run_dyn_debug(Binary* bin)
             debug_stop: 
             // 等待子进程结束之后父进程再退出
             wait(&status);
-            free(p_fun_code);
+            free(disasm_code);
             cs_close(&handle);
         }
     }

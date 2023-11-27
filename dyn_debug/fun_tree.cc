@@ -73,14 +73,17 @@ insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
 }
 
 void 
-parent_disasm(pid_t pid, char* byte_codes, 
+// parent_disasm(pid_t pid, char* byte_codes, 
+//     u64 parent_fun_addr, s32 parent_fun_size,
+//     fun_tree_node_t* parent_node)
+parent_disasm(pid_t pid,
     u64 parent_fun_addr, s32 parent_fun_size,
     fun_tree_node_t* parent_node)
 {
     cs_insn* insn = NULL;
     size_t count;
 
-    count = cs_disasm(handle, (uint8_t*)byte_codes, 
+    count = cs_disasm(handle, (uint8_t*)disasm_code, 
         parent_fun_size, parent_fun_addr, 0, &insn);
     if (count > 0) 
     {
@@ -177,12 +180,13 @@ creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
     p_fun_size = p_fun_size + LONG_SIZE - p_fun_size % LONG_SIZE; // 8字节对齐
 
     if (p_fun_size > 0x1000) 
-        p_fun_code = (char*)realloc(p_fun_code, p_fun_size);
+        disasm_code = (char*)realloc(disasm_code, p_fun_size);
 
-    memset(p_fun_code, 0, p_fun_size);
+    memset(disasm_code, 0, p_fun_size);
+    get_addr_data(pid, p_fun_start_addr, disasm_code, p_fun_size);
 
-    get_addr_data(pid, p_fun_start_addr, p_fun_code, p_fun_size);
-    parent_disasm(pid, p_fun_code, p_fun_start_addr, p_fun_size, parent_node);
+    // parent_disasm(pid, disasm_code, p_fun_start_addr, p_fun_size, parent_node);
+    parent_disasm(pid, p_fun_start_addr, p_fun_size, parent_node);
 
     return 0;
 }

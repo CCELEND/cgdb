@@ -17,11 +17,12 @@ break_point_inject(pid_t pid, break_point& bp)
 void 
 set_ni_break_point(pid_t pid, u64 addr)
 {
-    char rip_instruct[32];
+    // char rip_instruct[32];
     u64 next_addr;
     
-    get_addr_data(pid, addr, rip_instruct, 32);
-    next_addr = get_next_instruct_addr(rip_instruct, addr, 32);
+    // get_addr_data(pid, addr, rip_instruct, 32);
+    // next_addr = get_next_instruct_addr(rip_instruct, addr, 32);
+    next_addr = get_next_instruct_addr(pid, addr);
 
     // 检查普通断点列表是否有这个地址的断点，有则取消
     for (s32 i = 0; i < 8; i++) 
@@ -34,6 +35,7 @@ set_ni_break_point(pid_t pid, u64 addr)
     // 需要打断点的地址上指令取出备份
     get_addr_data(pid, next_addr, 
         ni_break_point.backup, CODE_SIZE);
+
     break_point_inject(pid, ni_break_point);
 
 }

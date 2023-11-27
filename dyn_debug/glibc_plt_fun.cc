@@ -42,6 +42,8 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
     command += addr_hex_str;
     command2 += addr_hex_str;
 
+    char* result = new char[100];
+
     for (int i = 0; i < 2 && !finded; i++)
     {
         if (i == 0) 
@@ -53,10 +55,12 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
         if (!fp)
         {
             printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
-            return "";
+            break;
         }
 
-        char* result = nullptr;
+        // char* result = nullptr;
+        memset(result, 0, 100);
+
         size_t len = 0;
         ssize_t read;
         s32 lib_plt_fun_str_start, lib_plt_fun_str_end;
@@ -74,10 +78,13 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
             }     
         }
 
-        pclose(fp);   // 关闭管道
-        if (result)
-            free(result);
+        pclose(fp);
+        // if (result)
+        //     free(result);
+        // if (result) delete[] result;
     }
+
+    if (result) delete[] result;
 
     if(lib_plt_fun_name != "")
     {
@@ -96,6 +103,8 @@ get_glibc_plt_fun_addr(char* fun_name)
     FILE* fp;
     u64 glibc_plt_fun_addr;
     string command, exe_command;
+
+    char* result = new char[100];
 
     for (int i = 0; i < 2 && !finded; i++)
     {
@@ -117,7 +126,8 @@ get_glibc_plt_fun_addr(char* fun_name)
             break;
         }
 
-        char* result = nullptr;
+        // char* result = nullptr;
+        memset(result, 0, 100);
         size_t len = 0;
         ssize_t read;
         while ((read = getline(&result, &len, fp)) != -1) 
@@ -131,10 +141,12 @@ get_glibc_plt_fun_addr(char* fun_name)
         }
 
         pclose(fp);   // 关闭管道
-        if (result)
-            free(result);
+        // if (result)
+        //     free(result);
 
     }
+
+    if (result) delete[] result;
 
     if (is_libc)
         glibc_plt_fun_addr = glibc_plt_fun_addr + libc_base;

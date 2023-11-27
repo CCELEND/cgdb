@@ -87,10 +87,10 @@ bp_disasm(pid_t pid, u64 addr)
     cs_insn* insn;
     size_t count;
 
-    char addr_instruct[33];
-    get_addr_data(pid, addr, addr_instruct, 32);
+    memset(disasm_code, 0, 32);
+    get_addr_data(pid, addr, disasm_code, 32);
 
-    count = cs_disasm(handle, (uint8_t*)addr_instruct, 32, addr, 0, &insn);
+    count = cs_disasm(handle, (uint8_t*)disasm_code, 32, addr, 0, &insn);
     if (count > 0) 
     {
         size_t j;
@@ -220,15 +220,16 @@ show_disasm(pid_t pid, u64 rip_val)
     show_str(str_count);
     printf("\033[0m\n");
 
-    char addr_instruct[177];
     // 反汇编开始地址与 rip 同步
     if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) 
     {
         disasm_addr = rip_val;
     }
 
-    get_addr_data(pid, disasm_addr, addr_instruct, 176);
-    count = cs_disasm(handle, (uint8_t*)addr_instruct, 176, disasm_addr, 0, &insn);
+    memset(disasm_code, 0, 176);
+    get_addr_data(pid, disasm_addr, disasm_code, 176);
+
+    count = cs_disasm(handle, (uint8_t*)disasm_code, 176, disasm_addr, 0, &insn);
     if (count > 0) 
     {
         size_t j;
@@ -371,15 +372,16 @@ disasm_mne_op(char* byte_codes,
 
 // 获得下一条指令地址
 u64 
-get_next_instruct_addr(char* byte_codes, 
-    u64 addr, s32 num)
+get_next_instruct_addr(pid_t pid, u64 addr)
 {
-
     cs_insn* insn;
     size_t count;
     u64 next_addr;
 
-    count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
+    memset(disasm_code, 0, 32);
+    get_addr_data(pid, addr, disasm_code, 32);
+
+    count = cs_disasm(handle, (uint8_t*)disasm_code, 32, addr, 0, &insn);
     if (count > 0) 
     {
         next_addr = insn[1].address;

@@ -17,6 +17,7 @@ void bp_disasm(pid_t pid, u64 addr);
 void call_disasm(char* byte_codes, u64  addr, s32 num, string call_fun_name);
 void show_disasm(pid_t pid, u64 rip_val);
 void disasm_mne_op(char* byte_codes, u64  addr, s32 num, s32 line);
-u64  get_next_instruct_addr(char* byte_codes, u64 addr, s32 num);
+// u64  get_next_instruct_addr(char* byte_codes, u64 addr, s32 num);
+u64  get_next_instruct_addr(pid_t pid, u64 addr);
 
 #endif
