@@ -158,6 +158,3 @@ get_glibc_plt_fun_addr(char* fun_name)
 
     return glibc_plt_fun_addr;
 }
-
-
-
