@@ -11,3 +11,6 @@ python3 -m pip install capstone && sudo apt install capstone-tool && sudo apt in
 
 ![Image text](https://github.com/CCELEND/cgdb/raw/main/img/UP.png)
 
+
+## bug
+No input filtering, there is a risk of command injection!
