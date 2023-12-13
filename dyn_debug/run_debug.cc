@@ -400,7 +400,7 @@ run_dyn_debug(Binary* bin)
                     }
                     else
                     {
-                        err_info("Please enter the function name!");
+                        err_info("Please enter the complete parameters!");
                     }
                 }
 
