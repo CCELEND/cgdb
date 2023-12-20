@@ -146,7 +146,8 @@ void show_glibc_addr();
 
 // 地址数据处理
 // addr_data_handler.cc
-string get_addr_file_base(u64 addr, u64* base_addr);
+// string get_addr_file_base(u64 addr, u64* base_addr);
+tuple<string, u64> get_addr_file_base(u64 addr);
 s64 get_addr_val(pid_t pid, u64 addr);
 u64 get_hex_in_string(const char* str);
 bool judg_addr_code  (u64 addr);

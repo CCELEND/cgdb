@@ -8,7 +8,6 @@ get_regs(pid_t pid, regs_struct* regs)
     ptrace(PTRACE_GETREGS, pid, nullptr, regs);
 }
 
-
 // 输出寄存器信息
 void 
 show_regs(pid_t pid, regs_struct* regs)

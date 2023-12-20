@@ -7,8 +7,10 @@ break_point_inject(pid_t pid, break_point& bp)
 {
     // int3 中断指令
     char code[CODE_SIZE] = { static_cast<char>(0xcc) };
+
     // 中断指令 int3 注入
     put_addr_data(pid, bp.addr, code, CODE_SIZE);
+    
     // 启用断点   
     bp.break_point_state = true;     
 }
@@ -53,6 +55,7 @@ set_break_point(pid_t pid, u64 break_point_addr)
     string fun_name = "", link_file = "";
     u64 fun_start_addr, base_addr;
     tuple<string, u64, u64> ret_val;
+    tuple<string, u64> ret_val2;
 
     for (s32 i = 0; i < 8; i++) 
     {
@@ -63,7 +66,10 @@ set_break_point(pid_t pid, u64 break_point_addr)
             fun_start_addr = get<1>(ret_val);
 
             fun_offset = break_point_addr - fun_start_addr;
-            link_file = get_addr_file_base(break_point_addr, &base_addr);
+
+            ret_val2 = get_addr_file_base(break_point_addr);
+            link_file = get<0>(ret_val2);
+            base_addr = get<1>(ret_val2);
 
             printf(
                 "[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
@@ -75,12 +81,15 @@ set_break_point(pid_t pid, u64 break_point_addr)
                 printf("<%s>\n", fun_name.c_str());
 
             break_point_list[i].addr = break_point_addr;
+
             // 需要打断点的地址上指令取出备份
             get_addr_data(pid, 
                 break_point_addr, break_point_list[i].backup, 
                 CODE_SIZE);
+
             // 输出2行断点地址的反汇编
             bp_disasm(pid, break_point_addr);
+
             // 注入断点
             break_point_inject(pid, break_point_list[i]);
             break;
@@ -134,6 +143,7 @@ break_point_handler(pid_t pid,
 
                 // 把 init 3 patch 回本来正常的指令
                 put_addr_data(pid, bp.addr, bp.backup, CODE_SIZE);
+
                 // 执行流回退，重新执行正确的指令
                 bp_regs.rip = bp.addr;
                 ptrace(PTRACE_SETREGS, pid, nullptr, &bp_regs);
@@ -167,7 +177,6 @@ break_point_info()
     {
         if (break_point_list[i].break_point_state) 
         {
-
             ret_val = get_fun_start_end(break_point_list[i].addr);
             fun_name = get<0>(ret_val);
             fun_start_addr = get<1>(ret_val);

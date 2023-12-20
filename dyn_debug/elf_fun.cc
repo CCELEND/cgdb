@@ -19,7 +19,9 @@ get_elf_fun_addr(const char* fun_name)
     for (auto it : elf_fun_start) 
     {
         if (string(fun_name) == it.first)
+        {
             return it.second + elf_base;
+        }
     }
 
     return 0;
@@ -31,8 +33,11 @@ addr_get_elf_fun(u64 addr)
 {
     for (auto it : elf_fun_start) 
     {
-        if (addr >= it.second + elf_base && addr <= elf_fun_end[it.first])
+        if ( addr >= it.second + elf_base && 
+             addr <= elf_fun_end[it.first] )
+        {
             return it.first;
+        }
     }
 
     return "";
@@ -45,8 +50,11 @@ addr_get_elf_fun_offset(u64 addr)
 {
     for (auto it : elf_fun_start) 
     {
-        if (addr >= it.second + elf_base && addr <= elf_fun_end[it.first])
+        if ( addr >= it.second + elf_base && 
+             addr <= elf_fun_end[it.first])
+        {
             return addr - it.second - elf_base;
+        }
     }
 
     return -1;

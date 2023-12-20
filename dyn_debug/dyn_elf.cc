@@ -7,8 +7,8 @@ addr_get_fun(const fun_list_info_type* fun_info, u64 addr)
 {
     for (s32 i = 0; i < 0x10; i++)
     {
-        if(addr >= fun_info->fun_list[i].fun_start_addr && 
-           addr <= fun_info->fun_list[i].fun_end_addr)
+        if( addr >= fun_info->fun_list[i].fun_start_addr && 
+            addr <= fun_info->fun_list[i].fun_end_addr )
             return fun_info->fun_list[i].fun_name;
     }
 
@@ -71,6 +71,7 @@ get_fun_addr(const char* fun_name)
     u64 addr;
     tuple<s32, u64, u64> ret_val;
 
+    // elf
     addr = get_elf_fun_addr(fun_name);
     if (addr)
     {
@@ -84,11 +85,13 @@ get_fun_addr(const char* fun_name)
         return ret_val;
     }
 
+    // glibc
     addr = get_glibc_fun_addr(fun_name);
     if (addr)
     {
-        u64 fun_start_addr, fun_end_addr;
         tuple<string, u64, u64> temp;
+        u64 fun_start_addr, fun_end_addr;
+
         temp = addr_get_glibc_fun_start_and_end(addr);
         fun_start_addr = get<1>(temp);
         fun_end_addr = get<2>(temp);
@@ -96,8 +99,6 @@ get_fun_addr(const char* fun_name)
         ret_val = make_tuple(0, fun_start_addr, fun_end_addr);
         return ret_val;
     }
-
-    
     addr = get_glibc_plt_fun_addr(fun_name);
     if (addr)
     {
@@ -123,9 +124,8 @@ get_fun_end(pid_t pid, u64 fun_addr)
     for (s32 i = 0; i < 0x1000; i += LONG_SIZE)
     {
         word.val = get_addr_val(pid, fun_addr + i);
-        // word.val = ptrace(PTRACE_PEEKDATA, pid, fun_addr + i, nullptr);
-        if (word.val == -1)
-            return 0;
+        
+        if (word.val == -1) return 0;
 
         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
 

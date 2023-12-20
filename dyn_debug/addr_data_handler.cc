@@ -6,7 +6,6 @@ s64
 get_addr_val(pid_t pid, u64 addr)
 {
     u64 val;
-
     val = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
     if (val == -1)
     {
@@ -16,6 +15,7 @@ get_addr_val(pid_t pid, u64 addr)
 
     return val;
 }
+
 // 往指定地址写入8字节值
 s64
 put_addr_val(pid_t pid, u64 addr, s64 val)
@@ -175,6 +175,7 @@ flag_addr_printf(u64 addr, bool addr_flag)
         printf("0x%llx", addr);
         return;
     }
+
     string fun_name, data_name, ini_name;
     s32 offset;
 
@@ -254,8 +255,7 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
         }
 
         word.val = get_addr_val(pid, addr + i * LONG_SIZE);
-        if (word.val == -1)
-            return;
+        if (word.val == -1) return;
 
         memcpy(laddr, word.chars, LONG_SIZE);
 
@@ -298,7 +298,6 @@ show_addr_point(pid_t pid, u64 address, bool addr_flag)
 {
     u64 addr;
     u64 val;
-    // char addr_instruct[17]; // one line dis
     flag_addr_printf(address, addr_flag);
 
     if (address < 0x550000000000 || address > 0x7fffffffffff)
@@ -369,29 +368,37 @@ judg_addr_code(u64 addr)
 }
 
 // 通过地址获取文件名和加载基址
-string 
-get_addr_file_base(u64 addr, u64* base_addr)
+// string 
+// get_addr_file_base(u64 addr, u64* base_addr)
+tuple<string, u64>
+get_addr_file_base(u64 addr)
 {
+    tuple<string, u64> ret_val;
+
     if (addr > elf_code_start && addr < elf_code_end) 
     {
-        *base_addr = elf_base;
-        return "elf";
+        // *base_addr = elf_base;
+        // return "elf";
+        ret_val = make_tuple("elf", elf_base);
+        return ret_val;
     } 
     else if (addr > libc_code_start && addr < libc_code_end) 
     {
-        *base_addr = libc_base;
-        return "libc";
+        // *base_addr = libc_base;
+        // return "libc";
+        ret_val = make_tuple("libc", libc_base);
+        return ret_val;
     } 
     else if (addr > ld_code_start && addr < ld_code_end) 
     {
-        *base_addr = ld_base;
-        return "ld";
+        // *base_addr = ld_base;
+        // return "ld";
+        ret_val = make_tuple("ld", ld_base);
+        return ret_val;
     }
-    else
-    {
-        *base_addr = 0;
-        return "";
-    }
+
+    ret_val = make_tuple("", 0);
+    return ret_val;
 }
 
 // qword ptr [rip + 0x2f25]

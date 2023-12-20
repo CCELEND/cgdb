@@ -29,7 +29,7 @@ get_vma_address(pid_t pid)
                 elf_code_end   = strtoul(line.data()+13, nullptr, 16);
             }
             
-            else if ( line.find("rw-p") != string::npos   && 
+            else if ( line.find("rw-p")   != string::npos && 
                       line.find("[heap]") != string::npos &&
                       !heap_base)
             {
@@ -37,7 +37,7 @@ get_vma_address(pid_t pid)
                 heap_end  = strtoul(line.data()+13, nullptr, 16);
             }
 
-            else if ( line.find("rw-p") != string::npos &&
+            else if ( line.find("rw-p")   != string::npos &&
                       line.find("[heap]") == string::npos)
             {
                 elf_data_start = strtoul(line.data(), nullptr, 16);
@@ -71,8 +71,8 @@ get_vma_address(pid_t pid)
             }
 
             else if ( line.find("ld-linux") == string::npos && 
-                      line.find("[stack]") == string::npos  &&
-                      line.find("rw-p") != string::npos ) 
+                      line.find("[stack]")  == string::npos  &&
+                      line.find("rw-p")     != string::npos ) 
             {
                 libc_data_end = strtoul(line.data()+13, nullptr, 16);
             }
@@ -92,7 +92,7 @@ get_vma_address(pid_t pid)
             }
 
             else if ( line.find("ld-linux") != string::npos && 
-                      line.find("rw-p") != string::npos ) 
+                      line.find("rw-p")     != string::npos ) 
             {
                 ld_data_start = strtoul(line.data(), nullptr, 16);
                 ld_data_end   = strtoul(line.data()+13, nullptr, 16);
@@ -108,7 +108,7 @@ get_vma_address(pid_t pid)
             }
             
             else if ( line.find("[vdso]") != string::npos && 
-                      line.find("r-xp") != string::npos   && 
+                      line.find("r-xp")   != string::npos && 
                       !vdso_code_start) 
             {
                 vdso_code_start = strtoul(line.data(), nullptr, 16);

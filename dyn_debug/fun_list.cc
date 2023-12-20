@@ -27,7 +27,9 @@ set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
         // 地址在列表某个函数范围内就直接退出
         if (fun_addr >= fun_info->fun_list[i].fun_start_addr && 
             fun_addr <= fun_info->fun_list[i].fun_end_addr )
+        {
             break;
+        }
 
         if ( fun_info->fun_list[i].fun_start_addr == 0 ) 
         {
@@ -47,8 +49,7 @@ set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
                 else
                 {
                     u64 glibc_fun_start, glibc_fun_end;
-                    // fun_name = addr_get_glibc_fun_start_and_end(fun_addr, 
-                    //     &glibc_fun_start, &glibc_fun_end);
+
                     ret_val = addr_get_glibc_fun_start_and_end(fun_addr);
                     fun_name = get<0>(ret_val);
                     glibc_fun_start = get<1>(ret_val);
@@ -82,12 +83,9 @@ set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
                     fun_info->fun_list[i].fun_name = fun_name;
                     fun_info->fun_num++;
                     break;
-
                 }
-
             }
         }
-
     }
 }
 
@@ -117,7 +115,9 @@ addr_get_fun_offset(fun_list_info_type* fun_info, u64 addr)
     {
         if ( addr >= fun_info->fun_list[i].fun_start_addr && 
              addr <= fun_info->fun_list[i].fun_end_addr )
+        {
             return addr - fun_info->fun_list[i].fun_start_addr;
+        }
     }
 
     return -1;

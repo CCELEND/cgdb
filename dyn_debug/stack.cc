@@ -41,7 +41,8 @@ show_stack(pid_t pid, regs_struct* regs)
 void 
 show_num_stack(pid_t pid, regs_struct* regs, s32 num)
 {
-    if (num < 0 || num > 0x100){
+    if (num < 0 || num > 0x100)
+    {
         printf("[-] Number of errors!\n");
         return;
     }

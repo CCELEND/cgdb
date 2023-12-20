@@ -209,7 +209,9 @@ run_dyn_debug(Binary* bin)
                     }
 
                     if (index != -1)
+                    {
                         break_point_handler(pid, status, break_point_list[index], true);
+                    }
 
                 } 
                 // 计算执行完毕所需指令数
@@ -413,8 +415,7 @@ run_dyn_debug(Binary* bin)
                     tuple<string, u64, u64> ret_val;
 
                     addr = strtoul(arguments[1], nullptr, 16);
-                    // fun_name = addr_get_glibc_fun_start_and_end(addr, 
-                    //     &fun_start_addr, &fun_end_addr);
+
                     ret_val = addr_get_glibc_fun_start_and_end(addr);
                     fun_name = get<0>(ret_val);
                     fun_start_addr = get<1>(ret_val);

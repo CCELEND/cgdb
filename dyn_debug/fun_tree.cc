@@ -117,10 +117,7 @@ parent_disasm(pid_t pid,
                         sub_fun_addr = strtoul(insn[j].op_str, nullptr, 16);
                     }
 
-                    if (!sub_fun_addr) 
-                    {
-                        continue;
-                    }
+                    if (!sub_fun_addr) continue;
 
                 }
 
@@ -184,13 +181,14 @@ creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
     p_fun_size = p_fun_end_addr - p_fun_start_addr;
     p_fun_size = p_fun_size + LONG_SIZE - p_fun_size % LONG_SIZE; // 8字节对齐
 
-    if (p_fun_size > 0x1000) 
+    if (p_fun_size > 0x1000)
+    {
         disasm_code = (char*)realloc(disasm_code, p_fun_size);
+    }
 
     memset(disasm_code, 0, p_fun_size);
     get_addr_data(pid, p_fun_start_addr, disasm_code, p_fun_size);
 
-    // parent_disasm(pid, disasm_code, p_fun_start_addr, p_fun_size, parent_node);
     parent_disasm(pid, p_fun_start_addr, p_fun_size, parent_node);
 
     return 0;

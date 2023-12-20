@@ -2,7 +2,8 @@
 #include "dyn_fun.h"
 
 void 
-arg_error(const char* cgdb){
+arg_error(const char* cgdb)
+{
     printf("[-] Usage: %s <binary>\n", cgdb);
     exit(EXIT_FAILURE);
 }
@@ -36,6 +37,8 @@ void
 show_str(s32 count)
 {
     for (s32 i = 0; i < count; i++)
+    {
         printf("\033[34m─");
+    }
 }
 
