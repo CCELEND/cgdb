@@ -3,7 +3,7 @@
 
 // 通过 glibc 函数名获得函数开始地址
 u64 
-get_glibc_fun_addr(char* fun_name)
+get_glibc_fun_addr(const char* fun_name)
 {
     bool is_libc = false;
     u64 glibc_fun_addr = 0;
@@ -55,17 +55,19 @@ get_glibc_fun_addr(char* fun_name)
         return 0;
 
     if (is_libc)
-        glibc_fun_addr = glibc_fun_addr + libc_base;
+        glibc_fun_addr += libc_base;
     else
-        glibc_fun_addr = glibc_fun_addr + ld_base;
+        glibc_fun_addr += ld_base;
     return glibc_fun_addr;
 }
 
 
 // 通过 glibc 地址获得函数名, 函数开始地址, 函数结束地址
-string 
-addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glibc_fun_end)
+tuple<string, u64, u64>
+addr_get_glibc_fun_start_and_end(u64 glibc_addr)
 {
+    tuple<string, u64, u64> ret_val;
+
     u64 glibc_fun_addr_offset, glibc_fun_start_addr, glibc_fun_end_addr;
     string command = "", glibc_fun_name = "";
     s32 sub_num = 0x1;
@@ -113,10 +115,9 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glib
         if (!fp)
         {
             printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
-            *glibc_fun_start = 0;
-            *glibc_fun_end = 0;
+            ret_val = make_tuple("", 0, 0);
             if (result) delete[] result;
-            return "";
+            return ret_val;
         }
 
         memset(result, 0, 100);
@@ -156,16 +157,19 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glib
 
     if (is_libc)
     {
-        *glibc_fun_start = glibc_fun_start_addr + libc_base;
-        *glibc_fun_end = glibc_fun_end_addr + libc_base;
-        glibc_fun_name = "libc." + glibc_fun_name;
+        glibc_fun_start_addr += libc_base;
+        glibc_fun_end_addr += libc_base;
+        ret_val = make_tuple("libc." + glibc_fun_name, 
+            glibc_fun_start_addr, glibc_fun_end_addr);
     }
     else
     {
-        *glibc_fun_start = glibc_fun_start_addr + ld_base;
-        *glibc_fun_end = glibc_fun_end_addr + ld_base;
-        glibc_fun_name = "ld." + glibc_fun_name;
+        glibc_fun_start_addr += ld_base;
+        glibc_fun_end_addr += ld_base;
+        ret_val = make_tuple("ld." + glibc_fun_name, 
+            glibc_fun_start_addr, glibc_fun_end_addr);
     }
-    return glibc_fun_name;
+
+    return ret_val;
 
 }

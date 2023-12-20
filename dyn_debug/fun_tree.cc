@@ -12,8 +12,12 @@ creat_node(u64 addr)
     string fun_name;
     u64 fun_start_addr, fun_end_addr;
     fun_tree_node_t* node = NULL;
+    tuple<string, u64, u64> ret_val;
 
-    fun_name = get_fun_start_end(addr, &fun_start_addr, &fun_end_addr);
+    ret_val = get_fun_start_end(addr);
+    fun_name = get<0>(ret_val);
+    fun_start_addr = get<1>(ret_val);
+    fun_end_addr = get<2>(ret_val);
 
     // try{}
     node = new fun_tree_node_t;
@@ -35,7 +39,7 @@ creat_node(u64 addr)
 }
 
 void 
-insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
+insert_sub_link(const u64 sub_fun_addr, fun_tree_node_t* parent_node)
 {
     if ( sub_fun_addr >= parent_node->fun_info.fun_start_addr && 
          sub_fun_addr <= parent_node->fun_info.fun_end_addr )
@@ -72,12 +76,9 @@ insert_sub_link(u64 sub_fun_addr, fun_tree_node_t* parent_node)
     }
 }
 
-void 
-// parent_disasm(pid_t pid, char* byte_codes, 
-//     u64 parent_fun_addr, s32 parent_fun_size,
-//     fun_tree_node_t* parent_node)
+void
 parent_disasm(pid_t pid,
-    u64 parent_fun_addr, s32 parent_fun_size,
+    const u64 parent_fun_addr, const s32 parent_fun_size,
     fun_tree_node_t* parent_node)
 {
     cs_insn* insn = NULL;
@@ -135,12 +136,16 @@ parent_disasm(pid_t pid,
 
 // 建立根节点
 s32 
-creat_root_node(char* root_fun_name)
+creat_root_node(const char* root_fun_name)
 {
-    u64 r_fun_start_addr, r_fun_end_addr;
+    tuple<s32, u64, u64> ret_val;
     string r_fun_name;
+    u64 r_fun_start_addr, r_fun_end_addr;
 
-    get_fun_addr(root_fun_name, &r_fun_start_addr, &r_fun_end_addr);
+    ret_val = get_fun_addr(root_fun_name);
+    r_fun_start_addr = get<1>(ret_val);
+    r_fun_end_addr = get<2>(ret_val);
+
     if (!r_fun_start_addr)
     {
         err_info("There is no such function!");

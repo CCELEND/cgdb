@@ -14,7 +14,7 @@ dyn_show_elf_fun()
 
 // 通过 elf 函数名获得 elf 函数地址
 u64 
-get_elf_fun_addr(char* fun_name)
+get_elf_fun_addr(const char* fun_name)
 {
     for (auto it : elf_fun_start) 
     {

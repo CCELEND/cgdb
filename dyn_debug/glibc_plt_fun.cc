@@ -97,7 +97,7 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
 
 // 通过 glibc plt 函数名获得函数开始地址
 u64 
-get_glibc_plt_fun_addr(char* fun_name)
+get_glibc_plt_fun_addr(const char* fun_name)
 {
     bool finded = false, is_libc = false;
     FILE* fp;

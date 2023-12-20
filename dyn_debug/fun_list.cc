@@ -20,6 +20,8 @@ clear_fun_list(fun_list_info_type* fun_info)
 void 
 set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
 {
+    tuple<string, u64, u64> ret_val;
+
     for (s32 i = 0; i < 0x10; i++) 
     {
         // 地址在列表某个函数范围内就直接退出
@@ -45,8 +47,12 @@ set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
                 else
                 {
                     u64 glibc_fun_start, glibc_fun_end;
-                    fun_name = addr_get_glibc_fun_start_and_end(fun_addr, 
-                        &glibc_fun_start, &glibc_fun_end);
+                    // fun_name = addr_get_glibc_fun_start_and_end(fun_addr, 
+                    //     &glibc_fun_start, &glibc_fun_end);
+                    ret_val = addr_get_glibc_fun_start_and_end(fun_addr);
+                    fun_name = get<0>(ret_val);
+                    glibc_fun_start = get<1>(ret_val);
+                    glibc_fun_end = get<2>(ret_val);
 
                     fun_info->fun_list[i].fun_name = fun_name;
                     fun_info->fun_list[i].fun_start_addr = glibc_fun_start;

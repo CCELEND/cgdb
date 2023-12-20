@@ -241,8 +241,10 @@ run_dyn_debug(Binary* bin)
                 {
                     if (argc == 2) 
                     {
-                        u64 break_point_fun_addr, end_addr;
-                        get_fun_addr(arguments[1], &break_point_fun_addr, &end_addr);
+                        tuple<s32, u64, u64> ret_val;
+                        u64 break_point_fun_addr;
+                        ret_val = get_fun_addr(arguments[1]);
+                        break_point_fun_addr = get<1>(ret_val);
 
                         if (!break_point_fun_addr)
                             err_info("There is no such function!");
@@ -408,10 +410,15 @@ run_dyn_debug(Binary* bin)
                 {
                     string fun_name;
                     u64 addr, fun_start_addr, fun_end_addr;
+                    tuple<string, u64, u64> ret_val;
 
                     addr = strtoul(arguments[1], nullptr, 16);
-                    fun_name = addr_get_glibc_fun_start_and_end(addr, 
-                        &fun_start_addr, &fun_end_addr);
+                    // fun_name = addr_get_glibc_fun_start_and_end(addr, 
+                    //     &fun_start_addr, &fun_end_addr);
+                    ret_val = addr_get_glibc_fun_start_and_end(addr);
+                    fun_name = get<0>(ret_val);
+                    fun_start_addr = get<1>(ret_val);
+                    fun_end_addr = get<2>(ret_val);
 
                     printf("%s\n", fun_name.c_str());
                     printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);

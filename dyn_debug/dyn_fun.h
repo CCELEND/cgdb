@@ -137,18 +137,18 @@ void show_num_stack (pid_t pid, regs_struct* regs, int num);
 // 显示寄存器，反汇编，栈信息, 和各种基地址
 // show_info.cc
 void show_regs_dis_stack_info(pid_t pid, regs_struct* regs);
-void show_base_addr();
-void show_code_addr();
-void show_data_addr();
+void show_base_addr ();
+void show_code_addr ();
+void show_data_addr ();
 void show_stack_addr();
-void show_heap_addr();
+void show_heap_addr ();
 void show_glibc_addr();
 
 // 地址数据处理
 // addr_data_handler.cc
 string get_addr_file_base(u64 addr, u64* base_addr);
 s64 get_addr_val(pid_t pid, u64 addr);
-u64 get_hex_in_string(char* str);
+u64 get_hex_in_string(const char* str);
 bool judg_addr_code  (u64 addr);
 void val_to_string   (u64 val);
 void flag_addr_printf(u64 addr, bool addr_flag);
@@ -156,15 +156,14 @@ void show_addr_data  (pid_t pid, s32 num , u64 addr);
 void show_addr_point (pid_t pid, u64 addr, bool addr_flag);
 void get_addr_data   (pid_t pid, u64 addr, char* str, s32 len);
 void put_addr_data   (pid_t pid, u64 addr, char* str, s32 len);
-void print_bytes(char* codes, s32 len);
+void print_bytes(const char* codes, s32 len);
 
 
 // dyn_elf.cc
-string addr_get_fun(fun_list_info_type* fun_info, u64 addr);
-string get_fun  (u64 addr,  u64* fun_start_addr);
-s32 get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr);
+string addr_get_fun(const fun_list_info_type* fun_info, u64 addr);
+tuple<s32, u64, u64> get_fun_addr(const char* fun_name);
 u64 get_fun_end (pid_t pid, u64 fun_addr);
-string get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr);
+tuple<string, u64, u64> get_fun_start_end(u64 addr);
 
 // elf 函数
 // elf_fun.cc
@@ -172,7 +171,7 @@ string addr_get_elf_fun(u64 elf_fun_addr);
 void dyn_show_elf_fun();
 void map_fun_end  (pid_t pid);
 s32 addr_get_elf_fun_offset(u64 addr);
-u64 get_elf_fun_addr(char* fun_name);
+u64 get_elf_fun_addr(const char* fun_name);
 
 // elf plt 函数
 // elf_plt_fun.cc
@@ -180,7 +179,7 @@ string addr_get_elf_plt_fun(u64 elf_plt_fun_addr);
 void dyn_show_elf_plt_fun();
 void map_plt_fun_end(pid_t pid);
 s32 addr_get_elf_plt_fun_offset(u64 addr);
-u64 get_elf_plt_fun_addr(char* plt_fun_name);
+u64 get_elf_plt_fun_addr(const char* plt_fun_name);
 
 // elf 文件函数指针初始化，析构函数处理
 // elf_init_fini_array.cc
@@ -193,18 +192,14 @@ void set_elf_rdata(Binary* bin);
 
 // glibc 函数
 // glibc_fun.cc
-string addr_get_glibc_fun(u64 glibc_fun_addr, 
-    u64* glibc_fun_start);
-u64 get_glibc_fun_end(u64 glibc_fun_addr, 
-    string fun_name);
-u64 get_glibc_fun_addr(char* fun_name);
-
-string addr_get_glibc_fun_start_and_end(u64 glibc_addr, u64* glibc_fun_start, u64* glibc_fun_end);
+u64 get_glibc_fun_addr(const char* fun_name);
+tuple<string, u64, u64>
+addr_get_glibc_fun_start_and_end(u64 glibc_addr);
 
 // glibc plt 函数
 // glibc_plt_fun.cc
 string addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr);
-u64 get_glibc_plt_fun_addr(char* fun_name);
+u64 get_glibc_plt_fun_addr(const char* fun_name);
 
 // glibc 数据段处理
 // glibc_data.cc
@@ -239,11 +234,11 @@ void set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs);
 
 // 显示调用函数信息
 // fun_call.cc
-void show_elf_fun_call(pid_t pid, char* elf_fun_name);
+void show_elf_fun_call(pid_t pid, const char* elf_fun_name);
 
 // 函数调用树
 // fun_tree.cc
-s32  creat_root_node(char* root_fun_name);
+s32  creat_root_node(const char* root_fun_name);
 void creat_fun_tree(pid_t pid, s32 level);
 void show_fun_tree();
 void free_fun_tree();

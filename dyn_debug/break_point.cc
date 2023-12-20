@@ -17,11 +17,7 @@ break_point_inject(pid_t pid, break_point& bp)
 void 
 set_ni_break_point(pid_t pid, u64 addr)
 {
-    // char rip_instruct[32];
     u64 next_addr;
-    
-    // get_addr_data(pid, addr, rip_instruct, 32);
-    // next_addr = get_next_instruct_addr(rip_instruct, addr, 32);
     next_addr = get_next_instruct_addr(pid, addr);
 
     // 检查普通断点列表是否有这个地址的断点，有则取消
@@ -55,14 +51,17 @@ set_break_point(pid_t pid, u64 break_point_addr)
 
     s32 fun_offset;
     string fun_name = "", link_file = "";
-    u64 fun_start_addr, fun_end_addr, base_addr;
+    u64 fun_start_addr, base_addr;
+    tuple<string, u64, u64> ret_val;
+
     for (s32 i = 0; i < 8; i++) 
     {
         if (!break_point_list[i].addr)
         {
-            // fun_name = get_fun(break_point_addr, &fun_start_addr);
-            fun_name = get_fun_start_end(break_point_addr, 
-                &fun_start_addr, &fun_end_addr);
+            ret_val = get_fun_start_end(break_point_addr);
+            fun_name = get<0>(ret_val);
+            fun_start_addr = get<1>(ret_val);
+
             fun_offset = break_point_addr - fun_start_addr;
             link_file = get_addr_file_base(break_point_addr, &base_addr);
 
@@ -160,15 +159,19 @@ break_point_info()
 {
     s32 fun_offset;
     string fun_name = "";
-    u64 fun_start_addr, fun_end_addr;
+    u64 fun_start_addr;
+    tuple<string, u64, u64> ret_val;
 
     printf("Num        Type            Address\n");
     for (s32 i = 0; i < 8; i++) 
     {
         if (break_point_list[i].break_point_state) 
         {
-            fun_name = get_fun_start_end(break_point_list[i].addr, 
-                &fun_start_addr, &fun_end_addr);
+
+            ret_val = get_fun_start_end(break_point_list[i].addr);
+            fun_name = get<0>(ret_val);
+            fun_start_addr = get<1>(ret_val);
+            
             fun_offset = break_point_list[i].addr - fun_start_addr;
 
             printf("%-11dbreak point     \033[31m0x%llx\033[0m ",

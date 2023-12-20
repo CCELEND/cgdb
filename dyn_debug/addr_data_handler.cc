@@ -84,7 +84,7 @@ put_addr_data(pid_t pid, u64 addr, char* str, s32 len)
 
 // 按照字节打印数据
 void 
-print_bytes(char* codes, s32 len) 
+print_bytes(const char* codes, s32 len) 
 {
     for (s32 i = 0; i < len; ++i) 
     {
@@ -397,7 +397,7 @@ get_addr_file_base(u64 addr, u64* base_addr)
 // qword ptr [rip + 0x2f25]
 // 从字符串获取十六进制值
 u64 
-get_hex_in_string(char* str)
+get_hex_in_string(const char* str)
 {
     u64 hex_val;
     s32 hex_str_start, hex_str_end;

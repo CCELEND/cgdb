@@ -3,7 +3,7 @@
 
 // 从函数信息结构体获取对应地址的信息
 string 
-addr_get_fun(fun_list_info_type* fun_info, u64 addr)
+addr_get_fun(const fun_list_info_type* fun_info, u64 addr)
 {
     for (s32 i = 0; i < 0x10; i++)
     {
@@ -16,26 +16,24 @@ addr_get_fun(fun_list_info_type* fun_info, u64 addr)
 }
 
 // 通过地址找函数名, 函数开始地址, 结束地址
-string 
-get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
+tuple<string, u64, u64>
+get_fun_start_end(u64 addr)
 {
     string fun_name;
+    tuple<string, u64, u64> ret_val;
+
     if (addr > 0x7f0000000000)
     {
         fun_name = addr_get_glibc_plt_fun(addr);
         if (fun_name != "") 
         {
-            *fun_start_addr = addr;
-            *fun_end_addr = addr + 0xb;
-
-            return fun_name;
+            ret_val = make_tuple(fun_name, addr, addr + 0xb);
+            return ret_val;
         }
         else
         {
-            fun_name = addr_get_glibc_fun_start_and_end(addr, 
-                fun_start_addr, fun_end_addr);
-
-            return fun_name;
+            ret_val = addr_get_glibc_fun_start_and_end(addr);
+            return ret_val;
         }
     }
 
@@ -45,18 +43,20 @@ get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
         fun_name = addr_get_elf_fun(addr);
         if (fun_name != "") 
         {
-            *fun_start_addr = elf_fun_start[fun_name] + elf_base;
-            *fun_end_addr = elf_fun_end[fun_name];
+            ret_val = make_tuple(fun_name, 
+                elf_fun_start[fun_name] + elf_base, 
+                elf_fun_end[fun_name]);
 
-            return fun_name;
+            return ret_val;
         }
         else 
         {
             fun_name = addr_get_elf_plt_fun(addr);
-            *fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
-            *fun_end_addr = elf_plt_fun_end[fun_name];
+            ret_val = make_tuple(fun_name,
+                elf_plt_fun_start[fun_name] + elf_base,
+                elf_plt_fun_end[fun_name]);
 
-            return fun_name;
+            return ret_val;
         }
 
     }
@@ -65,52 +65,48 @@ get_fun_start_end(u64 addr, u64* fun_start_addr, u64* fun_end_addr)
 
 
 // 通过函数名找函数开始地址, 结束地址
-s32 
-get_fun_addr(char* fun_name, u64* fun_start_addr, u64* fun_end_addr)
+tuple<s32, u64, u64>
+get_fun_addr(const char* fun_name)
 {
     u64 addr;
+    tuple<s32, u64, u64> ret_val;
 
     addr = get_elf_fun_addr(fun_name);
     if (addr)
     {
-        *fun_start_addr = addr;
-        *fun_end_addr = elf_fun_end[string(fun_name)];
-
-        return 0;
+        ret_val = make_tuple(0, addr, elf_fun_end[string(fun_name)]);
+        return ret_val;
     }
     addr = get_elf_plt_fun_addr(fun_name);
     if (addr)
     {
-        *fun_start_addr = addr;
-        *fun_end_addr = elf_plt_fun_end[string(fun_name)];
-
-        return 0;
+        ret_val = make_tuple(0, addr, elf_plt_fun_end[string(fun_name)]);
+        return ret_val;
     }
 
     addr = get_glibc_fun_addr(fun_name);
     if (addr)
     {
-        addr_get_glibc_fun_start_and_end(addr, 
-            fun_start_addr, fun_end_addr);
+        u64 fun_start_addr, fun_end_addr;
+        tuple<string, u64, u64> temp;
+        temp = addr_get_glibc_fun_start_and_end(addr);
+        fun_start_addr = get<1>(temp);
+        fun_end_addr = get<2>(temp);
 
-        return 0;
+        ret_val = make_tuple(0, fun_start_addr, fun_end_addr);
+        return ret_val;
     }
 
     
     addr = get_glibc_plt_fun_addr(fun_name);
     if (addr)
     {
-        *fun_start_addr = addr;
-        *fun_end_addr = addr + 0xb;
-
-        return 0;
+        ret_val = make_tuple(0, addr, addr + 0xb);
+        return ret_val;
     }
 
-    *fun_start_addr = 0;
-    *fun_end_addr = 0;
-
-    return -1;
-
+    ret_val = make_tuple(-1, 0, 0);
+    return ret_val;
 }
 
 // 通过函数地址获得函数结束地址
