@@ -14,9 +14,13 @@ judg_jump(char* mnemonic)
         !strcmp(mnemonic, "jl"  ) || !strcmp(mnemonic, "jle") ||
         !strcmp(mnemonic, "bnd jmp" ) //|| !strcmp(mnemonic, "ret" )
        )
+    {
         return true;
+    }
     else
+    {
         return false;
+    }
 }
 
 // addr:汇编代码的地址, fun_name:函数名, offset:偏移, 
@@ -26,65 +30,85 @@ void
 dis_highlight_show(u64 addr, string fun_name, s32 offset, 
     char* codes, char* mnemonic, char* ops)
 {
-    tuple<string, u64, u64> ret_val;
+    tuple<string, u64, u64> fun_info;
     string jump_fun_name = "";
     u64 jump_addr, jump_fun_start_addr;
     s32 jump_fun_offset;
 
-    printf("\033[32m\033[1m ► 0x%llx\033[0m ", addr);
+    printf("\033[32m\033[1m ► 0x%llx\033[0m ", 
+        addr);
+
     if(fun_name != "")
     {
-        printf("\033[32m\033[1m<%s+%04d>   ", fun_name.c_str(), offset);
+        printf("\033[32m\033[1m<%s+%04d>   ", 
+            fun_name.c_str(), offset);
     }
     printf("\033[34m\033[1m%-20s\033[0m", codes);
     printf("\033[33m\033[1m%-16s\033[0m", mnemonic);
     printf("\033[36m\033[1m%s\033[0m ", ops);
+
     if (judg_jump(mnemonic))
     {
         jump_addr = strtoul(ops, nullptr, 16);
 
-        ret_val = get_fun_start_end(jump_addr);
-        jump_fun_name = get<0>(ret_val);
-        jump_fun_start_addr = get<1>(ret_val);
+        fun_info = get_fun_start_end(jump_addr);
+        jump_fun_name = get<0>(fun_info);
+        jump_fun_start_addr = get<1>(fun_info);
 
         jump_fun_offset = jump_addr - jump_fun_start_addr;
 
         if (jump_fun_offset)
-            printf("\033[32m\033[1m<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
+        {
+            printf("\033[32m\033[1m<%s+%d>", 
+                jump_fun_name.c_str(), jump_fun_offset);
+        }
         else
-            printf("\033[32m\033[1m<%s>", jump_fun_name.c_str());
+        {
+            printf("\033[32m\033[1m<%s>", 
+                jump_fun_name.c_str());
+        }
     }
 }
 void 
 dis_show(u64 addr, string fun_name, s32 offset, 
     char* codes, char* mnemonic, char* ops)
 {
-    tuple<string, u64, u64> ret_val;
+    tuple<string, u64, u64> fun_info;
     string jump_fun_name = "";
     u64 jump_addr, jump_fun_start_addr;
     s32 jump_fun_offset;
 
     printf("   0x%llx ", addr);
-    if(fun_name != ""){
-        printf("<%s+%04d>   ", fun_name.c_str(), offset);
+
+    if(fun_name != "")
+    {
+        printf("<%s+%04d>   ", 
+            fun_name.c_str(), offset);
     }
     printf("\033[34m%-20s\033[0m", codes);
     printf("\033[33m%-16s\033[0m", mnemonic);
     printf("\033[36m%s\033[0m ", ops);
+
     if (judg_jump(mnemonic))
     {
         jump_addr = strtoul(ops, nullptr, 16);
 
-        ret_val = get_fun_start_end(jump_addr);
-        jump_fun_name = get<0>(ret_val);
-        jump_fun_start_addr = get<1>(ret_val);
+        fun_info = get_fun_start_end(jump_addr);
+        jump_fun_name = get<0>(fun_info);
+        jump_fun_start_addr = get<1>(fun_info);
 
         jump_fun_offset = jump_addr - jump_fun_start_addr;
 
         if (jump_fun_offset)
-            printf("<%s+%d>", jump_fun_name.c_str(), jump_fun_offset);
+        {
+            printf("<%s+%d>", 
+                jump_fun_name.c_str(), jump_fun_offset);
+        }
         else
-            printf("<%s>", jump_fun_name.c_str());
+        {
+            printf("<%s>", 
+                jump_fun_name.c_str());
+        }
     }
 }
 
@@ -103,7 +127,7 @@ bp_disasm(pid_t pid, u64 addr)
     {
         size_t j;
         s32 fun_offset;
-        tuple<string, u64, u64> ret_val;
+        tuple<string, u64, u64> fun_info;
         string dis_fun_name = "";
         u64 fun_start_addr;
 
@@ -111,14 +135,16 @@ bp_disasm(pid_t pid, u64 addr)
         {
             char code[32];
             
-            ret_val = get_fun_start_end(insn[j].address);
-            dis_fun_name = get<0>(ret_val);
-            fun_start_addr = get<1>(ret_val);
+            fun_info = get_fun_start_end(insn[j].address);
+            dis_fun_name = get<0>(fun_info);
+            fun_start_addr = get<1>(fun_info);
 
             fun_offset = insn[j].address - fun_start_addr;
             
             for(s32 i = 0; i < insn[j].size; ++i)
+            {
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
+            }
 
             // addr 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
             if (insn[j].address == addr)
@@ -136,7 +162,9 @@ bp_disasm(pid_t pid, u64 addr)
         cs_free(insn, count);
     }
     else 
+    {
         printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    }
 
 }
 
@@ -183,15 +211,21 @@ call_disasm(char* byte_codes,
                 {
                     offset = addr_get_elf_fun_offset(fun_addr);
                 }
+
                 printf("  -> 0x%lx(\033[31m%s\033[0m+0x%llx) call \033[31m%15s\033[0m: ", 
                     insn[j].address, call_fun_name.c_str(), insn[j].address-addr,
                     fun_name.c_str());
-                printf("0x%llx\n", fun_addr);
+
+                printf("0x%llx\n", 
+                    fun_addr);
             } 
         }
         cs_free(insn, count);
     }
-    else printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    else 
+    {
+        printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    }
 
 }
 
@@ -205,16 +239,23 @@ flow_change_op(char* ops)
 
     flow_change_addr = strtoul(ops, nullptr, 16);
     if (!flow_change_addr)
+    {
         return;
+    }
 
     set_fun_list(&flow_change_fun_info, flow_change_addr);
     flow_change_fun_name = addr_get_fun(&flow_change_fun_info, flow_change_addr);
     offset = addr_get_fun_offset(&flow_change_fun_info, flow_change_addr);
 
     if (!offset)
+    {
         cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+    }
     else
-        printf("<\033[31m%s+%d\033[0m>", flow_change_fun_name.c_str(), offset);
+    {
+        printf("<\033[31m%s+%d\033[0m>", 
+            flow_change_fun_name.c_str(), offset);
+    }
 }
 
 void 
@@ -226,7 +267,7 @@ show_disasm(pid_t pid, u64 rip_val)
 
     struct winsize size;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
-    s32 str_count = (size.ws_col-10)/2;      // 要重复输出的次数
+    s32 str_count = (size.ws_col-10) / 2;      // 要重复输出的次数
     show_str(str_count);
     printf("[ DISASM ]");
     show_str(str_count);
@@ -250,8 +291,9 @@ show_disasm(pid_t pid, u64 rip_val)
         num = dis_fun_info.fun_num;
 
         for (s32 i = 0; i < 11 && i < count-1; i++ )
+        {
             line++;
-        // printf("%d\n", line);
+        }
 
         if( !(insn[0].address >= dis_fun_info.fun_list[0].fun_start_addr &&
             insn[0].address <= dis_fun_info.fun_list[0].fun_end_addr
@@ -260,10 +302,11 @@ show_disasm(pid_t pid, u64 rip_val)
             insn[line-1].address <= dis_fun_info.fun_list[num-1].fun_end_addr)
           )
         {
-            // printf("---0x%lx\n", insn[line-1].address);
             clear_fun_list(&dis_fun_info); // 清空函数列表
             for(s32 i = 0; i < 11 && i < count-1; i++)
+            {
                 set_fun_list(&dis_fun_info, insn[i].address);
+            }
         }
 
         for (j = 0; j < 11 && j < count-1; j++)
@@ -283,10 +326,14 @@ show_disasm(pid_t pid, u64 rip_val)
             {
                 next_disasm_addr = insn[j + 1].address;
 
-                printf("\033[32m\033[1m ► 0x%lx\033[0m ", insn[j].address);
+                printf("\033[32m\033[1m ► 0x%lx\033[0m ", 
+                    insn[j].address);
 
                 if(dis_fun_name != "")
-                    printf("\033[32m\033[1m<%s+%04d>   ", dis_fun_name.c_str(), fun_offset);
+                {
+                    printf("\033[32m\033[1m<%s+%04d>   ", 
+                        dis_fun_name.c_str(), fun_offset);
+                }
 
                 printf("\033[34m\033[1m%-20s\033[0m" "\033[33m\033[1m%-16s\033[0m" 
                     "\033[36m\033[1m%s\033[0m ", 
@@ -305,7 +352,9 @@ show_disasm(pid_t pid, u64 rip_val)
                 }
 
                 if (!strcmp(insn[j-1].mnemonic, "call"))
+                {
                     set_fun_args_regs(&regs, &fun_args_regs);
+                }
 
                 printf("\n");
 
@@ -316,7 +365,10 @@ show_disasm(pid_t pid, u64 rip_val)
                 printf("   0x%lx ", insn[j].address);
 
                 if(dis_fun_name != "")
-                    printf("<%s+%04d>   ", dis_fun_name.c_str(), fun_offset);
+                {
+                    printf("<%s+%04d>   ", 
+                        dis_fun_name.c_str(), fun_offset);
+                }
 
                 printf("\033[34m%-20s\033[0m", code);
 

@@ -9,14 +9,16 @@ open_bfd(string &fname)
 
   bfd *bfd_h;
 
-  if(!bfd_inited) {
+  if(!bfd_inited) 
+  {
     // 初始化 libbfd 的内部状态
     bfd_init();
     bfd_inited = 1;
   }
 
   bfd_h = bfd_openr(fname.c_str(), NULL);
-  if(!bfd_h) {
+  if(!bfd_h) 
+  {
     fprintf(stderr, "failed to open binary '%s' (%s)\n",
             fname.c_str(), bfd_errmsg(bfd_get_error()));
     return NULL;
@@ -24,7 +26,8 @@ open_bfd(string &fname)
 
   // 检查二进制文件的格式, 加载器将其设置为 bfd_object, 用来验证打开的文件确实是一个对象
   // 可执行文件、可重定位对象，或者共享库
-  if(!bfd_check_format(bfd_h, bfd_object)) {
+  if(!bfd_check_format(bfd_h, bfd_object)) 
+  {
     fprintf(stderr, "file '%s' does not look like an executable (%s)\n",
             fname.c_str(), bfd_errmsg(bfd_get_error()));
     return NULL;
@@ -35,7 +38,8 @@ open_bfd(string &fname)
    * the format has been detected. We unset it manually to prevent problems. */
   bfd_set_error(bfd_error_no_error);
 
-  if(bfd_get_flavour(bfd_h) == bfd_target_unknown_flavour) {
+  if(bfd_get_flavour(bfd_h) == bfd_target_unknown_flavour) 
+  {
     fprintf(stderr, "unrecognized format for binary '%s' (%s)\n",
             fname.c_str(), bfd_errmsg(bfd_get_error()));
     return NULL;
@@ -57,12 +61,14 @@ load_symbols_bfd(bfd* bfd_h, Binary* bin)
 
   // 返回需要存储符号信息的空间大小
   n = bfd_get_symtab_upper_bound(bfd_h);
-  if(n < 0) {
+  if(n < 0) 
+  {
     fprintf(stderr, "failed to read symtab (%s)\n",
             bfd_errmsg(bfd_get_error()));
     goto fail;
   } 
-  else if(n) {
+  else if(n) 
+  {
     // 分配存储符号信息的空间
     bfd_symtab = (asymbol**)malloc(n);
     if(!bfd_symtab) {
@@ -71,15 +77,18 @@ load_symbols_bfd(bfd* bfd_h, Binary* bin)
     }
     // 填充符号表到 bfd_symtab
     nsyms = bfd_canonicalize_symtab(bfd_h, bfd_symtab);
-    if(nsyms < 0) {
+    if(nsyms < 0) 
+    {
       fprintf(stderr, "failed to read symtab (%s)\n",
               bfd_errmsg(bfd_get_error()));
       goto fail;
     }
     // 遍历所有符号
-    for(i = 0; i < nsyms; i++) {
+    for(i = 0; i < nsyms; i++) 
+    {
       // 检查其是否设置了 BSF_FUNCTION 标志，是否是一个函数符号
-      if(bfd_symtab[i]->flags & BSF_FUNCTION) {
+      if(bfd_symtab[i]->flags & BSF_FUNCTION) 
+      {
         bin->symbols.push_back(Symbol());
         sym = &bin->symbols.back();
         sym->type = Symbol::SYM_TYPE_FUNC;
@@ -117,20 +126,25 @@ load_dynsym_bfd(bfd* bfd_h, Binary* bin)
 
   // 返回为符号指针保留的字节数
   n = bfd_get_dynamic_symtab_upper_bound(bfd_h);
-  if(n < 0) {
+  if(n < 0) 
+  {
     fprintf(stderr, "failed to read dynamic symtab (%s)\n",
             bfd_errmsg(bfd_get_error()));
     goto fail;
   } 
-  else if(n) {
+  else if(n) 
+  {
     bfd_dynsym = (asymbol**)malloc(n);
-    if(!bfd_dynsym) {
+    if(!bfd_dynsym) 
+    {
       fprintf(stderr, "out of memory\n");
       goto fail;
     }
+
     // 填充符号表到 bfd_dynsym
     nsyms = bfd_canonicalize_dynamic_symtab(bfd_h, bfd_dynsym);
-    if(nsyms < 0) {
+    if(nsyms < 0) 
+    {
       fprintf(stderr, "failed to read dynamic symtab (%s)\n",
               bfd_errmsg(bfd_get_error()));
       goto fail;
@@ -175,17 +189,23 @@ load_sections_bfd(bfd* bfd_h, Binary* bin)
 
   // 遍历所有节
   // 由 libbfd 的节的链表头指向 bfd_h->sections
-  for(bfd_sec = bfd_h->sections; bfd_sec; bfd_sec = bfd_sec->next) {
+  for(bfd_sec = bfd_h->sections; bfd_sec; bfd_sec = bfd_sec->next) 
+  {
     // 获取节的标志
     bfd_flags = bfd_get_section_flags(bfd_h, bfd_sec);
 
     // 只加载代码和数据段
     sectype = Section::SEC_TYPE_NONE;
-    if(bfd_flags & SEC_CODE) {
+    if(bfd_flags & SEC_CODE) 
+    {
       sectype = Section::SEC_TYPE_CODE;
-    } else if(bfd_flags & SEC_DATA) {
+    } 
+    else if(bfd_flags & SEC_DATA) 
+    {
       sectype = Section::SEC_TYPE_DATA;
-    } else {
+    } 
+    else 
+    {
       continue;
     }
 
@@ -208,12 +228,14 @@ load_sections_bfd(bfd* bfd_h, Binary* bin)
     sec->vma    = vma;
     sec->size   = size;
     sec->bytes  = (uint8_t*)malloc(size);
-    if(!sec->bytes) {
+    if(!sec->bytes) 
+    {
       fprintf(stderr, "out of memory\n");
       return -1;
     }
     // 将 libbfd 的节对象的所有字节复制到 Section 中
-    if(!bfd_get_section_contents(bfd_h, bfd_sec, sec->bytes, 0, size)) {
+    if(!bfd_get_section_contents(bfd_h, bfd_sec, sec->bytes, 0, size)) 
+    {
       fprintf(stderr, "failed to read section '%s' (%s)\n",
               secname, bfd_errmsg(bfd_get_error()));
       return -1;
@@ -255,7 +277,8 @@ load_binary_bfd(string &fname, Binary* bin, Binary::BinaryType type)
       break;
     case bfd_target_unknown_flavour:
     default:
-      fprintf(stderr, "unsupported binary type (%s)\n", bfd_h->xvec->name);
+      fprintf(stderr, "unsupported binary type (%s)\n", 
+        bfd_h->xvec->name);
       goto fail;
   }
 
@@ -263,7 +286,8 @@ load_binary_bfd(string &fname, Binary* bin, Binary::BinaryType type)
   bfd_info = bfd_get_arch_info(bfd_h);
   // 提供了有关二进制体系结构的信息，以及方便的、可打印的字符串描述该体系结构
   bin->arch_str = string(bfd_info->printable_name);
-  switch(bfd_info->mach) {
+  switch(bfd_info->mach) 
+  {
     case bfd_mach_i386_i386:
       bin->arch = Binary::ARCH_X86; 
       bin->bits = 32;
@@ -273,7 +297,8 @@ load_binary_bfd(string &fname, Binary* bin, Binary::BinaryType type)
       bin->bits = 64;
       break;
     default:
-      fprintf(stderr, "unsupported architecture (%s)\n", bfd_info->printable_name);
+      fprintf(stderr, "unsupported architecture (%s)\n", 
+        bfd_info->printable_name);
       goto fail;
   }
 
@@ -314,9 +339,11 @@ unload_binary(Binary* bin)
   size_t i;
   Section *sec;
 
-  for(i = 0; i < bin->sections.size(); i++) {
+  for(i = 0; i < bin->sections.size(); i++) 
+  {
     sec = &bin->sections[i];
-    if(sec->bytes) {
+    if(sec->bytes) 
+    {
       free(sec->bytes);
     }
   }

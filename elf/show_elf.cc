@@ -19,8 +19,11 @@ show_elf_got()
 
     while ((read = getline(&result, &len, fp)) != -1) 
     {
-        if (strcmp(result, "\n") != 0 && string(result).find("elf64-x86-64") == string::npos)
+        if ( strcmp(result, "\n") != 0 && 
+             string(result).find("elf64-x86-64") == string::npos) 
+        {
             cout << result;
+        }
     }
 
     pclose(fp);   // 关闭管道
@@ -66,7 +69,8 @@ show_elf_fun()
     printf("=====================================\n");
     for (auto it : elf_fun_start) 
     {
-        printf("%-30s0x%llx\n", it.first.c_str(), it.second);
+        printf("%-30s0x%llx\n", 
+            it.first.c_str(), it.second);
     }
 }
 
@@ -79,7 +83,8 @@ show_elf_plt_fun()
     printf("=====================================\n");
     for (auto it : elf_plt_fun_start) 
     {
-        printf("%-30s0x%llx\n", it.first.c_str(), it.second);
+        printf("%-30s0x%llx\n", 
+            it.first.c_str(), it.second);
     }
 }
 

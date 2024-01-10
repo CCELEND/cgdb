@@ -20,20 +20,20 @@ tuple<string, u64, u64>
 get_fun_start_end(u64 addr)
 {
     string fun_name;
-    tuple<string, u64, u64> ret_val;
+    tuple<string, u64, u64> fun_info;
 
     if (addr > 0x7f0000000000)
     {
         fun_name = addr_get_glibc_plt_fun(addr);
         if (fun_name != "") 
         {
-            ret_val = make_tuple(fun_name, addr, addr + 0xb);
-            return ret_val;
+            fun_info = make_tuple(fun_name, addr, addr + 0xb);
+            return fun_info;
         }
         else
         {
-            ret_val = addr_get_glibc_fun_start_and_end(addr);
-            return ret_val;
+            fun_info = addr_get_glibc_fun_start_and_end(addr);
+            return fun_info;
         }
     }
 
@@ -43,20 +43,20 @@ get_fun_start_end(u64 addr)
         fun_name = addr_get_elf_fun(addr);
         if (fun_name != "") 
         {
-            ret_val = make_tuple(fun_name, 
+            fun_info = make_tuple(fun_name, 
                 elf_fun_start[fun_name] + elf_base, 
                 elf_fun_end[fun_name]);
 
-            return ret_val;
+            return fun_info;
         }
         else 
         {
             fun_name = addr_get_elf_plt_fun(addr);
-            ret_val = make_tuple(fun_name,
+            fun_info = make_tuple(fun_name,
                 elf_plt_fun_start[fun_name] + elf_base,
                 elf_plt_fun_end[fun_name]);
 
-            return ret_val;
+            return fun_info;
         }
 
     }
@@ -69,20 +69,20 @@ tuple<s32, u64, u64>
 get_fun_addr(const char* fun_name)
 {
     u64 addr;
-    tuple<s32, u64, u64> ret_val;
+    tuple<s32, u64, u64> fun_info;
 
     // elf
     addr = get_elf_fun_addr(fun_name);
     if (addr)
     {
-        ret_val = make_tuple(0, addr, elf_fun_end[string(fun_name)]);
-        return ret_val;
+        fun_info = make_tuple(0, addr, elf_fun_end[string(fun_name)]);
+        return fun_info;
     }
     addr = get_elf_plt_fun_addr(fun_name);
     if (addr)
     {
-        ret_val = make_tuple(0, addr, elf_plt_fun_end[string(fun_name)]);
-        return ret_val;
+        fun_info = make_tuple(0, addr, elf_plt_fun_end[string(fun_name)]);
+        return fun_info;
     }
 
     // glibc
@@ -96,18 +96,18 @@ get_fun_addr(const char* fun_name)
         fun_start_addr = get<1>(temp);
         fun_end_addr = get<2>(temp);
 
-        ret_val = make_tuple(0, fun_start_addr, fun_end_addr);
-        return ret_val;
+        fun_info = make_tuple(0, fun_start_addr, fun_end_addr);
+        return fun_info;
     }
     addr = get_glibc_plt_fun_addr(fun_name);
     if (addr)
     {
-        ret_val = make_tuple(0, addr, addr + 0xb);
-        return ret_val;
+        fun_info = make_tuple(0, addr, addr + 0xb);
+        return fun_info;
     }
 
-    ret_val = make_tuple(-1, 0, 0);
-    return ret_val;
+    fun_info = make_tuple(-1, 0, 0);
+    return fun_info;
 }
 
 // 通过函数地址获得函数结束地址

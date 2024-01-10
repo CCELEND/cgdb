@@ -72,14 +72,16 @@ extern regs_struct fun_args_regs;
 
 extern char* disasm_code;
 
-typedef struct fun_info {
+typedef struct fun_info 
+{
     u64 fun_start_addr;
     u64 fun_end_addr;
     string fun_name;
     fun_info(): fun_start_addr(0), fun_end_addr(0), fun_name("") {}
 } fun_info_type;
 
-typedef struct fun_list_info {
+typedef struct fun_list_info 
+{
     fun_info_type fun_list[0x10];
     s32 fun_num;
     fun_list_info(): fun_num(0) {}
@@ -93,7 +95,8 @@ extern fun_list_info_type dis_fun_info;
 extern fun_list_info_type flow_change_fun_info;
 
 // 断点结构体，包含有需要插入断点的地址，断点地址处的指令备份，以及断点的状态
-typedef struct break_point {
+typedef struct break_point 
+{
     u64 addr;
     char backup[CODE_SIZE];
     bool break_point_state;
@@ -106,7 +109,8 @@ extern break_point_type break_point_list[8];
 extern break_point_type ni_break_point;
 
 // 函数调用树节点
-typedef struct fun_tree_node {
+typedef struct fun_tree_node 
+{
     fun_info_type fun_info;
     struct fun_tree_node* next;
     struct fun_tree_node* sub_fun;
@@ -146,7 +150,6 @@ void show_glibc_addr();
 
 // 地址数据处理
 // addr_data_handler.cc
-// string get_addr_file_base(u64 addr, u64* base_addr);
 tuple<string, u64> get_addr_file_base(u64 addr);
 s64 get_addr_val(pid_t pid, u64 addr);
 u64 get_hex_in_string(const char* str);

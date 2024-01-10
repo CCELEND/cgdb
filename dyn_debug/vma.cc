@@ -6,7 +6,8 @@ void
 get_vma_address(pid_t pid)
 {
     string maps_path = "/proc/" + to_string(pid) + "/maps";
-    ifstream inf(maps_path.data());//建立输入流
+    
+    ifstream inf(maps_path.data()); //建立输入流
     if (!inf) 
     {
         err_info("Read failed!");
@@ -48,7 +49,6 @@ get_vma_address(pid_t pid)
         // glibc stack
         else 
         {
-
             if ( line.find("libc") != string::npos && 
                  !libc_base) 
             {
@@ -126,6 +126,7 @@ void
 show_vmmap(pid_t pid) 
 {
     string maps_path = "/proc/" + to_string(pid) + "/maps";
+
     ifstream inf(maps_path.data());//建立输入流
     if (!inf) 
     {
@@ -147,24 +148,31 @@ show_vmmap(pid_t pid)
     {
         if (line.find("-xp") != string::npos) 
         {
-            printf("\033[31m%s\033[0m\n", line.c_str());
+            printf("\033[31m%s\033[0m\n", 
+                line.c_str());
         } 
         else if (line.find("rw-p") != string::npos) 
         {
             if (line.find("[stack]") != string::npos)
             {
-                printf("\033[33m%s\033[0m\n", line.c_str());
-            } else if (line.find("[heap]") != string::npos)
+                printf("\033[33m%s\033[0m\n", 
+                    line.c_str());
+            } 
+            else if (line.find("[heap]") != string::npos)
             {
-                printf("\033[34m%s\033[0m\n", line.c_str());
-            } else 
+                printf("\033[34m%s\033[0m\n", 
+                    line.c_str());
+            } 
+            else 
             {
-                printf("\033[35m%s\033[0m\n", line.c_str());
+                printf("\033[35m%s\033[0m\n", 
+                    line.c_str());
             }
         } 
         else 
         {
-            printf("%s\n", line.c_str());
+            printf("%s\n", 
+                line.c_str());
         }
     }
 

@@ -42,6 +42,7 @@ addr_get_elf_init(u64 elf_init_addr)
         {
             elf_init_str_start = std::string(result).find("<");
             elf_init_str_end = std::string(result).find(">");
+            
             elf_init_name = std::string(result).substr(elf_init_str_start+1, 
                 elf_init_str_end - elf_init_str_start-1);
         }     

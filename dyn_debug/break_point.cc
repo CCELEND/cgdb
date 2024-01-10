@@ -71,8 +71,7 @@ set_break_point(pid_t pid, u64 break_point_addr)
             link_file = get<0>(ret_val2);
             base_addr = get<1>(ret_val2);
 
-            printf(
-                "[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
+            printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
                     i, link_file.c_str(), break_point_addr-base_addr, break_point_addr);
 
             if (fun_offset)
@@ -170,16 +169,16 @@ break_point_info()
     s32 fun_offset;
     string fun_name = "";
     u64 fun_start_addr;
-    tuple<string, u64, u64> ret_val;
+    tuple<string, u64, u64> fun_info;
 
     printf("Num        Type            Address\n");
     for (s32 i = 0; i < 8; i++) 
     {
         if (break_point_list[i].break_point_state) 
         {
-            ret_val = get_fun_start_end(break_point_list[i].addr);
-            fun_name = get<0>(ret_val);
-            fun_start_addr = get<1>(ret_val);
+            fun_info = get_fun_start_end(break_point_list[i].addr);
+            fun_name = get<0>(fun_info);
+            fun_start_addr = get<1>(fun_info);
             
             fun_offset = break_point_list[i].addr - fun_start_addr;
 

@@ -106,9 +106,11 @@ elf_code_fun_printf(u64 addr)
     offset = addr_get_fun_offset(&regs_fun_info, addr);
 
     if (!offset)
-        printf("\033[31m0x%llx (elf.%s)\033[0m", addr, fun_name.c_str());
+        printf("\033[31m0x%llx (elf.%s)\033[0m", 
+            addr, fun_name.c_str());
     else
-        printf("\033[31m0x%llx (elf.%s+%d)\033[0m", addr, fun_name.c_str(), offset);  
+        printf("\033[31m0x%llx (elf.%s+%d)\033[0m", 
+            addr, fun_name.c_str(), offset);  
 }
 void
 elf_ini_printf(u64 addr)
@@ -116,20 +118,24 @@ elf_ini_printf(u64 addr)
     string ini_name = addr_get_elf_fini(addr);
 
     if (ini_name != "")
-        printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
+        printf("0x%llx (elf.%s)\033[0m", 
+            addr, ini_name.c_str());
     else 
     {
         ini_name = addr_get_elf_init(addr);
-        printf("0x%llx (elf.%s)\033[0m", addr, ini_name.c_str());
+        printf("0x%llx (elf.%s)\033[0m", 
+            addr, ini_name.c_str());
     }
 }
 void
 elf_heap_printf(u64 addr)
 {
     if (addr == heap_base)
-        printf("\033[34m0x%llx (heap)\033[0m", addr);
+        printf("\033[34m0x%llx (heap)\033[0m", 
+            addr);
     else
-        printf("\033[34m0x%llx (heap+0x%llx)\033[0m", addr, addr-heap_base);
+        printf("\033[34m0x%llx (heap+0x%llx)\033[0m", 
+            addr, addr-heap_base);
 }
 void
 glibc_code_fun_printf(u64 addr)
@@ -142,9 +148,11 @@ glibc_code_fun_printf(u64 addr)
     offset = addr_get_fun_offset(&regs_fun_info, addr);
 
     if (!offset)
-        printf("\033[31m0x%llx (%s)\033[0m", addr, fun_name.c_str());
+        printf("\033[31m0x%llx (%s)\033[0m", 
+            addr, fun_name.c_str());
     else
-        printf("\033[31m0x%llx (%s+%d)\033[0m", addr, fun_name.c_str(), offset);
+        printf("\033[31m0x%llx (%s+%d)\033[0m", 
+            addr, fun_name.c_str(), offset);
 }
 void
 glibc_data_printf(u64 addr)
@@ -152,17 +160,21 @@ glibc_data_printf(u64 addr)
     string data_name;
 
     data_name = addr_get_glibc_data(addr);
-    printf("\033[35m0x%llx (%s)\033[0m", addr, data_name.c_str());
+    printf("\033[35m0x%llx (%s)\033[0m", 
+        addr, data_name.c_str());
 }
 void 
 stack_printf(u64 addr)
 {
     if (addr > regs.rsp)
-        printf("\033[33m0x%llx (stack+0x%llx)\033[0m", addr, addr-regs.rsp);
+        printf("\033[33m0x%llx (stack+0x%llx)\033[0m", 
+            addr, addr-regs.rsp);
     else if(addr < regs.rsp) 
-        printf("\033[33m0x%llx (stack-0x%llx)\033[0m", addr, regs.rsp-addr);
+        printf("\033[33m0x%llx (stack-0x%llx)\033[0m", 
+            addr, regs.rsp-addr);
     else
-        printf("\033[33m0x%llx (stack)\033[0m", addr); 
+        printf("\033[33m0x%llx (stack)\033[0m", 
+            addr); 
 }
 
 
@@ -368,8 +380,6 @@ judg_addr_code(u64 addr)
 }
 
 // 通过地址获取文件名和加载基址
-// string 
-// get_addr_file_base(u64 addr, u64* base_addr)
 tuple<string, u64>
 get_addr_file_base(u64 addr)
 {
@@ -377,22 +387,16 @@ get_addr_file_base(u64 addr)
 
     if (addr > elf_code_start && addr < elf_code_end) 
     {
-        // *base_addr = elf_base;
-        // return "elf";
         ret_val = make_tuple("elf", elf_base);
         return ret_val;
     } 
     else if (addr > libc_code_start && addr < libc_code_end) 
     {
-        // *base_addr = libc_base;
-        // return "libc";
         ret_val = make_tuple("libc", libc_base);
         return ret_val;
     } 
     else if (addr > ld_code_start && addr < ld_code_end) 
     {
-        // *base_addr = ld_base;
-        // return "ld";
         ret_val = make_tuple("ld", ld_base);
         return ret_val;
     }
@@ -414,9 +418,11 @@ get_hex_in_string(const char* str)
     {
         hex_str_start = string(str).find("0x");
         hex_str_end = string(str).find("]");
+
         hex_str = string(str).substr(hex_str_start+2, 
                     hex_str_end-hex_str_start-2);
         hex_val = strtoul(hex_str.c_str(), nullptr, 16);
+
         return hex_val;
     }
     

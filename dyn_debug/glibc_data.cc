@@ -30,6 +30,7 @@ addr_get_glibc_data(u64 glibc_data_addr)
     stringstream ss;
     ss << hex << glibc_data_addr_offset; // 使用十六进制输出
     string addr_hex_str = ss.str();
+
     // 去掉前缀"0x"
     if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") 
     {
@@ -41,7 +42,7 @@ addr_get_glibc_data(u64 glibc_data_addr)
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)
     {
-        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+        err_info("Popen failed!");
         return "";
     }
 
@@ -65,7 +66,8 @@ addr_get_glibc_data(u64 glibc_data_addr)
     }
 
     pclose(fp);
-    if (result) delete[] result;
+    if (result) 
+        delete[] result;
 
     if (lib_data_name == "")
     {
@@ -83,7 +85,6 @@ addr_get_glibc_data(u64 glibc_data_addr)
     }
 
     return lib_data_name;
-
 }
 
 

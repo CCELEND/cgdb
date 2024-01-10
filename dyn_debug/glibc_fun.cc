@@ -29,8 +29,9 @@ get_glibc_fun_addr(const char* fun_name)
     fp = popen(exe_command.c_str(), "r");
     if (!fp)
     {
-        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
-        if (result) delete[] result;
+        err_info("Popen failed!");
+        if (result) 
+            delete[] result;
         return 0;
     }
 
@@ -103,6 +104,7 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
         // 使stringstream 将十六进制数转换为字符串
         ss << hex << glibc_fun_addr_offset; // 使用十六进制输出
         string addr_hex_str = ss.str();
+
         // 去掉前缀"0x"
         if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") 
             addr_hex_str = addr_hex_str.substr(2);
@@ -114,9 +116,10 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
         fp = popen(exe_command.c_str(), "r");
         if (!fp)
         {
-            printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+            err_info("Popen failed!");
             ret_val = make_tuple("", 0, 0);
-            if (result) delete[] result;
+            if (result) 
+                delete[] result;
             return ret_val;
         }
 

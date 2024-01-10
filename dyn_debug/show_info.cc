@@ -22,10 +22,13 @@ show_code_addr()
 {
     printf("[+] elf code:  \033[31m0x%llx-0x%llx\033[0m\n", 
         elf_code_start,  elf_code_end);
+
     printf("[+] libc code: \033[31m0x%llx-0x%llx\033[0m\n", 
         libc_code_start, libc_code_end);
+
     printf("[+] ld code:   \033[31m0x%llx-0x%llx\033[0m\n", 
         ld_code_start,   ld_code_end);
+
     printf("[+] vdso code: \033[31m0x%llx-0x%llx\033[0m\n", 
         vdso_code_start, vdso_code_end);
 }
@@ -35,8 +38,10 @@ show_data_addr()
 {
     printf("[+] elf data:  \033[35m0x%llx-0x%llx\033[0m\n", 
         elf_data_start,  elf_data_end);
+
     printf("[+] libc data: \033[35m0x%llx-0x%llx\033[0m\n", 
         libc_data_start, libc_data_end);
+
     printf("[+] ld data:   \033[35m0x%llx-0x%llx\033[0m\n", 
         ld_data_start,   ld_data_end);
 }
@@ -58,8 +63,11 @@ show_heap_addr()
 void
 show_glibc_addr()
 {
-    printf("[+] libc base: 0x%llx\n", libc_base);
-    printf("[+] ld base:   0x%llx\n", ld_base);
+    printf("[+] libc base: 0x%llx\n", 
+        libc_base);
+    
+    printf("[+] ld base:   0x%llx\n", 
+        ld_base);
 }
 
 

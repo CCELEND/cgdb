@@ -10,7 +10,9 @@ map_fun_start(Binary* bin)
     {
         sym = &bin->symbols[i];
         if(sym->addr)
+        {
             elf_fun_start[sym->name] = sym->addr;
+        }
     }
 }
 

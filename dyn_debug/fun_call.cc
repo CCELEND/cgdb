@@ -25,8 +25,10 @@ show_elf_fun_call(pid_t pid, const char* elf_fun_name)
 
     get_addr_data(pid, fun_start_addr, fun_code, fun_size);
 
-    printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
-    printf("\033[31m%s\033[0m():\n", fun_name.c_str());
+    printf("0x%llx-0x%llx\n", 
+        fun_start_addr, fun_end_addr);
+    printf("\033[31m%s\033[0m():\n", 
+        fun_name.c_str());
     
     call_disasm(fun_code, fun_start_addr, fun_size, fun_name);
 

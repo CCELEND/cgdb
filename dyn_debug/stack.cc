@@ -1,7 +1,6 @@
 
 #include "dyn_fun.h"
 
-
 // 输出栈信息
 void 
 show_stack(pid_t pid, regs_struct* regs)
@@ -9,7 +8,7 @@ show_stack(pid_t pid, regs_struct* regs)
     struct winsize size;
     u64 stack = regs->rsp;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
-    s32 count = (size.ws_col-9)/2;      // 要重复输出的次数
+    s32 count = (size.ws_col-9) / 2;      // 要重复输出的次数
 
     show_str(count);
     printf("[ STACK ]");
@@ -43,7 +42,7 @@ show_num_stack(pid_t pid, regs_struct* regs, s32 num)
 {
     if (num < 0 || num > 0x100)
     {
-        printf("[-] Number of errors!\n");
+        err_info("Number of errors!");
         return;
     }
 

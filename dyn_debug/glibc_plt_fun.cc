@@ -31,6 +31,7 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
     stringstream ss;
     ss << hex << glibc_plt_fun_addr_offset; // 使用十六进制输出
     string addr_hex_str = ss.str();
+
     // 去掉前缀"0x"
     if (addr_hex_str.size() >= 2 && 
         addr_hex_str.substr(0, 2) == "0x") 
@@ -54,17 +55,16 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
         FILE* fp = popen(exe_cmd.c_str(), "r");
         if (!fp)
         {
-            printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+            err_info("Popen failed!");
+            // printf("\033[31m\033[1m[-] \033[0m\n");
             break;
         }
 
-        // char* result = nullptr;
         memset(result, 0, 100);
 
         size_t len = 0;
         ssize_t read;
         s32 lib_plt_fun_str_start, lib_plt_fun_str_end;
-        // string lib_plt_fun_name = "";
 
         while ((read = getline(&result, &len, fp)) != -1) 
         {
@@ -72,6 +72,7 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
             {
                 lib_plt_fun_str_start = string(result).find("<");
                 lib_plt_fun_str_end = string(result).find(">");
+
                 lib_plt_fun_name = string(result).substr(lib_plt_fun_str_start+1, 
                     lib_plt_fun_str_end - lib_plt_fun_str_start-1);
                 finded = true;
@@ -79,12 +80,10 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
         }
 
         pclose(fp);
-        // if (result)
-        //     free(result);
-        // if (result) delete[] result;
     }
 
-    if (result) delete[] result;
+    if (result) 
+        delete[] result;
 
     if(lib_plt_fun_name != "")
     {
@@ -126,7 +125,6 @@ get_glibc_plt_fun_addr(const char* fun_name)
             break;
         }
 
-        // char* result = nullptr;
         memset(result, 0, 100);
         size_t len = 0;
         ssize_t read;
@@ -141,12 +139,10 @@ get_glibc_plt_fun_addr(const char* fun_name)
         }
 
         pclose(fp);   // 关闭管道
-        // if (result)
-        //     free(result);
-
     }
 
-    if (result) delete[] result;
+    if (result) 
+        delete[] result;
 
     if (is_libc)
         glibc_plt_fun_addr = glibc_plt_fun_addr + libc_base;

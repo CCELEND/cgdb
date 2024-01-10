@@ -15,7 +15,7 @@ show_regs(pid_t pid, regs_struct* regs)
 
     struct winsize size;
     ioctl(STDIN_FILENO, TIOCGWINSZ, &size);
-    s32 count = (size.ws_col-13)/2;      // 要重复输出的次数
+    s32 count = (size.ws_col-13) / 2;      // 要重复输出的次数
 
     printf("LEGEND: "
     "\033[33mSTACK\033[0m | "

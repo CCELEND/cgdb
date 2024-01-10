@@ -7,7 +7,8 @@ clear_fun_list(fun_list_info_type* fun_info)
 {
     for (s32 i = 0; i < fun_info->fun_num; i++)
     {
-        if (!fun_info->fun_list[i].fun_start_addr) break;
+        if (!fun_info->fun_list[i].fun_start_addr) 
+            break;
 
         fun_info->fun_list[i].fun_start_addr = 0;
         fun_info->fun_list[i].fun_end_addr = 0;
@@ -20,8 +21,6 @@ clear_fun_list(fun_list_info_type* fun_info)
 void 
 set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
 {
-    tuple<string, u64, u64> ret_val;
-
     for (s32 i = 0; i < 0x10; i++) 
     {
         // 地址在列表某个函数范围内就直接退出
@@ -40,24 +39,37 @@ set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
                 fun_name = addr_get_glibc_plt_fun(fun_addr);
                 if (fun_name != "") 
                 {
-                    fun_info->fun_list[i].fun_start_addr = fun_addr;
-                    fun_info->fun_list[i].fun_end_addr = fun_addr + 0xb;
-                    fun_info->fun_list[i].fun_name = fun_name;
+                    fun_info->fun_list[i].fun_start_addr = 
+                        fun_addr;
+
+                    fun_info->fun_list[i].fun_end_addr = 
+                        fun_addr + 0xb;
+
+                    fun_info->fun_list[i].fun_name = 
+                        fun_name;
+
                     fun_info->fun_num++;
                     break;
                 }
                 else
                 {
+                    tuple<string, u64, u64> fun_info_temp;
                     u64 glibc_fun_start, glibc_fun_end;
 
-                    ret_val = addr_get_glibc_fun_start_and_end(fun_addr);
-                    fun_name = get<0>(ret_val);
-                    glibc_fun_start = get<1>(ret_val);
-                    glibc_fun_end = get<2>(ret_val);
+                    fun_info_temp = addr_get_glibc_fun_start_and_end(fun_addr);
+                    fun_name = get<0>(fun_info_temp);
+                    glibc_fun_start = get<1>(fun_info_temp);
+                    glibc_fun_end = get<2>(fun_info_temp);
 
-                    fun_info->fun_list[i].fun_name = fun_name;
-                    fun_info->fun_list[i].fun_start_addr = glibc_fun_start;
-                    fun_info->fun_list[i].fun_end_addr = glibc_fun_end;
+                    fun_info->fun_list[i].fun_name = 
+                        fun_name;
+
+                    fun_info->fun_list[i].fun_start_addr = 
+                        glibc_fun_start;
+
+                    fun_info->fun_list[i].fun_end_addr = 
+                        glibc_fun_end;
+
                     fun_info->fun_num++;
                     break;
                 }
@@ -69,18 +81,31 @@ set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
                 fun_name = addr_get_elf_fun(fun_addr);
                 if (fun_name != "") 
                 {
-                    fun_info->fun_list[i].fun_start_addr = elf_fun_start[fun_name] + elf_base;
-                    fun_info->fun_list[i].fun_end_addr = elf_fun_end[fun_name];
-                    fun_info->fun_list[i].fun_name = fun_name;
+                    fun_info->fun_list[i].fun_start_addr = 
+                        elf_fun_start[fun_name] + elf_base;
+
+                    fun_info->fun_list[i].fun_end_addr = 
+                        elf_fun_end[fun_name];
+
+                    fun_info->fun_list[i].fun_name = 
+                        fun_name;
+
                     fun_info->fun_num++;
                     break;
                 }
                 else 
                 {
                     fun_name = addr_get_elf_plt_fun(fun_addr);
-                    fun_info->fun_list[i].fun_start_addr = elf_plt_fun_start[fun_name] + elf_base;
-                    fun_info->fun_list[i].fun_end_addr = elf_plt_fun_end[fun_name];
-                    fun_info->fun_list[i].fun_name = fun_name;
+
+                    fun_info->fun_list[i].fun_start_addr = 
+                        elf_plt_fun_start[fun_name] + elf_base;
+
+                    fun_info->fun_list[i].fun_end_addr = 
+                        elf_plt_fun_end[fun_name];
+
+                    fun_info->fun_list[i].fun_name = 
+                        fun_name;
+
                     fun_info->fun_num++;
                     break;
                 }
@@ -95,12 +120,19 @@ show_fun_list(fun_list_info_type* fun_info)
 {
     for (s32 i = 0; i < 0x10; i++)
     {
-        if (fun_info->fun_list[i].fun_start_addr == 0) break;
+        if (fun_info->fun_list[i].fun_start_addr == 0) 
+            break;
 
         printf("idx: %d\n", i);
-        printf("fun start: 0x%llx\n", fun_info->fun_list[i].fun_start_addr);
-        printf("fun end:   0x%llx\n", fun_info->fun_list[i].fun_end_addr);
-        printf("fun name:  %s\n",     fun_info->fun_list[i].fun_name.c_str());
+
+        printf("fun start: 0x%llx\n", 
+            fun_info->fun_list[i].fun_start_addr);
+
+        printf("fun end:   0x%llx\n", 
+            fun_info->fun_list[i].fun_end_addr);
+
+        printf("fun name:  %s\n",     
+            fun_info->fun_list[i].fun_name.c_str());
     }
 
     printf("num: %d\n", fun_info->fun_num);

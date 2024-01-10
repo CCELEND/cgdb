@@ -125,7 +125,8 @@ run_dyn_debug(Binary* bin)
                 // 上、下、左、右这四个光标键对应的 ASCII 码值不是一个值而是三个，
                 // 准确的说光标键的 ASCII 码值是一个组合
                 all_sum = cmd[0] + cmd[1] + cmd[2];
-                if (all_sum == KEYCODE_U) cmd = old_cmd;
+                if (all_sum == KEYCODE_U) 
+                    cmd = old_cmd;
 
                 debug_start:
                 //输入参数解析
@@ -253,8 +254,10 @@ run_dyn_debug(Binary* bin)
                         else  // 打断点
                             set_break_point(pid, break_point_fun_addr);
                     } 
-                    else 
+                    else
+                    { 
                         err_info("Please enter the break point function name!");
+                    }
                 } 
                 else if (!strcmp(arguments[0], "ba")) 
                 {
@@ -267,8 +270,10 @@ run_dyn_debug(Binary* bin)
                         else // 打断点
                             set_break_point(pid, break_point_addr);
                     } 
-                    else 
+                    else
+                    {
                         err_info("Please enter the break point address!");
+                    }
 
                 }             
                 else if (!strcmp(arguments[0], "d") && !strcmp(arguments[1], "b")) 
@@ -283,7 +288,9 @@ run_dyn_debug(Binary* bin)
                             break_point_delete(pid, num);
                     }
                     else
+                    {
                         err_info("Please enter the break point number to delete!");
+                    }
 
                 } 
                 else if (!strcmp(arguments[0], "ib")) 
@@ -297,9 +304,13 @@ run_dyn_debug(Binary* bin)
                     if (argc == 3) 
                     {
                         s32 num = stoi(arguments[1]);
-                        if (num < 0) 
+
+                        if (num < 0)
+                        {
                             err_info("Wrong number of reads!");
-                        else {
+                        }
+                        else 
+                        {
                             u64 address = strtoul(arguments[2], nullptr, 16);
                             show_addr_data(pid, num, address);
                         }
@@ -316,7 +327,9 @@ run_dyn_debug(Binary* bin)
                         show_num_stack(pid, &regs, num);
                     }
                     else 
+                    {
                         err_info("Please Enter the correct quantity!");
+                    }
                 }
 
 
@@ -369,7 +382,9 @@ run_dyn_debug(Binary* bin)
                             printf("%s\n", addr_get_elf_plt_fun(address).c_str());
                     } 
                     else 
+                    {
                         err_info("Please enter the function address!");
+                    }
                 }
                 else if (!strcmp(arguments[0], "fun")) 
                 {
@@ -397,8 +412,10 @@ run_dyn_debug(Binary* bin)
                                 show_fun_tree();
                                 free_fun_tree();
                             }
-                            else
+                            else 
+                            {
                                 printf("[-] Failed to create node\n");
+                            }
                         }
 
                     }
@@ -421,8 +438,11 @@ run_dyn_debug(Binary* bin)
                     fun_start_addr = get<1>(ret_val);
                     fun_end_addr = get<2>(ret_val);
 
-                    printf("%s\n", fun_name.c_str());
-                    printf("0x%llx-0x%llx\n", fun_start_addr, fun_end_addr);
+                    printf("%s\n", 
+                        fun_name.c_str());
+
+                    printf("0x%llx-0x%llx\n", 
+                        fun_start_addr, fun_end_addr);
                 }
 
                 else if (!strcmp(arguments[0], "help") || !strcmp(arguments[0], "h")) 
@@ -446,33 +466,4 @@ run_dyn_debug(Binary* bin)
             cs_close(&handle);
         }
     }
-} 
-
-// printf("-------------regs:\n");
-// show_fun_list(&regs_fun_info);
-// printf("--------------dis:\n");
-// show_fun_list(&dis_fun_info);
-// printf("--------------flow_change_fun:\n");
-// show_fun_list(&flow_change_fun_info);
-
-// for (auto it : fun_start) {
-//     printf("%-30s0x%llx\n", it.first.c_str(), it.second);
-// }
-// printf("\n");
-// for (auto i : fun_end) {
-//     printf("%-30s0x%llx\n", i.first.c_str(), i.second);
-// }
-
-// printf("fun_args_regs.rdi: 0x%llx\n", fun_args_regs.rdi);
-// printf("fun_args_regs.rsi: 0x%llx\n", fun_args_regs.rsi);
-// printf("fun_args_regs.rdx: 0x%llx\n", fun_args_regs.rdx);
-// printf("fun_args_regs.rcx: 0x%llx\n", fun_args_regs.rcx);
-// printf("fun_args_regs.r8:  0x%llx\n", fun_args_regs.r8);
-// printf("fun_args_regs.r9:  0x%llx\n", fun_args_regs.r9);
-
-// printf("regs.rdi: 0x%llx\n", regs.rdi);
-// printf("regs.rsi: 0x%llx\n", regs.rsi);
-// printf("regs.rdx: 0x%llx\n", regs.rdx);
-// printf("regs.rcx: 0x%llx\n", regs.rcx);
-// printf("regs.r8:  0x%llx\n", regs.r8);
-// printf("regs.r9:  0x%llx\n", regs.r9);
+}
