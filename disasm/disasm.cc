@@ -274,7 +274,9 @@ show_disasm(pid_t pid, u64 rip_val)
     printf("\033[0m\n");
 
     // 反汇编开始地址与 rip 同步
-    if (disasm_addr_synchronous || next_disasm_addr && next_disasm_addr != rip_val) 
+    if ( disasm_addr_synchronous || 
+         next_disasm_addr && 
+         next_disasm_addr != rip_val) 
     {
         disasm_addr = rip_val;
     }
