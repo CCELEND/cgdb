@@ -31,11 +31,13 @@ put_addr_val(pid_t pid, u64 addr, s64 val)
 
 // 从子进程指定地址读取 len 字节长度数据到 str, len 需要8字节对齐
 void 
-get_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
+// get_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
+get_data_from_addr(pid_t pid, u64 addr, char* str, s32 len)
 {
     char* laddr = str;
     u64 data_addr = addr;
     s32 j = len >> 3;
+
     union u 
     {
         long val;
@@ -48,7 +50,9 @@ get_addr_data(pid_t pid, u64 addr, char* str, s32 len)
 
         word.val = get_addr_val(pid, data_addr);
         if (word.val == -1)
+        {
             return;
+        }
 
         memcpy(laddr, word.chars, LONG_SIZE);//将这8个字节拷贝进 laddr 数组
         laddr += LONG_SIZE;
@@ -59,7 +63,8 @@ get_addr_data(pid_t pid, u64 addr, char* str, s32 len)
 
 // 从 str 插入 len 字节长度数据到子进程指定地址
 void 
-put_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
+// put_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
+put_data_to_addr(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
     u64 data_addr = addr;
@@ -91,7 +96,9 @@ print_bytes(const char* codes, s32 len)
         printf("%02x", (unsigned char) codes[i]);
 
         if ((i + 1) % 8 == 0) 
+        {
             printf("\n");
+        }
     }
 }
 
@@ -105,21 +112,27 @@ elf_code_fun_printf(u64 addr)
     fun_name = addr_get_fun(&regs_fun_info, addr);
     offset = addr_get_fun_offset(&regs_fun_info, addr);
 
-    if (!offset)
+    if (!offset) 
+    {
         printf("\033[31m0x%llx (elf.%s)\033[0m", 
             addr, fun_name.c_str());
-    else
+    }
+    else 
+    {
         printf("\033[31m0x%llx (elf.%s+%d)\033[0m", 
             addr, fun_name.c_str(), offset);  
+    }
 }
 void
 elf_ini_printf(u64 addr)
 {
     string ini_name = addr_get_elf_fini(addr);
 
-    if (ini_name != "")
+    if (ini_name != "") 
+    {
         printf("0x%llx (elf.%s)\033[0m", 
             addr, ini_name.c_str());
+    }
     else 
     {
         ini_name = addr_get_elf_init(addr);
@@ -130,12 +143,16 @@ elf_ini_printf(u64 addr)
 void
 elf_heap_printf(u64 addr)
 {
-    if (addr == heap_base)
+    if (addr == heap_base) 
+    {
         printf("\033[34m0x%llx (heap)\033[0m", 
             addr);
-    else
+    }
+    else 
+    {
         printf("\033[34m0x%llx (heap+0x%llx)\033[0m", 
             addr, addr-heap_base);
+    }
 }
 void
 glibc_code_fun_printf(u64 addr)
@@ -147,12 +164,16 @@ glibc_code_fun_printf(u64 addr)
     fun_name = addr_get_fun(&regs_fun_info, addr);
     offset = addr_get_fun_offset(&regs_fun_info, addr);
 
-    if (!offset)
+    if (!offset) 
+    {
         printf("\033[31m0x%llx (%s)\033[0m", 
             addr, fun_name.c_str());
-    else
+    }
+    else 
+    {
         printf("\033[31m0x%llx (%s+%d)\033[0m", 
             addr, fun_name.c_str(), offset);
+    }
 }
 void
 glibc_data_printf(u64 addr)
@@ -166,15 +187,21 @@ glibc_data_printf(u64 addr)
 void 
 stack_printf(u64 addr)
 {
-    if (addr > regs.rsp)
+    if (addr > regs.rsp) 
+    {
         printf("\033[33m0x%llx (stack+0x%llx)\033[0m", 
             addr, addr-regs.rsp);
+    }
     else if(addr < regs.rsp) 
+    {
         printf("\033[33m0x%llx (stack-0x%llx)\033[0m", 
             addr, regs.rsp-addr);
-    else
+    }
+    else 
+    {
         printf("\033[33m0x%llx (stack)\033[0m", 
             addr); 
+    }
 }
 
 
@@ -234,16 +261,21 @@ flag_addr_printf(u64 addr, bool addr_flag)
     else
     {
         if (judg_addr_code(addr)) 
+        {
             printf("\033[31m0x%llx\033[0m", addr);
-
+        }
         else if (addr > stack_base && addr < stack_end) 
+        {
             printf("\033[33m0x%llx\033[0m", addr);
-
-        else if (addr >= heap_base && addr <= heap_end)
+        }
+        else if (addr >= heap_base && addr <= heap_end) 
+        {
             printf("\033[34m0x%llx\033[0m", addr);
-
+        }
         else 
+        {
             printf("0x%llx", addr);
+        }
     }
 }
 
@@ -279,7 +311,9 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
         }
 
         if (( i + 1 ) % 2 == 0 || ( i + 1 ) == num) 
+        {
             printf("\n");
+        }
     }
 
 }
@@ -293,14 +327,18 @@ end_output(pid_t pid, u64 addr, u64 val)
     
     if (judg_addr_code(addr)) 
     {
-        get_addr_data(pid, addr, addr_instruct, 16);
+        // get_addr_data(pid, addr, addr_instruct, 16);
+        get_data_from_addr(pid, addr, addr_instruct, 16);
         disasm_mne_op(addr_instruct, addr, 16, 1);
     }
     else 
     {
         flag_addr_printf(val, false);
-        if (val > 0x7fffffffffff && val != 0xffffffffffffffff)
+        if (val > 0x7fffffffffff && 
+            val != 0xffffffffffffffff) 
+        {
             val_to_string(val);
+        }
     }
 }
 
@@ -312,15 +350,20 @@ show_addr_point(pid_t pid, u64 address, bool addr_flag)
     u64 val;
     flag_addr_printf(address, addr_flag);
 
-    if (address < 0x550000000000 || address > 0x7fffffffffff)
+    if (address < 0x550000000000 || 
+        address > 0x7fffffffffff) 
+    {
         return;
+    }
 
     addr = address;
     while (true)
     {
         val = get_addr_val(pid, addr);
 
-        if (val < 0x550000000000 || val > 0x7fffffffffff || val == addr) 
+        if (val < 0x550000000000 || 
+            val > 0x7fffffffffff || 
+            val == addr) 
         {
             end_output(pid, addr, val);
             break;
@@ -350,11 +393,14 @@ val_to_string(u64 val)
     for(s32 i = 0; i < CODE_SIZE; ++i)
     {
         if ( long((unsigned char)word.chars[i]) == 0x00 ) 
+        {
             break;
+        }
 
         if ( long((unsigned char)word.chars[i]) >= 0x21 &&
-             long((unsigned char)word.chars[i]) <= 0x7e ) 
+             long((unsigned char)word.chars[i]) <= 0x7e ) {
             printf("%c", word.chars[i]);
+        }
     }
     printf("'");
 }

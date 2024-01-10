@@ -158,8 +158,8 @@ void val_to_string   (u64 val);
 void flag_addr_printf(u64 addr, bool addr_flag);
 void show_addr_data  (pid_t pid, s32 num , u64 addr);
 void show_addr_point (pid_t pid, u64 addr, bool addr_flag);
-void get_addr_data   (pid_t pid, u64 addr, char* str, s32 len);
-void put_addr_data   (pid_t pid, u64 addr, char* str, s32 len);
+void get_data_from_addr(pid_t pid, u64 addr, char* str, s32 len);
+void put_data_to_addr(pid_t pid, u64 addr, char* str, s32 len);
 void print_bytes(const char* codes, s32 len);
 
 

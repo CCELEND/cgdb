@@ -120,7 +120,7 @@ bp_disasm(pid_t pid, u64 addr)
     size_t count;
 
     memset(disasm_code, 0, 32);
-    get_addr_data(pid, addr, disasm_code, 32);
+    get_data_from_addr(pid, addr, disasm_code, 32);
 
     count = cs_disasm(handle, (uint8_t*)disasm_code, 32, addr, 0, &insn);
     if (count > 0) 
@@ -280,7 +280,7 @@ show_disasm(pid_t pid, u64 rip_val)
     }
 
     memset(disasm_code, 0, 176);
-    get_addr_data(pid, disasm_addr, disasm_code, 176);
+    get_data_from_addr(pid, disasm_addr, disasm_code, 176);
 
     count = cs_disasm(handle, (uint8_t*)disasm_code, 176, disasm_addr, 0, &insn);
     if (count > 0) 
@@ -391,13 +391,17 @@ show_disasm(pid_t pid, u64 rip_val)
             }
 
             if (insn[5].address == rip_val)
+            {
                 disasm_addr = insn[1].address;
+            }
         }
         disasm_addr_synchronous = false;
         cs_free(insn, count);
     }
     else 
+    {
         printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    }
 
 }
 
@@ -430,7 +434,9 @@ disasm_mne_op(char* byte_codes,
         cs_free(insn, count);
     }
     else 
+    {
         printf("\033[31m\033[1m[-] Failed to disassemble given code!\n");
+    }
 
 }
 
@@ -443,7 +449,7 @@ get_next_instruct_addr(pid_t pid, u64 addr)
     u64 next_addr;
 
     memset(disasm_code, 0, 32);
-    get_addr_data(pid, addr, disasm_code, 32);
+    get_data_from_addr(pid, addr, disasm_code, 32);
 
     count = cs_disasm(handle, (uint8_t*)disasm_code, 32, addr, 0, &insn);
     if (count > 0) 

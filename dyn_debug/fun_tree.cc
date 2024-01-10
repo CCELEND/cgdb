@@ -122,7 +122,9 @@ parent_disasm(pid_t pid,
                     }
 
                     if (!sub_fun_addr) 
+                    {
                         continue;
+                    }
                 }
 
                 insert_sub_link(sub_fun_addr, parent_node);
@@ -191,7 +193,7 @@ creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
     }
     memset(disasm_code, 0, p_fun_size);
 
-    get_addr_data(pid, p_fun_start_addr, disasm_code, p_fun_size);
+    get_data_from_addr(pid, p_fun_start_addr, disasm_code, p_fun_size);
 
     parent_disasm(pid, p_fun_start_addr, p_fun_size, parent_node);
 
