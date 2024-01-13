@@ -25,7 +25,8 @@ int main(int argc, char *argv[])
     fname.assign(argv[1]);
     printf("[*] Reading symbols from \033[34m\033[1m%s\033[0m...\n", 
         fname.c_str());
-    if(load_binary(fname, &bin, Binary::BIN_TYPE_AUTO) < 0) {
+    if(load_binary(fname, &bin, Binary::BIN_TYPE_AUTO) < 0) 
+    {
         err_exit("Program loading failed!");
     }
     
