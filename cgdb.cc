@@ -20,7 +20,10 @@ int main(int argc, char *argv[])
     Symbol *sym;
     pid_t pid;
 
-    if(argc < 2) arg_error(argv[0]);
+    if(argc < 2) 
+    {
+        arg_error(argv[0]);
+    }
 
     fname.assign(argv[1]);
     printf("[*] Reading symbols from \033[34m\033[1m%s\033[0m...\n", 
@@ -41,7 +44,9 @@ int main(int argc, char *argv[])
 
         all_sum = cmd[0] + cmd[1] + cmd[2];
         if (all_sum == KEYCODE_U)
+        {
             cmd = old_cmd;
+        }
 
         if (cmd == "q") {
             goto cgdb_exit;
@@ -80,7 +85,6 @@ int main(int argc, char *argv[])
         } else if (cmd == "help" || cmd == "h") {
             old_cmd = cmd;
             show_elf_help();
-
         }
         else {
             err_info("Command not found!");
