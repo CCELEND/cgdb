@@ -129,18 +129,17 @@ void run_dyn_debug(Binary* bin);
 // 寄存器信息处理
 // regs.cc
 void get_regs  (pid_t pid, regs_struct* regs);
-void show_regs (pid_t pid, regs_struct* regs);
-void regs_disasm_info(pid_t pid, regs_struct* regs);
-void copy_regs_to_last_regs(regs_struct* last_regs, regs_struct* regs);
+void show_regs (pid_t pid, const regs_struct* regs);
+void copy_regs_to_last_regs(regs_struct* last_regs, const regs_struct* regs);
 
 // 栈信息
 // stack.cc
-void show_stack     (pid_t pid, regs_struct* regs);
-void show_num_stack (pid_t pid, regs_struct* regs, int num);
+void show_stack     (pid_t pid, const regs_struct* regs);
+void show_num_stack (pid_t pid, const regs_struct* regs, int num);
 
 // 显示寄存器，反汇编，栈信息, 和各种基地址
 // show_info.cc
-void show_regs_dis_stack_info(pid_t pid, regs_struct* regs);
+void show_regs_dis_stack_info(pid_t pid, const regs_struct* regs);
 void show_base_addr ();
 void show_code_addr ();
 void show_data_addr ();
@@ -154,6 +153,7 @@ tuple<string, u64> get_addr_file_base(u64 addr);
 s64 get_addr_val(pid_t pid, u64 addr);
 u64 get_hex_in_string(const char* str);
 bool judg_addr_code  (u64 addr);
+bool judg_fun_legitimacy(const char* fun_name);
 void val_to_string   (u64 val);
 void flag_addr_printf(u64 addr, bool addr_flag);
 void show_addr_data  (pid_t pid, s32 num , u64 addr);
@@ -211,10 +211,10 @@ string addr_get_glibc_data(u64 glibc_data_addr);
 
 // 函数列表信息
 // fun_list.cc
-void show_fun_list (fun_list_info_type* fun_info);
+void show_fun_list (const fun_list_info_type* fun_info);
 void clear_fun_list(fun_list_info_type* fun_info);
 void set_fun_list  (fun_list_info_type* fun_info, u64 fun_addr);
-int  addr_get_fun_offset(fun_list_info_type* fun_info, u64 addr);
+int  addr_get_fun_offset(const fun_list_info_type* fun_info, u64 addr);
 
 // 断点处理
 // break_point.cc
@@ -233,8 +233,8 @@ void show_vmmap(pid_t pid);
 
 // 调用函数参数
 // fun_args.cc
-void show_fun_args(pid_t pid, regs_struct* regs, regs_struct* fun_args_regs);
-void set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs);
+void show_fun_args(pid_t pid, const regs_struct* regs, const regs_struct* fun_args_regs);
+void set_fun_args_regs(const regs_struct* regs, regs_struct* fun_args_regs);
 
 // 显示调用函数信息
 // fun_call.cc

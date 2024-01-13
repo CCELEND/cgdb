@@ -7,7 +7,7 @@ argparse()
 {
     string param;
     // 用到空格进行分割，为了防止最后一个参数分割不到加一个空格
-    for (char i:cmd + " ") 
+    for (char i : cmd + " ") 
     {
         if (i != ' ') 
         {

@@ -9,7 +9,9 @@ addr_get_fun(const fun_list_info_type* fun_info, u64 addr)
     {
         if( addr >= fun_info->fun_list[i].fun_start_addr && 
             addr <= fun_info->fun_list[i].fun_end_addr )
+        {
             return fun_info->fun_list[i].fun_name;
+        }
     }
 
     return "";
@@ -43,7 +45,8 @@ get_fun_start_end(u64 addr)
         fun_name = addr_get_elf_fun(addr);
         if (fun_name != "") 
         {
-            fun_info = make_tuple(fun_name, 
+            fun_info = make_tuple(
+                fun_name, 
                 elf_fun_start[fun_name] + elf_base, 
                 elf_fun_end[fun_name]);
 
@@ -52,7 +55,8 @@ get_fun_start_end(u64 addr)
         else 
         {
             fun_name = addr_get_elf_plt_fun(addr);
-            fun_info = make_tuple(fun_name,
+            fun_info = make_tuple(
+                fun_name,
                 elf_plt_fun_start[fun_name] + elf_base,
                 elf_plt_fun_end[fun_name]);
 
@@ -69,20 +73,20 @@ tuple<s32, u64, u64>
 get_fun_addr(const char* fun_name)
 {
     u64 addr;
-    tuple<s32, u64, u64> fun_info;
+    tuple<s32, u64, u64> fun_addr_info;
 
     // elf
     addr = get_elf_fun_addr(fun_name);
     if (addr)
     {
-        fun_info = make_tuple(0, addr, elf_fun_end[string(fun_name)]);
-        return fun_info;
+        fun_addr_info = make_tuple(0, addr, elf_fun_end[string(fun_name)]);
+        return fun_addr_info;
     }
     addr = get_elf_plt_fun_addr(fun_name);
     if (addr)
     {
-        fun_info = make_tuple(0, addr, elf_plt_fun_end[string(fun_name)]);
-        return fun_info;
+        fun_addr_info = make_tuple(0, addr, elf_plt_fun_end[string(fun_name)]);
+        return fun_addr_info;
     }
 
     // glibc
@@ -96,25 +100,29 @@ get_fun_addr(const char* fun_name)
         fun_start_addr = get<1>(temp);
         fun_end_addr = get<2>(temp);
 
-        fun_info = make_tuple(0, fun_start_addr, fun_end_addr);
-        return fun_info;
+        fun_addr_info = make_tuple(0, fun_start_addr, fun_end_addr);
+        return fun_addr_info;
     }
+
+    puts("glibc plt");
     addr = get_glibc_plt_fun_addr(fun_name);
     if (addr)
     {
-        fun_info = make_tuple(0, addr, addr + 0xb);
-        return fun_info;
+        fun_addr_info = make_tuple(0, addr, addr + 0xb);
+        return fun_addr_info;
     }
 
-    fun_info = make_tuple(-1, 0, 0);
-    return fun_info;
+    fun_addr_info = make_tuple(-1, 0, 0);
+    return fun_addr_info;
 }
 
 // 通过函数地址获得函数结束地址
 u64 
 get_fun_end(pid_t pid, u64 fun_addr)
 {
-    char buf[0x1000];
+    // char buf[0x1000];
+    char* buf = new char[0x1000];
+    memset(buf, 0, 0x1000);
     union u 
     {
         long val;
@@ -124,8 +132,11 @@ get_fun_end(pid_t pid, u64 fun_addr)
     for (s32 i = 0; i < 0x1000; i += LONG_SIZE)
     {
         word.val = get_addr_val(pid, fun_addr + i);
-        
-        if (word.val == -1) return 0;
+        if (word.val == -1) 
+        {
+            delete[] buf;
+            return 0;
+        }
 
         memcpy(buf + i, word.chars, LONG_SIZE); // 将这8个字节拷贝进数组
 
@@ -137,10 +148,12 @@ get_fun_end(pid_t pid, u64 fun_addr)
                  long((unsigned char)buf[j]) == 0xe9 && long((unsigned char)buf[j-1]) == 0xfa ||
                  long((unsigned char)buf[j]) == 0x0f && long((unsigned char)buf[j-1]) == 0x00 )
             {
+                delete[] buf;
                 return j + fun_addr;
             }
         }
     }
 
+    delete[] buf;
     return 0;
 }

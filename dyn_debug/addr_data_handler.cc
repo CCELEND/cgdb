@@ -31,7 +31,6 @@ put_addr_val(pid_t pid, u64 addr, s64 val)
 
 // 从子进程指定地址读取 len 字节长度数据到 str, len 需要8字节对齐
 void 
-// get_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 get_data_from_addr(pid_t pid, u64 addr, char* str, s32 len)
 {
     char* laddr = str;
@@ -63,7 +62,6 @@ get_data_from_addr(pid_t pid, u64 addr, char* str, s32 len)
 
 // 从 str 插入 len 字节长度数据到子进程指定地址
 void 
-// put_addr_data(pid_t pid, u64 addr, char* str, s32 len) 
 put_data_to_addr(pid_t pid, u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
@@ -81,7 +79,9 @@ put_data_to_addr(pid_t pid, u64 addr, char* str, s32 len)
         data_addr = addr + i * LONG_SIZE;
 
         if (put_addr_val(pid, data_addr, word.val) == -1)
+        {
             return;
+        }
 
         laddr += LONG_SIZE;
     }
@@ -205,7 +205,8 @@ stack_printf(u64 addr)
 }
 
 
-// 输出带颜色的地址以标记所属地址范围 addr_flag 为真会显示地址所属文件
+// 输出带颜色的地址以标记所属地址范围 
+// addr_flag 为真会显示地址所属文件
 void 
 flag_addr_printf(u64 addr, bool addr_flag)
 {
@@ -292,14 +293,17 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
 
     for (s32 i = 0; i < num; i++) 
     {
-        if( i % 2 == 0)
+        if( i % 2 == 0 )
         {
             flag_addr_printf(addr + i * LONG_SIZE, false);
             printf(": ");
         }
 
         word.val = get_addr_val(pid, addr + i * LONG_SIZE);
-        if (word.val == -1) return;
+        if (word.val == -1) 
+        {
+            return;
+        }
 
         memcpy(laddr, word.chars, LONG_SIZE);
 
@@ -307,10 +311,12 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
         for (s32 j = 7; j > -1; --j)
         {
             printf("%02x", (unsigned char)laddr[j]);
-            if (j == 0) printf("     ");
+            if (j == 0) {
+                printf("     ");
+            }
         }
 
-        if (( i + 1 ) % 2 == 0 || ( i + 1 ) == num) 
+        if ( ( i + 1 ) % 2 == 0 || ( i + 1 ) == num ) 
         {
             printf("\n");
         }
@@ -327,15 +333,14 @@ end_output(pid_t pid, u64 addr, u64 val)
     
     if (judg_addr_code(addr)) 
     {
-        // get_addr_data(pid, addr, addr_instruct, 16);
         get_data_from_addr(pid, addr, addr_instruct, 16);
         disasm_mne_op(addr_instruct, addr, 16, 1);
     }
     else 
     {
         flag_addr_printf(val, false);
-        if (val > 0x7fffffffffff && 
-            val != 0xffffffffffffffff) 
+        if ( val > 0x7fffffffffff && 
+             val != 0xffffffffffffffff ) 
         {
             val_to_string(val);
         }
@@ -350,8 +355,8 @@ show_addr_point(pid_t pid, u64 address, bool addr_flag)
     u64 val;
     flag_addr_printf(address, addr_flag);
 
-    if (address < 0x550000000000 || 
-        address > 0x7fffffffffff) 
+    if ( address < 0x550000000000 || 
+         address > 0x7fffffffffff ) 
     {
         return;
     }
@@ -363,7 +368,7 @@ show_addr_point(pid_t pid, u64 address, bool addr_flag)
 
         if (val < 0x550000000000 || 
             val > 0x7fffffffffff || 
-            val == addr) 
+            val == addr ) 
         {
             end_output(pid, addr, val);
             break;
@@ -423,6 +428,28 @@ judg_addr_code(u64 addr)
 
     else
         return false;
+}
+
+bool 
+judg_fun_legitimacy(const char* fun_name)
+{
+    string str = string(fun_name);
+
+    if (isdigit(str[0]))
+    {
+        return false;
+    }
+
+    for (char c : str) 
+    {
+        if (!(isdigit(c) || isalpha(c) || c == '_' || c == '.'))
+        {
+            return false;
+        }
+    }
+
+    return true;
+
 }
 
 // 通过地址获取文件名和加载基址

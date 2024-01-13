@@ -2,7 +2,7 @@
 
 // 判断操作码是否是跳转指令
 bool 
-judg_jump(char* mnemonic)
+judg_jump(const char* mnemonic)
 {
     if (
         !strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||

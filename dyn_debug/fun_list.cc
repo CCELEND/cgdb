@@ -116,12 +116,14 @@ set_fun_list(fun_list_info_type* fun_info, u64 fun_addr)
 
 // 显示函数列表
 void 
-show_fun_list(fun_list_info_type* fun_info)
+show_fun_list(const fun_list_info_type* fun_info)
 {
     for (s32 i = 0; i < 0x10; i++)
     {
         if (fun_info->fun_list[i].fun_start_addr == 0) 
+        {
             break;
+        }
 
         printf("idx: %d\n", i);
 
@@ -140,7 +142,7 @@ show_fun_list(fun_list_info_type* fun_info)
 
 // 通过地址获得对应函数地址偏移
 s32 
-addr_get_fun_offset(fun_list_info_type* fun_info, u64 addr)
+addr_get_fun_offset(const fun_list_info_type* fun_info, u64 addr)
 {
 
     for (s32 i = 0; i < 0x10; i++)

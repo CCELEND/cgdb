@@ -73,7 +73,8 @@ set_break_point(pid_t pid, u64 break_point_addr)
             link_file = get<0>(ret_val2);
             base_addr = get<1>(ret_val2);
 
-            printf("[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
+            printf(
+            "[+] Break point %d at (%s) offset \033[31m0x%llx\033[0m: \033[31m0x%llx\033[0m ", 
                     i, link_file.c_str(), break_point_addr-base_addr, break_point_addr);
 
             if (fun_offset) 

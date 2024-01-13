@@ -3,7 +3,7 @@
 
 // 输出栈信息
 void 
-show_stack(pid_t pid, regs_struct* regs)
+show_stack(pid_t pid, const regs_struct* regs)
 {
     struct winsize size;
     u64 stack = regs->rsp;
@@ -38,7 +38,7 @@ show_stack(pid_t pid, regs_struct* regs)
 }
 
 void 
-show_num_stack(pid_t pid, regs_struct* regs, s32 num)
+show_num_stack(pid_t pid, const regs_struct* regs, s32 num)
 {
     if (num < 0 || num > 0x100)
     {

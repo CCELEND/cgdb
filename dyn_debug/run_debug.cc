@@ -70,6 +70,7 @@ run_dyn_debug(Binary* bin)
         case -1:
             err_info("Failed to create subprocess!");
             break;
+
         // 处理子进程
         case 0:
             if (ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0) 
@@ -86,6 +87,7 @@ run_dyn_debug(Binary* bin)
             // 子进程，没有成功执行
             printf("\033[31m\033[1m[-] Invalid input command: %s\033[0m\n", fname.c_str());
             break;
+
         default:
         {
             // 初始化 Capstone
@@ -102,15 +104,18 @@ run_dyn_debug(Binary* bin)
 
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
             sleep(1);
+
             // 获取子进程的虚拟地址
             get_vma_address(pid);
             printf("[+] elf base: 0x%llx\n", elf_base);
 
+            // 只读数据段处理
             set_elf_rdata(bin);
             // 建立函数名和结束地址的映射
             map_fun_end(pid);
             map_plt_fun_end(pid);
 
+            // 寄存器信息处理
             get_regs(pid, &regs);
             show_regs_dis_stack_info(pid, &regs);
             copy_regs_to_last_regs(&last_regs, &regs);
@@ -122,11 +127,13 @@ run_dyn_debug(Binary* bin)
                 printf("\033[32m\033[1mcgdb> \033[0m");
                 getline(cin, cmd);
 
-                // 上、下、左、右这四个光标键对应的 ASCII 码值不是一个值而是三个，
+                // 上、下、左、右这四个光标键对应的 ASCII 码值不是一个值而是三个
                 // 准确的说光标键的 ASCII 码值是一个组合
                 all_sum = cmd[0] + cmd[1] + cmd[2];
                 if (all_sum == KEYCODE_U) 
+                {
                     cmd = old_cmd;
+                }
 
                 debug_start:
                 //输入参数解析
@@ -134,8 +141,10 @@ run_dyn_debug(Binary* bin)
                 s32 argc = myargv.size();
                 char** arguments = new char* [argc]; // 转换参数类型
 
-                for (s32 i = 0; i < argc; i++)
+                for (s32 i = 0; i < argc; i++) 
+                {
                     arguments[i] = (char*) myargv[i].data();
+                }
 
                 // 退出操作
                 if (!strcmp(arguments[0], "q")) 
@@ -211,7 +220,8 @@ run_dyn_debug(Binary* bin)
 
                     if (index != -1)
                     {
-                        break_point_handler(pid, status, break_point_list[index], true);
+                        break_point_handler(pid, 
+                            status, break_point_list[index], true);
                     }
 
                 } 
@@ -244,15 +254,28 @@ run_dyn_debug(Binary* bin)
                 {
                     if (argc == 2) 
                     {
-                        tuple<s32, u64, u64> ret_val;
+                        tuple<s32, u64, u64> fun_addr_info;
                         u64 break_point_fun_addr;
-                        ret_val = get_fun_addr(arguments[1]);
-                        break_point_fun_addr = get<1>(ret_val);
 
-                        if (!break_point_fun_addr)
+                        puts(arguments[1]);
+
+                        if(!judg_fun_legitimacy(arguments[1]))
+                        {
+                            err_info("Illegal function name!");
+                            goto next_input;
+                        }
+
+                        fun_addr_info = get_fun_addr(arguments[1]);
+                        break_point_fun_addr = get<1>(fun_addr_info);
+
+                        if (!break_point_fun_addr) 
+                        {
                             err_info("There is no such function!");
-                        else  // 打断点
+                        }
+                        else 
+                        {   // 打断点
                             set_break_point(pid, break_point_fun_addr);
+                        }
                     } 
                     else
                     { 
@@ -263,12 +286,17 @@ run_dyn_debug(Binary* bin)
                 {
                     if (argc == 2) 
                     { 
-                        u64 break_point_addr = strtoul(arguments[1], nullptr, 16);
+                        u64 break_point_addr = 
+                            strtoul(arguments[1], nullptr, 16);
 
-                        if (!judg_addr_code(break_point_addr))
+                        if (!judg_addr_code(break_point_addr)) 
+                        {
                             err_info("Illegal address!");
-                        else // 打断点
+                        }
+                        else 
+                        {   // 打断点
                             set_break_point(pid, break_point_addr);
+                        }
                     } 
                     else
                     {
@@ -282,10 +310,14 @@ run_dyn_debug(Binary* bin)
                     {
                         s32 num = stoi(arguments[2]);
 
-                        if (num >= 8 || num < 0)
+                        if (num >= 8 || num < 0) 
+                        {
                             err_info("Error break point number!");
-                        else
+                        }
+                        else 
+                        {
                             break_point_delete(pid, num);
+                        }
                     }
                     else
                     {
@@ -316,7 +348,9 @@ run_dyn_debug(Binary* bin)
                         }
                     } 
                     else 
+                    {
                         err_info("Please enter the address and read quantity!");
+                    }
                 } 
                 else if (!strcmp(arguments[0], "stack")) 
                 {
@@ -376,10 +410,15 @@ run_dyn_debug(Binary* bin)
                     {
                         u64 address = strtoul(arguments[1], nullptr, 16);
 
-                        if ( addr_get_elf_plt_fun(address)== "" )
+                        if ( addr_get_elf_plt_fun(address)== "" ) 
+                        {
                             printf("\033[31m\033[1m[-] There is no such function!\033[0m\n");
-                        else
-                            printf("%s\n", addr_get_elf_plt_fun(address).c_str());
+                        }
+                        else 
+                        {
+                            printf("%s\n", 
+                                addr_get_elf_plt_fun(address).c_str());
+                        }
                     } 
                     else 
                     {
@@ -388,10 +427,14 @@ run_dyn_debug(Binary* bin)
                 }
                 else if (!strcmp(arguments[0], "fun")) 
                 {
-                    if (argc == 2)
+                    if (argc == 2) 
+                    {
                         show_elf_fun_call(pid, arguments[1]);
+                    }
                     else 
+                    {
                         err_info("Please enter the function name!");
+                    }
                 }
                 else if (!strcmp(arguments[0], "tree")) 
                 {
@@ -460,6 +503,7 @@ run_dyn_debug(Binary* bin)
             }
 
             debug_stop: 
+
             // 等待子进程结束之后父进程再退出
             wait(&status);
             free(disasm_code);

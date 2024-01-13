@@ -5,7 +5,7 @@
 // 当前 regs 与函数参数  regs 的寄存器对比，如果有变化说明寄存器是函数参数
 void 
 show_fun_args(pid_t pid,
-    regs_struct* regs, regs_struct* fun_args_regs)
+    const regs_struct* regs, const regs_struct* fun_args_regs)
 {
     if (regs->rdi != fun_args_regs->rdi ) 
     {
@@ -28,9 +28,9 @@ show_fun_args(pid_t pid,
     }
 }
 
-// 设置函数参数  regs 结构体
+// 设置函数参数 regs 结构体
 void 
-set_fun_args_regs(regs_struct* regs, regs_struct* fun_args_regs)
+set_fun_args_regs(const regs_struct* regs, regs_struct* fun_args_regs)
 {
     fun_args_regs->rdi = regs->rdi;
     fun_args_regs->rsi = regs->rsi;

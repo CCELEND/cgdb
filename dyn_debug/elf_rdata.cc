@@ -17,9 +17,13 @@ set_elf_rdata(Binary* bin)
         }
 
         if (sec->name == ".init_array")
+        {
             elf_ini_start = sec->vma + elf_base;
+        }
         if (sec->name == ".fini_array")
+        {
             elf_ini_end = sec->vma + elf_base + sec->size;
+        }
     }
 }
 

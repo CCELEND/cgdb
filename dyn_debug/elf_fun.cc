@@ -69,5 +69,7 @@ void
 map_fun_end(pid_t pid)
 {
     for (auto it : elf_fun_start) 
+    {
         elf_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
+    }
 }

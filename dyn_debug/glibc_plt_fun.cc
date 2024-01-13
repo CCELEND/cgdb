@@ -83,7 +83,9 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
     }
 
     if (result) 
+    {
         delete[] result;
+    }
 
     if(lib_plt_fun_name != "")
     {
@@ -107,11 +109,13 @@ get_glibc_plt_fun_addr(const char* fun_name)
 
     for (int i = 0; i < 2 && !finded; i++)
     {
-        if (i == 0){
+        if (i == 0)
+        {
             command = string(
                 "objdump -d -j .plt.sec ld-linux-x86-64.so.2 | fgrep ");
         }
-        else{
+        else
+        {
             is_libc = true;
             command = string(
                 "objdump -d -j .plt.sec libc.so.6 | fgrep ");
@@ -128,6 +132,7 @@ get_glibc_plt_fun_addr(const char* fun_name)
         memset(result, 0, 100);
         size_t len = 0;
         ssize_t read;
+
         while ((read = getline(&result, &len, fp)) != -1) 
         {
             if (string(result).find("<") != string::npos) 
@@ -142,15 +147,19 @@ get_glibc_plt_fun_addr(const char* fun_name)
     }
 
     if (result) 
+    {
         delete[] result;
+    }
 
     if (is_libc)
         glibc_plt_fun_addr = glibc_plt_fun_addr + libc_base;
     else
         glibc_plt_fun_addr = glibc_plt_fun_addr + ld_base;
 
-    if (!finded)
+    if (!finded) 
+    {
         return 0;
+    }
 
     return glibc_plt_fun_addr;
 }

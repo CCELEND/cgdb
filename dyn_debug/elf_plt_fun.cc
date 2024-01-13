@@ -22,8 +22,8 @@ addr_get_elf_plt_fun(u64 addr)
 {
     for (auto it : elf_plt_fun_start) 
     {
-        if (addr >= it.second + elf_base && 
-            addr <= elf_plt_fun_end[it.first])
+        if ( addr >= it.second + elf_base && 
+             addr <= elf_plt_fun_end[it.first] )
         {
             return it.first;
         }

@@ -10,7 +10,7 @@ get_regs(pid_t pid, regs_struct* regs)
 
 // 输出寄存器信息
 void 
-show_regs(pid_t pid, regs_struct* regs)
+show_regs(pid_t pid, const regs_struct* regs)
 {
 
     struct winsize size;
@@ -56,7 +56,7 @@ show_regs(pid_t pid, regs_struct* regs)
 }
 
 void 
-copy_regs_to_last_regs(regs_struct* last_regs, regs_struct* regs)
+copy_regs_to_last_regs(regs_struct* last_regs, const regs_struct* regs)
 {
     memcpy(last_regs, regs, sizeof(struct user_regs_struct));
 }

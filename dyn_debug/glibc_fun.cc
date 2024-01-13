@@ -17,11 +17,16 @@ get_glibc_fun_addr(const char* fun_name)
             "objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
         glibc_fun_name = string(fun_name).substr(5);
     }
-    else
+    if (string(fun_name).find("ld.") != string::npos)
     {
         command = string(
             "objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
         glibc_fun_name = string(fun_name).substr(3);
+    }
+    else
+    {
+        delete[] result;
+        return 0;
     }
 
     FILE* fp;
@@ -31,14 +36,16 @@ get_glibc_fun_addr(const char* fun_name)
     {
         err_info("Popen failed!");
         if (result) 
+        {
             delete[] result;
+        }
         return 0;
     }
 
     memset(result, 0, 100);
-
     size_t len = 0;
     ssize_t read;
+    
     while ((read = getline(&result, &len, fp)) != -1) 
     {
         if (string(result).find("<") != string::npos) 
@@ -50,15 +57,23 @@ get_glibc_fun_addr(const char* fun_name)
 
     pclose(fp);   // 关闭管道
     if (result) 
+    {
         delete[] result;
+    }
 
     if (!glibc_fun_addr) 
+    {
         return 0;
+    }
 
-    if (is_libc)
+    if (is_libc) 
+    {
         glibc_fun_addr += libc_base;
-    else
+    }
+    else 
+    {
         glibc_fun_addr += ld_base;
+    }
     return glibc_fun_addr;
 }
 
@@ -67,7 +82,7 @@ get_glibc_fun_addr(const char* fun_name)
 tuple<string, u64, u64>
 addr_get_glibc_fun_start_and_end(u64 glibc_addr)
 {
-    tuple<string, u64, u64> ret_val;
+    tuple<string, u64, u64> glibc_fun_info;
 
     u64 glibc_fun_addr_offset, glibc_fun_start_addr, glibc_fun_end_addr;
     string command = "", glibc_fun_name = "";
@@ -117,10 +132,12 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
         if (!fp)
         {
             err_info("Popen failed!");
-            ret_val = make_tuple("", 0, 0);
+            glibc_fun_info = make_tuple("", 0, 0);
             if (result) 
+            {
                 delete[] result;
-            return ret_val;
+            }
+            return glibc_fun_info;
         }
 
         memset(result, 0, 100);
@@ -137,6 +154,7 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
                 {
                     lib_fun_str_start = string(result).find("<");
                     lib_fun_str_end = string(result).find(">");
+
                     glibc_fun_name = string(result).substr(lib_fun_str_start+1, 
                         lib_fun_str_end-lib_fun_str_start-1);
                     glibc_fun_start_addr = glibc_fun_addr_offset;
@@ -156,23 +174,25 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
     }
 
     // 释放动态分配的内存
-    if (result) delete[] result;
+    if (result) 
+    {
+        delete[] result;
+    }
 
     if (is_libc)
     {
         glibc_fun_start_addr += libc_base;
         glibc_fun_end_addr += libc_base;
-        ret_val = make_tuple("libc." + glibc_fun_name, 
+        glibc_fun_info = make_tuple("libc." + glibc_fun_name, 
             glibc_fun_start_addr, glibc_fun_end_addr);
     }
     else
     {
         glibc_fun_start_addr += ld_base;
         glibc_fun_end_addr += ld_base;
-        ret_val = make_tuple("ld." + glibc_fun_name, 
+        glibc_fun_info = make_tuple("ld." + glibc_fun_name, 
             glibc_fun_start_addr, glibc_fun_end_addr);
     }
-
-    return ret_val;
+    return glibc_fun_info;
 
 }
