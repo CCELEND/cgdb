@@ -26,11 +26,13 @@ addr_get_elf_init(u64 elf_init_addr)
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)
     {
-        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+        err_info("Popen failed!");
         return "";
     }
 
-    char* result = nullptr;
+    // char* result = nullptr;
+    char* result = new char[100];
+    memset(result, 0, 100);
     size_t len = 0;
     ssize_t read;
     int elf_init_str_start, elf_init_str_end;
@@ -48,8 +50,13 @@ addr_get_elf_init(u64 elf_init_addr)
         }     
     }
 
+    // pclose(fp);   // 关闭管道
+    // free(result); // 释放动态分配的内存
     pclose(fp);   // 关闭管道
-    free(result); // 释放动态分配的内存
+    if (result) 
+    {
+        delete[] result;
+    }
 
     if(elf_init_name != "")
     {
@@ -84,13 +91,16 @@ addr_get_elf_fini(u64 elf_fini_addr)
     FILE* fp = popen(command.c_str(), "r");
     if (!fp)
     {
-        printf("\033[31m\033[1m[-] Popen failed!\033[0m\n");
+        err_info("Popen failed!");
         return "";
     }
 
-    char* result = nullptr;
+    // char* result = nullptr;
+    char* result = new char[100];
+    memset(result, 0, 100);
     size_t len = 0;
     ssize_t read;
+
     int elf_fini_str_start, elf_fini_str_end;
     std::string elf_fini_name = "";
 
@@ -105,8 +115,13 @@ addr_get_elf_fini(u64 elf_fini_addr)
         }     
     }
 
+    // pclose(fp);   // 关闭管道
+    // free(result); // 释放动态分配的内存
     pclose(fp);   // 关闭管道
-    free(result); // 释放动态分配的内存
+    if (result) 
+    {
+        delete[] result;
+    }
 
     if(elf_fini_name != "")
     {

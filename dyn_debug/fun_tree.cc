@@ -262,7 +262,9 @@ show_fun_tree()
         ++depth; // 层级加1
     }
     else 
+    {
         return;
+    }
 
     while(temp_node)
     {
@@ -272,9 +274,13 @@ show_fun_tree()
         for (int i = 1; i < depth; i++)
         {
             if (sib_link_next_node[i])
+            {
                 printf(" │   ");
+            }
             else
+            {
                 printf("     ");
+            }
         }
 
         if (temp_node->next)
@@ -304,14 +310,14 @@ show_fun_tree()
                 --depth;
             }
 
-            if (!sib_link_next_node.size()) 
+            if (!sib_link_next_node.size())
+            {
                 break;
+            }
 
             temp_node = sib_link_next_node.back();
             sib_link_next_node.pop_back();
         }
-
-
     }
 }
 
@@ -330,9 +336,13 @@ creat_fun_tree(pid_t pid, s32 level)
         sib_link_next_node.push_back(parent_node->next);
 
         if (current_depth < level)
+        {
             creat_sub_link(pid, parent_node);
+        }
         else
+        {
             break;
+        }
 
         // 当前节点有子
         if (parent_node->sub_fun && current_depth+1 < level)

@@ -7,8 +7,7 @@ void
 show_fun_args(pid_t pid,
     const regs_struct* regs, const regs_struct* fun_args_regs)
 {
-    if (regs->rdi != fun_args_regs->rdi ) 
-    {
+    if (regs->rdi != fun_args_regs->rdi ){
         printf("        rdi: "); show_addr_point(pid, regs->rdi,   true); printf("\n");
     }
     if (regs->rsi != fun_args_regs->rsi) {

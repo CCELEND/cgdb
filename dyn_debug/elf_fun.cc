@@ -54,14 +54,13 @@ addr_get_elf_fun_offset(u64 addr)
     for (auto it : elf_fun_start) 
     {
         if ( addr >= it.second + elf_base && 
-             addr <= elf_fun_end[it.first])
+             addr <= elf_fun_end[it.first] )
         {
             return addr - it.second - elf_base;
         }
     }
 
     return -1;
-
 }
 
 // 建立 elf 函数名和结束地址的映射
@@ -70,6 +69,7 @@ map_fun_end(pid_t pid)
 {
     for (auto it : elf_fun_start) 
     {
-        elf_fun_end[it.first] = get_fun_end(pid, it.second + elf_base);
+        elf_fun_end[it.first] = get_fun_end(pid, 
+            it.second + elf_base);
     }
 }

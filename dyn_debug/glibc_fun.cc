@@ -122,7 +122,9 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
 
         // 去掉前缀"0x"
         if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") 
+        {
             addr_hex_str = addr_hex_str.substr(2);
+        }
 
         addr_hex_str = "0" + addr_hex_str;
         exe_command += addr_hex_str;
@@ -194,5 +196,4 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
             glibc_fun_start_addr, glibc_fun_end_addr);
     }
     return glibc_fun_info;
-
 }
