@@ -29,12 +29,14 @@ get_fun_start_end(u64 addr)
         fun_name = addr_get_glibc_plt_fun(addr);
         if (fun_name != "") 
         {
-            fun_info = make_tuple(fun_name, addr, addr + 0xb);
+            fun_info = 
+                make_tuple(fun_name, addr, addr + 0xb);
             return fun_info;
         }
         else
         {
-            fun_info = addr_get_glibc_fun_start_and_end(addr);
+            fun_info = 
+                addr_get_glibc_fun_start_and_end(addr);
             return fun_info;
         }
     }
@@ -79,13 +81,15 @@ get_fun_addr(const char* fun_name)
     addr = get_elf_fun_addr(fun_name);
     if (addr)
     {
-        fun_addr_info = make_tuple(0, addr, elf_fun_end[string(fun_name)]);
+        fun_addr_info = 
+            make_tuple(0, addr, elf_fun_end[string(fun_name)]);
         return fun_addr_info;
     }
     addr = get_elf_plt_fun_addr(fun_name);
     if (addr)
     {
-        fun_addr_info = make_tuple(0, addr, elf_plt_fun_end[string(fun_name)]);
+        fun_addr_info = 
+            make_tuple(0, addr, elf_plt_fun_end[string(fun_name)]);
         return fun_addr_info;
     }
 
@@ -96,11 +100,13 @@ get_fun_addr(const char* fun_name)
         tuple<string, u64, u64> fun_info;
         u64 fun_start_addr, fun_end_addr;
 
-        fun_info = addr_get_glibc_fun_start_and_end(addr);
+        fun_info = 
+            addr_get_glibc_fun_start_and_end(addr);
         fun_start_addr = get<1>(fun_info);
         fun_end_addr = get<2>(fun_info);
 
-        fun_addr_info = make_tuple(0, fun_start_addr, fun_end_addr);
+        fun_addr_info = 
+            make_tuple(0, fun_start_addr, fun_end_addr);
         return fun_addr_info;
     }
     addr = get_glibc_plt_fun_addr(fun_name);
@@ -118,7 +124,6 @@ get_fun_addr(const char* fun_name)
 u64 
 get_fun_end(pid_t pid, u64 fun_addr)
 {
-    // char buf[0x1000];
     char* buf = new char[0x1000];
     memset(buf, 0, 0x1000);
     union u 

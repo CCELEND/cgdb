@@ -72,16 +72,24 @@ addr_get_glibc_data(u64 glibc_data_addr)
     if (lib_data_name == "")
     {
         if (is_libc)
+        {
             lib_data_name = "libc[data]";
+        }
         else
+        {
             lib_data_name = "ld[data]";
+        }
     }
     else
     {
         if (is_libc)
+        {
             lib_data_name = "libc." + lib_data_name;
+        }
         else
+        {
             lib_data_name = "ld." + lib_data_name;
+        }
     }
 
     return lib_data_name;

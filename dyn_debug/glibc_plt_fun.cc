@@ -155,9 +155,13 @@ get_glibc_plt_fun_addr(const char* fun_name)
     }
 
     if (is_libc)
+    {
         glibc_plt_fun_addr = glibc_plt_fun_addr + libc_base;
+    }
     else
+    {
         glibc_plt_fun_addr = glibc_plt_fun_addr + ld_base;
+    }
 
     if (!finded) 
     {

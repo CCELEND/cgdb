@@ -18,7 +18,8 @@ get_addr_val(pid_t pid, u64 addr)
 
 // 往指定地址写入8字节值
 s64
-put_addr_val(pid_t pid, u64 addr, s64 val)
+put_addr_val(pid_t pid, 
+    u64 addr, s64 val)
 {
     if (ptrace(PTRACE_POKEDATA, pid, addr, val) == -1) 
     {
@@ -31,7 +32,8 @@ put_addr_val(pid_t pid, u64 addr, s64 val)
 
 // 从子进程指定地址读取 len 字节长度数据到 str, len 需要8字节对齐
 void 
-get_data_from_addr(pid_t pid, u64 addr, char* str, s32 len)
+get_data_from_addr(pid_t pid, 
+    u64 addr, char* str, s32 len)
 {
     char* laddr = str;
     u64 data_addr = addr;
@@ -62,7 +64,8 @@ get_data_from_addr(pid_t pid, u64 addr, char* str, s32 len)
 
 // 从 str 插入 len 字节长度数据到子进程指定地址
 void 
-put_data_to_addr(pid_t pid, u64 addr, char* str, s32 len) 
+put_data_to_addr(pid_t pid, 
+    u64 addr, char* str, s32 len) 
 {
     char* laddr = str;
     u64 data_addr = addr;
@@ -282,7 +285,8 @@ flag_addr_printf(u64 addr, bool addr_flag)
 
 // 输出指定地址的数据，输出 num 组，每组8字节
 void 
-show_addr_data(pid_t pid, s32 num, u64 addr)
+show_addr_data(pid_t pid, 
+    s32 num, u64 addr)
 {
     union u 
     {
@@ -325,7 +329,8 @@ show_addr_data(pid_t pid, s32 num, u64 addr)
 }
 
 void
-end_output(pid_t pid, u64 addr, u64 val)
+end_output(pid_t pid, 
+    u64 addr, u64 val)
 {
     char addr_instruct[17];
 
@@ -349,7 +354,8 @@ end_output(pid_t pid, u64 addr, u64 val)
 
 // 输出地址的多重指针
 void 
-show_addr_point(pid_t pid, u64 address, bool addr_flag)
+show_addr_point(pid_t pid, 
+    u64 address, bool addr_flag)
 {
     u64 addr;
     u64 val;
@@ -425,7 +431,7 @@ judg_addr_code(u64 addr)
 
     else if (addr > vdso_code_start && addr < vdso_code_end) 
         return true;
-
+    
     else
         return false;
 }

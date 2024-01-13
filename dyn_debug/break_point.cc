@@ -3,7 +3,8 @@
 
 // 断点注入
 void 
-break_point_inject(pid_t pid, break_point& bp) 
+break_point_inject(pid_t pid, 
+    break_point& bp) 
 {
     // int3 中断指令
     char code[CODE_SIZE] = { static_cast<char>(0xcc) };
@@ -17,7 +18,8 @@ break_point_inject(pid_t pid, break_point& bp)
 
 // 设置 ni 断点
 void 
-set_ni_break_point(pid_t pid, u64 addr)
+set_ni_break_point(pid_t pid, 
+    u64 addr)
 {
     u64 next_addr;
     next_addr = get_next_instruct_addr(pid, addr);
@@ -42,7 +44,8 @@ set_ni_break_point(pid_t pid, u64 addr)
 
 // 设置普通断点
 void 
-set_break_point(pid_t pid, u64 break_point_addr)
+set_break_point(pid_t pid, 
+    u64 break_point_addr)
 {
     for (s32 i = 0; i < 8; i++) 
     {
@@ -107,7 +110,8 @@ set_break_point(pid_t pid, u64 break_point_addr)
 
 // 删除断点
 void 
-break_point_delete(pid_t pid, s32 num)
+break_point_delete(pid_t pid, 
+    s32 num)
 {
     // 指令恢复
     put_data_to_addr(pid, 

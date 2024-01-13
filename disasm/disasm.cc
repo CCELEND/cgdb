@@ -365,7 +365,6 @@ show_disasm(pid_t pid, u64 rip_val)
             }
             else
             {
-
                 printf("   0x%lx ", insn[j].address);
 
                 if(dis_fun_name != "")

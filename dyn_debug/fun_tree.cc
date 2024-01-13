@@ -40,7 +40,8 @@ creat_node(u64 addr)
 }
 
 void 
-insert_sub_link(const u64 sub_fun_addr, fun_tree_node_t* parent_node)
+insert_sub_link(const u64 sub_fun_addr, 
+    fun_tree_node_t* parent_node)
 {
     if ( sub_fun_addr >= parent_node->fun_info.fun_start_addr && 
          sub_fun_addr <= parent_node->fun_info.fun_end_addr )
@@ -175,7 +176,8 @@ creat_root_node(const char* root_fun_name)
 
 // 根据父节点数据建立子函数链表
 s32 
-creat_sub_link(pid_t pid, fun_tree_node_t* parent_node)
+creat_sub_link(pid_t pid, 
+    fun_tree_node_t* parent_node)
 {
     u64 p_fun_start_addr, p_fun_end_addr, p_fun_size;
     string p_fun_name;
