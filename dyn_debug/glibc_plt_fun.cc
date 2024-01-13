@@ -56,7 +56,6 @@ addr_get_glibc_plt_fun(u64 glibc_plt_fun_addr)
         if (!fp)
         {
             err_info("Popen failed!");
-            // printf("\033[31m\033[1m[-] \033[0m\n");
             break;
         }
 

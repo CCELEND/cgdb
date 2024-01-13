@@ -93,21 +93,22 @@ get_fun_addr(const char* fun_name)
     addr = get_glibc_fun_addr(fun_name);
     if (addr)
     {
-        tuple<string, u64, u64> temp;
+        tuple<string, u64, u64> fun_info;
         u64 fun_start_addr, fun_end_addr;
 
-        temp = addr_get_glibc_fun_start_and_end(addr);
-        fun_start_addr = get<1>(temp);
-        fun_end_addr = get<2>(temp);
+        fun_info = addr_get_glibc_fun_start_and_end(addr);
+        fun_start_addr = get<1>(fun_info);
+        fun_end_addr = get<2>(fun_info);
 
         fun_addr_info = make_tuple(0, fun_start_addr, fun_end_addr);
         return fun_addr_info;
     }
 
-    puts("glibc plt");
+    
     addr = get_glibc_plt_fun_addr(fun_name);
     if (addr)
     {
+        printf("%llx\n", addr);
         fun_addr_info = make_tuple(0, addr, addr + 0xb);
         return fun_addr_info;
     }
