@@ -17,7 +17,7 @@ get_glibc_fun_addr(const char* fun_name)
             "objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
         glibc_fun_name = string(fun_name).substr(5);
     }
-    if (string(fun_name).find("ld.") != string::npos)
+    else if (string(fun_name).find("ld.") != string::npos)
     {
         command = string(
             "objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");

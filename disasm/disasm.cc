@@ -316,8 +316,10 @@ show_disasm(pid_t pid, u64 rip_val)
             char code[32];
             string dis_fun_name = "";
             
-            for(s32 i = 0; i < insn[j].size; ++i)
+            for(s32 i = 0; i < insn[j].size; ++i) 
+            {
                 sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
+            }
 
             dis_fun_name = addr_get_fun(&dis_fun_info, insn[j].address);
             // 根据地址得到函数偏移

@@ -257,8 +257,6 @@ run_dyn_debug(Binary* bin)
                         tuple<s32, u64, u64> fun_addr_info;
                         u64 break_point_fun_addr;
 
-                        // puts(arguments[1]);
-
                         if(!judg_fun_legitimacy(arguments[1]))
                         {
                             err_info("Illegal function name!");
@@ -447,6 +445,11 @@ run_dyn_debug(Binary* bin)
                         }
                         else
                         {
+                            if(!judg_fun_legitimacy(arguments[1]))
+                            {
+                                err_info("Illegal function name!");
+                                goto next_input;
+                            }
                             if(!creat_root_node(arguments[1]))
                             {
                                 printf("[*] Creating a forked function call tree...\n");

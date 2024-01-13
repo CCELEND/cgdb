@@ -110,14 +110,18 @@ get_glibc_plt_fun_addr(const char* fun_name)
     {
         if (i == 0)
         {
+            // command = string(
+            //     "objdump -d -j .plt.sec ld-linux-x86-64.so.2 | fgrep ");
             command = string(
-                "objdump -d -j .plt.sec ld-linux-x86-64.so.2 | fgrep ");
+                "objdump -d -j .plt.sec ld-linux-x86-64.so.2 | grep \\<");
         }
         else
         {
             is_libc = true;
+            // command = string(
+            //     "objdump -d -j .plt.sec libc.so.6 | fgrep ");
             command = string(
-                "objdump -d -j .plt.sec libc.so.6 | fgrep ");
+                "objdump -d -j .plt.sec libc.so.6 | grep \\<");
         }
 
         exe_command = command + string(fun_name);

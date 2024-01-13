@@ -103,12 +103,9 @@ get_fun_addr(const char* fun_name)
         fun_addr_info = make_tuple(0, fun_start_addr, fun_end_addr);
         return fun_addr_info;
     }
-
-    
     addr = get_glibc_plt_fun_addr(fun_name);
     if (addr)
     {
-        printf("%llx\n", addr);
         fun_addr_info = make_tuple(0, addr, addr + 0xb);
         return fun_addr_info;
     }
