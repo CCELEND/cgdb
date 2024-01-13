@@ -7,17 +7,18 @@ string
 addr_get_elf_init(u64 elf_init_addr) 
 {
     u64 elf_init_addr_offset;
-    std::string command;
+    string command;
 
     elf_init_addr_offset = elf_init_addr - elf_base;
-    command = std::string("objdump -d -j .init_array ") + fname + std::string(" | grep ");
+    command = string("objdump -d -j .init_array ") + fname + string(" | grep ");
 
     // stringstream 将十六进制数转换为字符串
-    std::stringstream ss;
-    ss << std::hex << elf_init_addr_offset; // 使用十六进制输出
-    std::string addr_hex_str = ss.str();
+    stringstream ss;
+    ss << hex << elf_init_addr_offset; // 使用十六进制输出
+    string addr_hex_str = ss.str();
     // 去掉前缀"0x"
-    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") 
+    {
         addr_hex_str = addr_hex_str.substr(2);
         addr_hex_str = "0" + addr_hex_str;
     }
@@ -30,28 +31,25 @@ addr_get_elf_init(u64 elf_init_addr)
         return "";
     }
 
-    // char* result = nullptr;
     char* result = new char[100];
     memset(result, 0, 100);
     size_t len = 0;
     ssize_t read;
     int elf_init_str_start, elf_init_str_end;
-    std::string elf_init_name = "";
+    string elf_init_name = "";
 
     while ((read = getline(&result, &len, fp)) != -1) 
     {
-        if (std::string(result).find("<") != std::string::npos) 
+        if (string(result).find("<") != string::npos) 
         {
-            elf_init_str_start = std::string(result).find("<");
-            elf_init_str_end = std::string(result).find(">");
+            elf_init_str_start = string(result).find("<");
+            elf_init_str_end = string(result).find(">");
             
-            elf_init_name = std::string(result).substr(elf_init_str_start+1, 
+            elf_init_name = string(result).substr(elf_init_str_start+1, 
                 elf_init_str_end - elf_init_str_start-1);
         }     
     }
 
-    // pclose(fp);   // 关闭管道
-    // free(result); // 释放动态分配的内存
     pclose(fp);   // 关闭管道
     if (result) 
     {
@@ -72,17 +70,18 @@ string
 addr_get_elf_fini(u64 elf_fini_addr) 
 {
     u64 elf_fini_addr_offset;
-    std::string command;
+    string command;
 
     elf_fini_addr_offset = elf_fini_addr - elf_base;
-    command = std::string("objdump -d -j .fini_array ") + fname + std::string(" | grep ");
+    command = string("objdump -d -j .fini_array ") + fname + string(" | grep ");
 
     // stringstream 将十六进制数转换为字符串
-    std::stringstream ss;
-    ss << std::hex << elf_fini_addr_offset; // 使用十六进制输出
-    std::string addr_hex_str = ss.str();
+    stringstream ss;
+    ss << hex << elf_fini_addr_offset; // 使用十六进制输出
+    string addr_hex_str = ss.str();
     // 去掉前缀"0x"
-    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") {
+    if (addr_hex_str.size() >= 2 && addr_hex_str.substr(0, 2) == "0x") 
+    {
         addr_hex_str = addr_hex_str.substr(2);
         addr_hex_str = "0" + addr_hex_str;
     }
@@ -95,28 +94,26 @@ addr_get_elf_fini(u64 elf_fini_addr)
         return "";
     }
 
-    // char* result = nullptr;
     char* result = new char[100];
     memset(result, 0, 100);
     size_t len = 0;
     ssize_t read;
 
     int elf_fini_str_start, elf_fini_str_end;
-    std::string elf_fini_name = "";
+    string elf_fini_name = "";
 
     while ((read = getline(&result, &len, fp)) != -1) 
     {
-        if (std::string(result).find("<") != std::string::npos) 
+        if (string(result).find("<") != string::npos) 
         {
-            elf_fini_str_start = std::string(result).find("<");
-            elf_fini_str_end = std::string(result).find(">");
-            elf_fini_name = std::string(result).substr(elf_fini_str_start+1, 
-                elf_fini_str_end - elf_fini_str_start-1);
+            elf_fini_str_start = string(result).find("<");
+            elf_fini_str_end = string(result).find(">");
+
+            elf_fini_name = string(result).substr(elf_fini_str_start+1, 
+                    elf_fini_str_end - elf_fini_str_start-1);
         }     
     }
 
-    // pclose(fp);   // 关闭管道
-    // free(result); // 释放动态分配的内存
     pclose(fp);   // 关闭管道
     if (result) 
     {
