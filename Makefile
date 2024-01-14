@@ -2,24 +2,24 @@ CXX=g++
 OBJ=cgdb
 
 BUILDDIR:=build
-sources:=$(wildcard elf/*.cc)
-objects:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(sources)))
+elf_sources:=$(wildcard elf/*.cc)
+elf_objects:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(elf_sources)))
 
-sources2:=$(wildcard dyn_debug/*.cc)
-objects2:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(sources2)))
+debug_sources:=$(wildcard dyn_debug/*.cc)
+debug_objects:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(debug_sources)))
+
+disasm_sources:=$(wildcard disasm/*.cc)
+disasm_objects:=$(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(disasm_sources)))
 
 .PHONY: all clean
 
 all: $(OBJ)
 
 $(BUILDDIR)/%.o: %.cc
-	$(CXX) -std=c++11 -c $^ -o $@
+	$(CXX) -std=c++17 -c $^ -o $@
 
-$(BUILDDIR)/disasm.o: disasm/disasm.cc
-	$(CXX) -std=c++11 -c $^ -o $@
-
-$(OBJ): $(objects) $(objects2) $(BUILDDIR)/disasm.o
-	$(CXX) -std=c++11 -o build/$@ cgdb.cc $^ -lbfd -lcapstone
+$(OBJ): $(elf_objects) $(debug_objects) $(disasm_objects)
+	$(CXX) -std=c++17 -o build/$@ cgdb.cc $^ -lbfd -lcapstone
 
 clean:
 	rm -f $(BUILDDIR)/$(OBJ) `find -name "*.o"`
