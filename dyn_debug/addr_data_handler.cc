@@ -3,25 +3,25 @@
 
 // 获取该地址8字节的值
 s64 
-get_addr_val(pid_t pid, u64 addr)
+get_8_data_from_addr(pid_t pid, u64 addr)
 {
-    u64 val;
-    val = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
-    if (val == -1)
+    u64 data;
+    data = ptrace(PTRACE_PEEKDATA, pid, addr, nullptr);
+    if (data == -1)
     {
         perror("Read failure");
         return -1;
     }
 
-    return val;
+    return data;
 }
 
 // 往指定地址写入8字节值
-s64
-put_addr_val(pid_t pid, 
-    u64 addr, s64 val)
+static s64
+put_8_data_to_addr(pid_t pid, 
+    u64 addr, s64 data)
 {
-    if (ptrace(PTRACE_POKEDATA, pid, addr, val) == -1) 
+    if (ptrace(PTRACE_POKEDATA, pid, addr, data) == -1) 
     {
         perror("Write failed");
         return -1;
@@ -49,7 +49,7 @@ get_data_from_addr(pid_t pid,
     {
         data_addr = addr + i * LONG_SIZE;
 
-        word.val = get_addr_val(pid, data_addr);
+        word.val = get_8_data_from_addr(pid, data_addr);
         if (word.val == -1)
         {
             return;
@@ -81,7 +81,7 @@ put_data_to_addr(pid_t pid,
         memcpy(word.chars, laddr, LONG_SIZE);
         data_addr = addr + i * LONG_SIZE;
 
-        if (put_addr_val(pid, data_addr, word.val) == -1)
+        if (put_8_data_to_addr(pid, data_addr, word.val) == -1)
         {
             return;
         }
@@ -303,7 +303,7 @@ show_addr_data(pid_t pid,
             printf(": ");
         }
 
-        word.val = get_addr_val(pid, addr + i * LONG_SIZE);
+        word.val = get_8_data_from_addr(pid, addr + i * LONG_SIZE);
         if (word.val == -1) 
         {
             return;
@@ -370,7 +370,7 @@ show_addr_point(pid_t pid,
     addr = address;
     while (true)
     {
-        val = get_addr_val(pid, addr);
+        val = get_8_data_from_addr(pid, addr);
 
         if (val < 0x550000000000 || 
             val > 0x7fffffffffff || 

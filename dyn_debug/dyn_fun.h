@@ -167,7 +167,7 @@ show_glibc_addr();
 tuple<string, u64> 
 get_addr_file_base(u64 addr);
 s64 
-get_addr_val(pid_t pid, u64 addr);
+get_8_data_from_addr(pid_t pid, u64 addr);
 u64 
 get_hex_in_string(const char* str);
 bool 

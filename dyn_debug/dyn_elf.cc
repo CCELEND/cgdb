@@ -134,7 +134,7 @@ get_fun_end(pid_t pid, u64 fun_addr)
 
     for (s32 i = 0; i < 0x1000; i += LONG_SIZE)
     {
-        word.val = get_addr_val(pid, fun_addr + i);
+        word.val = get_8_data_from_addr(pid, fun_addr + i);
         if (word.val == -1) 
         {
             delete[] buf;

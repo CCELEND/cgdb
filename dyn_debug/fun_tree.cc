@@ -104,7 +104,7 @@ parent_disasm(pid_t pid,
                     u64 got_addr;
 
                     got_addr = insn[j].address + get_hex_in_string(insn[j].op_str) + 7;
-                    sub_fun_addr = get_addr_val(pid, got_addr);
+                    sub_fun_addr = get_8_data_from_addr(pid, got_addr);
                 }
                 else
                 {
@@ -114,7 +114,7 @@ parent_disasm(pid_t pid,
 
                         addr = get_hex_in_string(insn[j].op_str);
                         got_addr = insn[j].address + addr + 6;
-                        sub_fun_addr = get_addr_val(pid, got_addr);
+                        sub_fun_addr = get_8_data_from_addr(pid, got_addr);
                         // printf("0x%llx\n", sub_fun_addr);
                     }
                     else
