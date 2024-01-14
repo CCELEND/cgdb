@@ -12,7 +12,7 @@ judg_jump(const char* mnemonic)
         !strcmp(mnemonic, "jb"  ) || !strcmp(mnemonic, "jbe") ||
         !strcmp(mnemonic, "jg"  ) || !strcmp(mnemonic, "jge") ||
         !strcmp(mnemonic, "jl"  ) || !strcmp(mnemonic, "jle") ||
-        !strcmp(mnemonic, "bnd jmp" ) //|| !strcmp(mnemonic, "ret" )
+        !strcmp(mnemonic, "bnd jmp" )
        )
     {
         return true;
@@ -26,9 +26,9 @@ judg_jump(const char* mnemonic)
 // addr:汇编代码的地址, fun_name:函数名, offset:偏移, 
 // 指令码:codes, 操作码:mnemonic, 操作数:ops 
 // 高亮显示
-void 
+static void 
 dis_highlight_show(u64 addr, string fun_name, s32 offset, 
-    char* codes, char* mnemonic, char* ops)
+    const char* codes, const char* mnemonic, const char* ops)
 {
     tuple<string, u64, u64> fun_info;
     string jump_fun_name = "";
@@ -69,9 +69,9 @@ dis_highlight_show(u64 addr, string fun_name, s32 offset,
         }
     }
 }
-void 
+static void 
 dis_show(u64 addr, string fun_name, s32 offset, 
-    char* codes, char* mnemonic, char* ops)
+    const char* codes, const char* mnemonic, const char* ops)
 {
     tuple<string, u64, u64> fun_info;
     string jump_fun_name = "";
@@ -130,11 +130,12 @@ bp_disasm(pid_t pid, u64 addr)
         tuple<string, u64, u64> fun_info;
         string dis_fun_name = "";
         u64 fun_start_addr;
+        char code[32];
 
         for (j = 0; j < 2 && j < count-1; j++)
         {
-            char code[32];
-            
+            memset(code, 0, 32);
+
             fun_info = get_fun_start_end(insn[j].address);
             dis_fun_name = get<0>(fun_info);
             fun_start_addr = get<1>(fun_info);
@@ -143,7 +144,8 @@ bp_disasm(pid_t pid, u64 addr)
             
             for(s32 i = 0; i < insn[j].size; ++i)
             {
-                sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
+                sprintf(code + i*2, "%02x", 
+                    (unsigned char) insn[j].bytes[i]);
             }
 
             // addr 汇编代码的地址, code 指令码, mnemonic 操作码, op_str 操作数
@@ -174,28 +176,22 @@ void
 call_disasm(char* byte_codes, 
     u64 addr, s32 num, string call_fun_name)
 {
-    cs_insn *insn;
+    cs_insn* insn;
     size_t count;
     u64 fun_addr;
     string fun_name;
     s32 offset;
 
-    count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
+    count = cs_disasm(handle, 
+        (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) 
     {
         size_t j;
+        // char code[32];
         for (j = 0; j < count; j++) 
         {
-            char code[32];
-            string dis_fun_name = "";
-            
-            // for(s32 i = 0; i < insn[j].size; ++i)
-            //     sprintf(code + i*2, "%02x", (unsigned char) insn[j].bytes[i]);
-
-            // printf("\033[34m\033[1m%-20s\033[0m" "\033[33m\033[1m%-16s\033[0m" 
-            //         "\033[36m\033[1m%s\033[0m\n", 
-            //             code, insn[j].mnemonic, insn[j].op_str);
-
+            // memset(code, 0, 32);
+        
             if ( !strcmp(insn[j].mnemonic, "call") || 
                  !strcmp(insn[j].mnemonic, "jmp") )
             {
@@ -230,7 +226,7 @@ call_disasm(char* byte_codes,
 }
 
 // 输出跳转指令流操作数的函数符号和偏移
-void 
+static void 
 flow_change_op(char* ops)
 {
     u64 flow_change_addr;
@@ -249,7 +245,8 @@ flow_change_op(char* ops)
 
     if (!offset)
     {
-        cout << "<\033[31m" << flow_change_fun_name << "\033[0m>";
+        printf("<\033[31m%s\033[0m>", 
+            flow_change_fun_name.c_str());
     }
     else
     {
@@ -284,7 +281,8 @@ show_disasm(pid_t pid, u64 rip_val)
     memset(disasm_code, 0, 176);
     get_data_from_addr(pid, disasm_addr, disasm_code, 176);
 
-    count = cs_disasm(handle, (uint8_t*)disasm_code, 176, disasm_addr, 0, &insn);
+    count = cs_disasm(handle, 
+        (uint8_t*)disasm_code, 176, disasm_addr, 0, &insn);
     if (count > 0) 
     {
         size_t j;
@@ -311,9 +309,11 @@ show_disasm(pid_t pid, u64 rip_val)
             }
         }
 
+        char code[32];
         for (j = 0; j < 11 && j < count-1; j++)
         {
-            char code[32];
+            // char code[32];
+            memset(code, 0, 32);
             string dis_fun_name = "";
             
             for(s32 i = 0; i < insn[j].size; ++i) 
@@ -413,11 +413,12 @@ void
 disasm_mne_op(char* byte_codes, 
     u64 addr, s32 num, s32 line)
 {
-    cs_insn *insn;
+    cs_insn* insn;
     size_t count;
     u64 plt_addr;
 
-    count = cs_disasm(handle, (uint8_t*)byte_codes, num, addr, 0, &insn);
+    count = cs_disasm(handle, 
+        (uint8_t*)byte_codes, num, addr, 0, &insn);
     if (count > 0) 
     {
         size_t j;
@@ -428,6 +429,7 @@ disasm_mne_op(char* byte_codes,
                 "\033[36m\033[1m%s\033[0m ", 
                 insn[j].mnemonic, insn[j].op_str
             );
+
             if ( !strcmp(insn[j].mnemonic, "call") ||  
                  !strcmp(insn[j].mnemonic, "jmp" ) )
             {
@@ -449,15 +451,16 @@ get_next_instruct_addr(pid_t pid, u64 addr)
 {
     cs_insn* insn;
     size_t count;
-    u64 next_addr;
+    u64 next_instruct_addr;
 
     memset(disasm_code, 0, 32);
     get_data_from_addr(pid, addr, disasm_code, 32);
 
-    count = cs_disasm(handle, (uint8_t*)disasm_code, 32, addr, 0, &insn);
+    count = cs_disasm(handle, 
+        (uint8_t*)disasm_code, 32, addr, 0, &insn);
     if (count > 0) 
     {
-        next_addr = insn[1].address;
+        next_instruct_addr = insn[1].address;
         cs_free(insn, count);        
     }
     else 
@@ -466,5 +469,5 @@ get_next_instruct_addr(pid_t pid, u64 addr)
         return 0;
     }
 
-    return next_addr;
+    return next_instruct_addr;
 }
