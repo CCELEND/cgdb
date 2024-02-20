@@ -251,7 +251,7 @@ show_fun_tree()
 {
     vector<fun_tree_node_t*> sib_link_next_node;
     fun_tree_node_t* temp_node = root_node;
-    int depth = 0;
+    s32 depth = 0;
 
     sib_link_next_node.push_back(temp_node->next);
     // 输出根节点
@@ -273,7 +273,7 @@ show_fun_tree()
         // 当前节点兄弟节点压栈
         sib_link_next_node.push_back(temp_node->next);
         // 输出当前节点
-        for (int i = 1; i < depth; i++)
+        for (s32 i = 1; i < depth; i++)
         {
             if (sib_link_next_node[i])
             {
@@ -347,7 +347,8 @@ creat_fun_tree(pid_t pid, s32 level)
         }
 
         // 当前节点有子
-        if (parent_node->sub_fun && current_depth+1 < level)
+        if ( parent_node->sub_fun && 
+             current_depth+1 < level )
         {
             parent_node = parent_node->sub_fun;
             ++current_depth;
@@ -356,7 +357,8 @@ creat_fun_tree(pid_t pid, s32 level)
         else
         {
             // 当前节点无兄
-            while (!sib_link_next_node.back() && current_depth != 0)
+            while ( !sib_link_next_node.back() && 
+                    current_depth != 0 )
             {
                 sib_link_next_node.pop_back();
                 --current_depth;

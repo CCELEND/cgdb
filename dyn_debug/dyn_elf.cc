@@ -69,7 +69,6 @@ get_fun_start_end(u64 addr)
 
 }
 
-
 // 通过函数名找函数开始地址, 结束地址
 tuple<s32, u64, u64>
 get_fun_addr(const char* fun_name)
@@ -126,6 +125,7 @@ get_fun_end(pid_t pid, u64 fun_addr)
 {
     char* buf = new char[0x1000];
     memset(buf, 0, 0x1000);
+
     union u 
     {
         long val;

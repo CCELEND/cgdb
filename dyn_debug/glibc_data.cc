@@ -67,7 +67,9 @@ addr_get_glibc_data(u64 glibc_data_addr)
 
     pclose(fp);
     if (result) 
+    {
         delete[] result;
+    }
 
     if (lib_data_name == "")
     {
