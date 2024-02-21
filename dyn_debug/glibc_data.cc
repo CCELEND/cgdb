@@ -13,7 +13,7 @@ addr_get_glibc_data(u64 glibc_data_addr)
     {
         glibc_data_addr_offset = glibc_data_addr - ld_base;
         command = string(
-            "objdump -d -j .data 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+            "objdump -d -j .data ../debug_info/ld/*.debug | grep ");
         // command = string("objdump -d -j .data ld-linux-x86-64.so.2 | grep ");
     }
     else 
@@ -21,7 +21,7 @@ addr_get_glibc_data(u64 glibc_data_addr)
         glibc_data_addr_offset = glibc_data_addr - libc_base;
         is_libc = true;
         command = string(
-            "objdump -d -j .data 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+            "objdump -d -j .data ../debug_info/libc/*.debug | grep ");
         // command = string("objdump -d -j .data libc.so.6 | grep ");
         
     }

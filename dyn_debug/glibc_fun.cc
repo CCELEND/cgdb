@@ -14,13 +14,13 @@ get_glibc_fun_addr(const char* fun_name)
     {
         is_libc = true;
         command = string(
-            "objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep \\<");
+            "objdump -d -j .text ../debug_info/libc/*.debug | grep \\<");
         glibc_fun_name = string(fun_name).substr(5);
     }
     else if (string(fun_name).find("ld.") != string::npos)
     {
         command = string(
-            "objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep \\<");
+            "objdump -d -j .text ../debug_info/ld/*.debug | grep \\<");
         glibc_fun_name = string(fun_name).substr(3);
     }
     else
@@ -95,7 +95,7 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
         is_libc = false;
         glibc_fun_addr_offset = glibc_addr - ld_base;
         command = string(
-            "objdump -d -j .text 2e105c0bb3ee8e8f5b917f8af764373d206659.debug | grep ");
+            "objdump -d -j .text ../debug_info/ld/*.debug | grep ");
     }
     // libc
     else 
@@ -103,7 +103,7 @@ addr_get_glibc_fun_start_and_end(u64 glibc_addr)
         is_libc = true;
         glibc_fun_addr_offset = glibc_addr - libc_base;
         command = string(
-            "objdump -d -j .text 704d25fbbb72fa95d517b883131828c0883fe9.debug | grep ");
+            "objdump -d -j .text ../debug_info/libc/*.debug | grep ");
     }
 
     stringstream ss;
