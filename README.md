@@ -5,10 +5,11 @@ A very simple gdb
 Environment that needs to be installed: capstone
 
 ### Install
-python3 -m pip install capstone && sudo apt install capstone-tool && sudo apt install libcapstone-dev
+python3 -m pip install capstone && sudo apt install capstone-tool && sudo apt install libcapstone-dev && sudo apt install binutils-dev
+
 
 ## compile
-chmod +x ./build.sh
+chmod +x ./build.sh 
 ./build.sh
 
 ## use
