@@ -84,18 +84,18 @@ public:
   vector<Symbol>  symbols;
 };
 
-int  load_binary   (string &fname, Binary* bin, Binary::BinaryType type);
+int  load_binary   (IN string &fname, OUT Binary* bin, Binary::BinaryType type);
 void unload_binary (Binary* bin);
 
-void show_elf_symbol(Binary* bin);
-void show_elf_dynsym(Binary* bin);
-void show_elf_sections_code_data(Binary* bin);
+void show_elf_symbol(IN Binary* bin);
+void show_elf_dynsym(IN Binary* bin);
+void show_elf_sections_code_data(IN Binary* bin);
 void show_elf_got   ();
 void show_elf_plt   ();
 void show_elf_plt_fun();
 void show_elf_fun();
 
-void map_fun_start(Binary* bin);
+void map_fun_start(IN Binary* bin);
 void map_plt_fun_start();
 
 u64 get_plt_fun_addr(char* funame);

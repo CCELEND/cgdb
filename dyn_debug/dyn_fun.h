@@ -132,7 +132,7 @@ run_dyn_debug(Binary* bin);
 // 寄存器信息处理
 // regs.cc
 void 
-get_regs  (pid_t pid, regs_struct* regs);
+get_regs  (pid_t pid, IN regs_struct* regs);
 void 
 show_regs (pid_t pid, const regs_struct* regs);
 void 
@@ -271,9 +271,9 @@ addr_get_fun_offset(const fun_list_info_type* fun_info, u64 addr);
 // 断点处理
 // break_point.cc
 s32  
-break_point_handler(pid_t pid, s32 status, break_point& bp, bool showbp_flag);
+break_point_handler(pid_t pid, s32 status, OUT break_point& bp, bool showbp_flag);
 void 
-break_point_inject (pid_t pid, break_point& bp);
+break_point_inject (pid_t pid, OUT break_point& bp);
 void 
 set_break_point    (pid_t pid, u64 break_point_addr);
 void 

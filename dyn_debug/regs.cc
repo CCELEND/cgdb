@@ -4,7 +4,7 @@
 // 获得 user_regs_struct
 void 
 get_regs(pid_t pid, 
-    regs_struct* regs)
+    IN regs_struct* regs)
 {
     ptrace(PTRACE_GETREGS, pid, nullptr, regs);
 }

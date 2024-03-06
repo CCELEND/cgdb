@@ -3,7 +3,7 @@
 
 // 打开二进制文件
 static bfd*
-open_bfd(string &fname)
+open_bfd(IN string &fname)
 {
   static s32 bfd_inited = 0;
 
@@ -177,7 +177,7 @@ cleanup:
 
 // 加载节信息
 static int
-load_sections_bfd(bfd* bfd_h, Binary* bin)
+load_sections_bfd(IN bfd* bfd_h, OUT Binary* bin)
 {
   s32 bfd_flags;
   uint64_t vma, size;
@@ -247,7 +247,7 @@ load_sections_bfd(bfd* bfd_h, Binary* bin)
 
 
 static int
-load_binary_bfd(string &fname, Binary* bin, Binary::BinaryType type)
+load_binary_bfd(IN string &fname, OUT Binary* bin, Binary::BinaryType type)
 {
   s32 ret;
   bfd *bfd_h;
@@ -327,7 +327,7 @@ cleanup:
 
 // 是解析由文件名指定的二进制文件，并将其加载到指定的 Binary 对象中
 int
-load_binary(string &fname, Binary* bin, Binary::BinaryType type)
+load_binary(IN string &fname, OUT Binary* bin, Binary::BinaryType type)
 {
   return load_binary_bfd(fname, bin, type);
 }

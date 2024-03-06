@@ -4,7 +4,7 @@
 // 断点注入
 void 
 break_point_inject(pid_t pid, 
-    break_point& bp) 
+    OUT break_point& bp) 
 {
     // int3 中断指令
     char code[CODE_SIZE] = { static_cast<char>(0xcc) };
@@ -126,7 +126,7 @@ break_point_delete(pid_t pid,
 // 断点处理
 s32 
 break_point_handler(pid_t pid, 
-    s32 status, break_point& bp, bool showbp_flag) 
+    s32 status, OUT break_point& bp, bool showbp_flag) 
 {
     struct user_regs_struct bp_regs{};
     // 判断信号类型

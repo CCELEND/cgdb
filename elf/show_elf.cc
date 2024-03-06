@@ -92,7 +92,7 @@ show_elf_plt_fun()
 
 // 显示符号表
 void 
-show_elf_symbol(Binary* bin)
+show_elf_symbol(IN Binary* bin)
 {
     Symbol* sym;
 
@@ -126,7 +126,7 @@ show_elf_symbol(Binary* bin)
 
 // 显示动态符号表
 void 
-show_elf_dynsym(Binary* bin)
+show_elf_dynsym(IN Binary* bin)
 {
     Symbol *sym;
 
@@ -148,7 +148,7 @@ show_elf_dynsym(Binary* bin)
 
 // 显示代码和数据段
 void 
-show_elf_sections_code_data(Binary* bin)
+show_elf_sections_code_data(IN Binary* bin)
 {
     Section *sec;
 
