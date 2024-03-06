@@ -99,7 +99,7 @@ run_dyn_debug(Binary* bin)
                 goto debug_stop;
             }
 
-            disasm_code = (char*)calloc(1, 0x1000);
+            disasm_code = (pchar)calloc(1, 0x1000);
             memset(disasm_code, 0, 0x1000);
 
             printf("[+] Tracked process pid: \033[32m%d\033[0m\n", pid);
@@ -139,11 +139,11 @@ run_dyn_debug(Binary* bin)
                 //输入参数解析
                 argparse();
                 s32 argc = myargv.size();
-                char** arguments = new char* [argc]; // 转换参数类型
+                char** arguments = new pchar [argc]; // 转换参数类型
 
                 for (s32 i = 0; i < argc; i++) 
                 {
-                    arguments[i] = (char*) myargv[i].data();
+                    arguments[i] = (pchar) myargv[i].data();
                 }
 
                 // 退出操作

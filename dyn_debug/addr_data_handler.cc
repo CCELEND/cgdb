@@ -33,9 +33,9 @@ put_8_data_to_addr(pid_t pid,
 // 从子进程指定地址读取 len 字节长度数据到 str, len 需要8字节对齐
 void 
 get_data_from_addr(pid_t pid, 
-    u64 addr, OUT char* str, s32 len)
+    u64 addr, OUT pchar str, s32 len)
 {
-    char* laddr = str;
+    pchar laddr = str;
     u64 data_addr = addr;
     s32 j = len >> 3;
 
@@ -65,9 +65,9 @@ get_data_from_addr(pid_t pid,
 // 从 str 插入 len 字节长度数据到子进程指定地址
 void 
 put_data_to_addr(pid_t pid, 
-    u64 addr, IN char* str, s32 len)
+    u64 addr, IN pchar str, s32 len)
 {
-    char* laddr = str;
+    pchar laddr = str;
     u64 data_addr = addr;
     s32 j = len >> 3;
     union u 
@@ -92,7 +92,7 @@ put_data_to_addr(pid_t pid,
 
 // 按照字节打印数据
 void 
-print_bytes(const char* codes, s32 len) 
+print_bytes(const pchar codes, s32 len) 
 {
     for (s32 i = 0; i < len; ++i) 
     {
@@ -437,7 +437,7 @@ judg_addr_code(u64 addr)
 }
 
 bool 
-judg_fun_legitimacy(const char* fun_name)
+judg_fun_legitimacy(const pchar fun_name)
 {
     string str = string(fun_name);
 
@@ -487,7 +487,7 @@ get_addr_file_base(u64 addr)
 // qword ptr [rip + 0x2f25]
 // 从字符串获取十六进制值
 u64 
-get_hex_in_string(const char* str)
+get_hex_in_string(const pchar str)
 {
     u64 hex_val;
     s32 hex_str_start, hex_str_end;

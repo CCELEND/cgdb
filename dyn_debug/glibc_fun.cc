@@ -3,12 +3,12 @@
 
 // 通过 glibc 函数名获得函数开始地址
 u64 
-get_glibc_fun_addr(const char* fun_name)
+get_glibc_fun_addr(const pchar fun_name)
 {
     bool is_libc = false;
     u64 glibc_fun_addr = 0;
     string glibc_fun_name, command, exe_command;
-    char* result = new char[100];
+    pchar result = new char[100];
 
     if (string(fun_name).find("libc.") != string::npos)
     {

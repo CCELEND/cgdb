@@ -4,7 +4,7 @@
 // 获得 user_regs_struct
 void 
 get_regs(pid_t pid, 
-    IN regs_struct* regs)
+    IN pregs_struct regs)
 {
     ptrace(PTRACE_GETREGS, pid, nullptr, regs);
 }
@@ -12,7 +12,7 @@ get_regs(pid_t pid,
 // 输出寄存器信息
 void 
 show_regs(pid_t pid, 
-    const regs_struct* regs)
+    const pregs_struct regs)
 {
 
     struct winsize size;
@@ -58,7 +58,7 @@ show_regs(pid_t pid,
 }
 
 void 
-copy_regs_to_last_regs(OUT regs_struct* last_regs, IN const regs_struct* regs)
+copy_regs_to_last_regs(OUT pregs_struct last_regs, IN const pregs_struct regs)
 {
     memcpy(last_regs, regs, sizeof(struct user_regs_struct));
 }

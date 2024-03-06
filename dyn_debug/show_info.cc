@@ -3,7 +3,7 @@
 
 void 
 show_regs_dis_stack_info(pid_t pid, 
-    const regs_struct* regs)
+    const pregs_struct regs)
 {
     show_regs(pid, regs);
     show_disasm(pid, regs->rip);

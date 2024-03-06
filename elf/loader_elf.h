@@ -98,7 +98,7 @@ void show_elf_fun();
 void map_fun_start(IN Binary* bin);
 void map_plt_fun_start();
 
-u64 get_plt_fun_addr(char* funame);
+u64 get_plt_fun_addr(pchar funame);
 
 void show_elf_help();
 

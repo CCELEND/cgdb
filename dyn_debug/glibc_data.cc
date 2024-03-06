@@ -46,7 +46,7 @@ addr_get_glibc_data(u64 glibc_data_addr)
         return "";
     }
 
-    char* result = new char[100];
+    pchar result = new char[100];
     memset(result, 0, 100);
 
     size_t len = 0;

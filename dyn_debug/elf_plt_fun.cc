@@ -34,7 +34,7 @@ addr_get_elf_plt_fun(u64 addr)
 
 // 通过 elf plt 函数名获得 elf plt 函数地址
 u64 
-get_elf_plt_fun_addr(const char* plt_fun_name)
+get_elf_plt_fun_addr(const pchar plt_fun_name)
 {
     for (auto it : elf_plt_fun_start) 
     {

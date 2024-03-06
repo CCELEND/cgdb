@@ -3,7 +3,7 @@
 
 // 从函数信息结构体获取对应地址的信息
 string 
-addr_get_fun(const fun_list_info_type* fun_info, u64 addr)
+addr_get_fun(const pfun_list_info_type fun_info, u64 addr)
 {
     for (s32 i = 0; i < 0x10; i++)
     {
@@ -71,7 +71,7 @@ get_fun_start_end(u64 addr)
 
 // 通过函数名找函数开始地址, 结束地址
 tuple<s32, u64, u64>
-get_fun_addr(const char* fun_name)
+get_fun_addr(const pchar fun_name)
 {
     u64 addr;
     tuple<s32, u64, u64> fun_addr_info;

@@ -4,9 +4,9 @@
 // │   ├──  └──
 
 // root node
-fun_tree_node_t* root_node = NULL;
+pfun_tree_node_t root_node = NULL;
 
-fun_tree_node_t* 
+pfun_tree_node_t 
 creat_node(u64 addr)
 {
     string fun_name;
@@ -41,7 +41,7 @@ creat_node(u64 addr)
 
 void 
 insert_sub_link(const u64 sub_fun_addr, 
-    OUT fun_tree_node_t* parent_node)
+    OUT pfun_tree_node_t parent_node)
 {
     if ( sub_fun_addr >= parent_node->fun_info.fun_start_addr && 
          sub_fun_addr <= parent_node->fun_info.fun_end_addr )
@@ -82,7 +82,7 @@ insert_sub_link(const u64 sub_fun_addr,
 void
 parent_disasm(pid_t pid,
     const u64 parent_fun_addr, const s32 parent_fun_size,
-    OUT fun_tree_node_t* parent_node)
+    OUT pfun_tree_node_t parent_node)
 {
     cs_insn* insn = NULL;
     size_t count;
@@ -140,7 +140,7 @@ parent_disasm(pid_t pid,
 
 // 建立根节点
 s32 
-creat_root_node(const char* root_fun_name)
+creat_root_node(const pchar root_fun_name)
 {
     tuple<s32, u64, u64> fun_info_temp;
     string r_fun_name;
@@ -162,7 +162,7 @@ creat_root_node(const char* root_fun_name)
     root_node = new fun_tree_node_t;
     if (!root_node) return -1;
 
-    memset(root_node, 0, sizeof(struct fun_tree_node));
+    memset(root_node, 0, sizeof(fun_tree_node_t));
 
     root_node->next = NULL;
     root_node->sub_fun = NULL;
@@ -177,7 +177,7 @@ creat_root_node(const char* root_fun_name)
 // 根据父节点数据建立子函数链表
 s32 
 creat_sub_link(pid_t pid, 
-    fun_tree_node_t* parent_node)
+    pfun_tree_node_t parent_node)
 {
     u64 p_fun_start_addr, p_fun_end_addr, p_fun_size;
     string p_fun_name;
@@ -191,7 +191,7 @@ creat_sub_link(pid_t pid,
 
     if (p_fun_size > 0x1000)
     {
-        disasm_code = (char*)realloc(disasm_code, p_fun_size);
+        disasm_code = (pchar)realloc(disasm_code, p_fun_size);
     }
     memset(disasm_code, 0, p_fun_size);
 
@@ -207,8 +207,8 @@ void
 free_fun_tree()
 {
     vector<fun_tree_node_t*> sib_link_next_node;
-    fun_tree_node_t *temp = NULL;
-    fun_tree_node_t *parent_node = root_node;
+    pfun_tree_node_t temp = NULL;
+    pfun_tree_node_t parent_node = root_node;
 
     while(parent_node)
     {
@@ -249,8 +249,8 @@ free_fun_tree()
 void 
 show_fun_tree()
 {
-    vector<fun_tree_node_t*> sib_link_next_node;
-    fun_tree_node_t* temp_node = root_node;
+    vector<pfun_tree_node_t> sib_link_next_node;
+    pfun_tree_node_t temp_node = root_node;
     s32 depth = 0;
 
     sib_link_next_node.push_back(temp_node->next);
@@ -328,7 +328,7 @@ void
 creat_fun_tree(pid_t pid, s32 level)
 {
     vector<fun_tree_node_t*> sib_link_next_node;
-    fun_tree_node_t* parent_node = root_node;
+    pfun_tree_node_t parent_node = root_node;
     int current_depth = 0;
 
     while(parent_node)

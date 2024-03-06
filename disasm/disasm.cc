@@ -2,7 +2,7 @@
 
 // 判断操作码是否是跳转指令
 bool 
-judg_jump(const char* mnemonic)
+judg_jump(const pchar mnemonic)
 {
     if (
         !strcmp(mnemonic, "call") || !strcmp(mnemonic, "jmp") ||
@@ -28,7 +28,7 @@ judg_jump(const char* mnemonic)
 // 高亮显示
 static void 
 dis_highlight_show(u64 addr, string fun_name, s32 offset, 
-    const char* codes, const char* mnemonic, const char* ops)
+    const pchar codes, const pchar mnemonic, const pchar ops)
 {
     tuple<string, u64, u64> fun_info;
     string jump_fun_name = "";
@@ -71,7 +71,7 @@ dis_highlight_show(u64 addr, string fun_name, s32 offset,
 }
 static void 
 dis_show(u64 addr, string fun_name, s32 offset, 
-    const char* codes, const char* mnemonic, const char* ops)
+    const pchar codes, const pchar mnemonic, const pchar ops)
 {
     tuple<string, u64, u64> fun_info;
     string jump_fun_name = "";
@@ -173,7 +173,7 @@ bp_disasm(pid_t pid, u64 addr)
 
 // 显示调用函数符号和信息
 void 
-call_disasm(char* byte_codes, 
+call_disasm(pchar byte_codes, 
     u64 addr, s32 num, string call_fun_name)
 {
     cs_insn* insn;
@@ -227,7 +227,7 @@ call_disasm(char* byte_codes,
 
 // 输出跳转指令流操作数的函数符号和偏移
 static void 
-flow_change_op(char* ops)
+flow_change_op(pchar ops)
 {
     u64 flow_change_addr;
     string flow_change_fun_name = "";
@@ -410,7 +410,7 @@ show_disasm(pid_t pid, u64 rip_val)
 
 //输出 line 行反汇编, 只输出 mnemonic 操作码, op_str 操作数
 void 
-disasm_mne_op(char* byte_codes, 
+disasm_mne_op(pchar byte_codes, 
     u64 addr, s32 num, s32 line)
 {
     cs_insn* insn;
