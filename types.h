@@ -14,4 +14,6 @@ typedef uint16_t            u16;
 typedef unsigned int        u32;
 typedef unsigned long long  u64;
 
+typedef char*  pchar;
+
 #endif
