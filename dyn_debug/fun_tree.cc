@@ -12,7 +12,7 @@ creat_node(u64 addr)
     string fun_name;
     u64 fun_start_addr, fun_end_addr;
     tuple<string, u64, u64> fun_info_temp;
-    fun_tree_node_t* node = NULL;
+    pfun_tree_node_t node = NULL;
     
     fun_info_temp = get_fun_start_end(addr);
     fun_name = get<0>(fun_info_temp);
@@ -49,7 +49,8 @@ insert_sub_link(const u64 sub_fun_addr,
         return;
     }
 
-    fun_tree_node_t *temp = NULL, *sub_node = NULL;
+    pfun_tree_node_t temp = NULL;
+    pfun_tree_node_t sub_node = NULL;
 
     if (!parent_node->sub_fun)
     {
