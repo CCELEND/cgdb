@@ -2,6 +2,9 @@
 #ifndef NEED_INCLUDE
 #define NEED_INCLUDE
 
+#define IN
+#define OUT
+
 #include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
