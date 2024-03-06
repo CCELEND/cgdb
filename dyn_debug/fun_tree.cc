@@ -206,7 +206,7 @@ creat_sub_link(pid_t pid,
 void 
 free_fun_tree()
 {
-    vector<fun_tree_node_t*> sib_link_next_node;
+    vector<pfun_tree_node_t> sib_link_next_node;
     pfun_tree_node_t temp = NULL;
     pfun_tree_node_t parent_node = root_node;
 
@@ -327,7 +327,7 @@ show_fun_tree()
 void 
 creat_fun_tree(pid_t pid, s32 level)
 {
-    vector<fun_tree_node_t*> sib_link_next_node;
+    vector<pfun_tree_node_t> sib_link_next_node;
     pfun_tree_node_t parent_node = root_node;
     int current_depth = 0;
 
