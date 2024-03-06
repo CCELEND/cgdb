@@ -31,7 +31,7 @@ addr_get_elf_init(u64 elf_init_addr)
         return "";
     }
 
-    char* result = new char[100];
+    pchar result = new char[100];
     memset(result, 0, 100);
     size_t len = 0;
     ssize_t read;
@@ -94,7 +94,7 @@ addr_get_elf_fini(u64 elf_fini_addr)
         return "";
     }
 
-    char* result = new char[100];
+    pchar result = new char[100];
     memset(result, 0, 100);
     size_t len = 0;
     ssize_t read;

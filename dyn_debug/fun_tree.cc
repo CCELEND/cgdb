@@ -26,7 +26,7 @@ creat_node(u64 addr)
         printf("[-] Failed to create node!\n");
         return NULL;
     }
-    memset(node, 0, sizeof(struct fun_tree_node));
+    memset(node, 0, sizeof(fun_tree_node_t));
 
     node->fun_info.fun_start_addr = fun_start_addr;
     node->fun_info.fun_end_addr = fun_end_addr;
@@ -233,7 +233,7 @@ free_fun_tree()
 
             if (!sib_link_next_node.size())
             {
-                memset(temp, 0, sizeof(struct fun_tree_node));
+                memset(temp, 0, sizeof(fun_tree_node_t));
                 delete temp;
                 break;
             }
@@ -242,7 +242,7 @@ free_fun_tree()
             sib_link_next_node.pop_back();
         }
 
-        memset(temp, 0, sizeof(struct fun_tree_node));
+        memset(temp, 0, sizeof(fun_tree_node_t));
         delete temp;
     }
 }
