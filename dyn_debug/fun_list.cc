@@ -20,7 +20,7 @@ clear_fun_list(fun_list_info_type* fun_list_info)
 }
 
 static s32
-set_glibc_fun_list(fun_list_info_type* fun_list_info, 
+set_glibc_fun_list(OUT fun_list_info_type* fun_list_info, 
     s32 i, u64 glibc_fun_addr)
 {
     string fun_name;
@@ -65,7 +65,7 @@ set_glibc_fun_list(fun_list_info_type* fun_list_info,
 }
 
 static s32
-set_elf_fun_list(fun_list_info_type* fun_list_info, 
+set_elf_fun_list(OUT fun_list_info_type* fun_list_info, 
     s32 i, u64 elf_fun_addr)
 {
     string fun_name;

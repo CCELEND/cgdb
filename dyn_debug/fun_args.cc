@@ -29,7 +29,7 @@ show_fun_args(pid_t pid,
 
 // 设置函数参数 regs 结构体
 void 
-set_fun_args_regs(const regs_struct* regs, regs_struct* fun_args_regs)
+set_fun_args_regs(IN const regs_struct* regs, OUT regs_struct* fun_args_regs)
 {
     fun_args_regs->rdi = regs->rdi;
     fun_args_regs->rsi = regs->rsi;

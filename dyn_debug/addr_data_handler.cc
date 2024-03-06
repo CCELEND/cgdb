@@ -33,7 +33,7 @@ put_8_data_to_addr(pid_t pid,
 // 从子进程指定地址读取 len 字节长度数据到 str, len 需要8字节对齐
 void 
 get_data_from_addr(pid_t pid, 
-    u64 addr, char* str, s32 len)
+    u64 addr, OUT char* str, s32 len)
 {
     char* laddr = str;
     u64 data_addr = addr;
@@ -65,7 +65,7 @@ get_data_from_addr(pid_t pid,
 // 从 str 插入 len 字节长度数据到子进程指定地址
 void 
 put_data_to_addr(pid_t pid, 
-    u64 addr, char* str, s32 len) 
+    u64 addr, IN char* str, s32 len)
 {
     char* laddr = str;
     u64 data_addr = addr;

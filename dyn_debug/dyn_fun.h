@@ -136,7 +136,7 @@ get_regs  (pid_t pid, regs_struct* regs);
 void 
 show_regs (pid_t pid, const regs_struct* regs);
 void 
-copy_regs_to_last_regs(regs_struct* last_regs, const regs_struct* regs);
+copy_regs_to_last_regs(OUT regs_struct* last_regs, IN const regs_struct* regs);
 
 // 栈信息
 // stack.cc
@@ -183,9 +183,9 @@ show_addr_data  (pid_t pid, s32 num , u64 addr);
 void 
 show_addr_point (pid_t pid, u64 addr, bool addr_flag);
 void 
-get_data_from_addr(pid_t pid, u64 addr, char* str, s32 len);
+get_data_from_addr(pid_t pid, u64 addr, OUT char* str, s32 len);
 void 
-put_data_to_addr(pid_t pid, u64 addr, char* str, s32 len);
+put_data_to_addr(pid_t pid, u64 addr, IN char* str, s32 len);
 void 
 print_bytes(const char* codes, s32 len);
 
@@ -264,7 +264,7 @@ show_fun_list (const fun_list_info_type* fun_info);
 void 
 clear_fun_list(fun_list_info_type* fun_info);
 void 
-set_fun_list  (fun_list_info_type* fun_info, u64 fun_addr);
+set_fun_list  (OUT fun_list_info_type* fun_info, u64 fun_addr);
 s32 
 addr_get_fun_offset(const fun_list_info_type* fun_info, u64 addr);
 
@@ -296,7 +296,7 @@ show_vmmap(pid_t pid);
 void 
 show_fun_args(pid_t pid, const regs_struct* regs, const regs_struct* fun_args_regs);
 void 
-set_fun_args_regs(const regs_struct* regs, regs_struct* fun_args_regs);
+set_fun_args_regs(const regs_struct* regs, OUT regs_struct* fun_args_regs);
 
 // 显示调用函数信息
 // fun_call.cc

@@ -41,7 +41,7 @@ creat_node(u64 addr)
 
 void 
 insert_sub_link(const u64 sub_fun_addr, 
-    fun_tree_node_t* parent_node)
+    OUT fun_tree_node_t* parent_node)
 {
     if ( sub_fun_addr >= parent_node->fun_info.fun_start_addr && 
          sub_fun_addr <= parent_node->fun_info.fun_end_addr )
@@ -82,7 +82,7 @@ insert_sub_link(const u64 sub_fun_addr,
 void
 parent_disasm(pid_t pid,
     const u64 parent_fun_addr, const s32 parent_fun_size,
-    fun_tree_node_t* parent_node)
+    OUT fun_tree_node_t* parent_node)
 {
     cs_insn* insn = NULL;
     size_t count;
