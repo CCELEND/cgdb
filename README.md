@@ -9,8 +9,7 @@ python3 -m pip install capstone && sudo apt install capstone-tool && sudo apt in
 
 
 ## compile
-chmod +x ./build.sh 
-./build.sh
+chmod +x ./build.sh && ./build.sh
 
 ## use
 
